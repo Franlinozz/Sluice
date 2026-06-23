@@ -15,10 +15,12 @@ import {
   wagmiConfig,
 } from "@/lib/wagmi";
 
-// Initialise the Reown AppKit modal exactly once, on the client, and only when a projectId
-// exists (CLAUDE.md: missing projectId → modal silently fails; we guard instead). Without it,
-// injected (browser) wallets still work through wagmi; email/social light up once it's set.
-if (hasProjectId && typeof window !== "undefined") {
+// Initialise the Reown AppKit modal exactly once, at module scope, when a projectId exists.
+// createAppKit is SSR-safe and MUST run during SSR too — components call useAppKit() while
+// server-rendering, which throws if createAppKit hasn't run (Vercel 500). Do NOT guard on
+// `typeof window`. When there's no projectId, the wallet UI takes the injected-only path
+// (no useAppKit), so this stays unset and nothing throws.
+if (hasProjectId) {
   createAppKit({
     adapters: [wagmiAdapter],
     networks: appKitNetworks,

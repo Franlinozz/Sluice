@@ -211,6 +211,16 @@ Eyebrows = small uppercase mono, +0.12em, text-low. Self-host all fonts (next/fo
   NEXT_PUBLIC_. Reconcile optimistic UI against chain/DB on an interval. Empty states look intentional.
 
 ## Bug register (append real bugs + fixes here as we hit them)
+- [Phase 0, VERCEL 500] Every route 500'd in production (not in `next dev`). Cause: `useAppKit()`
+  runs during SSR, but `createAppKit` was guarded behind `typeof window !== "undefined"` so it
+  never ran server-side → "Please call createAppKit before using useAppKit hook". FIX: call
+  `createAppKit` at module scope guarded ONLY by `hasProjectId` (it is SSR-safe; must run on the
+  server too). LESSON: always test the PRODUCTION runtime (`next build && next start`), not just
+  `next dev` — dev did not surface this. Also: a deploy's build succeeding ≠ runtime working.
+- [Phase 0, VERCEL CONFIG] The `sluice` project needs **Root Directory = `apps/web`** AND
+  **Framework Preset = Next.js** (set via API: PATCH /v9/projects). `vercel.json` CANNOT set
+  rootDirectory. With both set, zero-config deploy works (Vercel installs the pnpm workspace from
+  the repo root automatically). Git is connected → pushes to `main` auto-deploy.
 - [Phase 0] wagmi v3 (`@wagmi/core`/`@wagmi/connectors`) references optional connector packages
   via guarded dynamic `import()` (`accounts`, `cbw-sdk`, `porto`, `porto/internal`,
   `@base-org/account`, `@metamask/connect-evm`). The bundler resolves these statically →
