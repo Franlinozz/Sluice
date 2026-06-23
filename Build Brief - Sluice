@@ -1,0 +1,224 @@
+# Build Brief — "Sluice" (working name)
+### The settlement layer for the agent-paid web
+*Lepton Agents Hackathon · Canteen × Circle × Arc · Jun 15 → Jun 29, 2026*
+
+> **Name is not final.** This brief uses **Sluice** throughout as a placeholder. Once you pick from the top-10 list, find-replace `Sluice` everywhere.
+>
+> **One-line pitch:** *Any unit of value on the web — a read, a second, a citation, a listen, a call — made payable by humans and machines, metered and settled on Arc in USDC. Creators get paid per use. Agents pay per use, and decide for themselves.*
+
+---
+
+## 0. Why this wins (the thesis in one page)
+
+Three facts, all verified against the live 2026 landscape:
+
+1. **The round leans to creators (RFB 6).** The hosts repeat one idea everywhere: *the hard part was never the rail, it was finding the people — and for creators, they're already gathered.* Traction is 30% of the score. The Distribution + Prior Art sections are a literal list of open-source communities (Ghost, Navidrome, Owncast, PeerTube, RSSHub, Mastodon, immich) that already have audiences and expose webhooks/APIs. **We attach nanopayments to one of them → real usage in days, not a faked demo.**
+
+2. **There is a real, unbuilt primitive — the "Gas Observatory" of this hackathon.** x402 is a single-shot *request→pay→response* loop. Cloudflare itself says agents/crawlers need *deferred settlement* and *a single aggregated payment*. The hosts flag that *streaming payments are a real code gap in x402* and that the ERC-8004 reputation lane is nearly empty. **Nobody has packaged the metering + deferred-batch-settlement + streaming-rate primitive on Arc.** Gateway batches payments; the *meter that decides what/when to accrue and settle* is application work no one shipped.
+
+3. **The hero use case is the biggest live fight in tech.** "AI pays to read you" is real: Cloudflare Pay Per Crawl (1B+ 402s/day pre-GA), RSL 1.0 backed by 1,500+ orgs, ClaudeBot's 38,065:1 crawl-to-refer ratio. The gap: RSL has no enforcement; Cloudflare needs you to be its customer. **Small creators and self-hosted communities have no open way to actually collect.** Circle lists "per crawl" as a nanopayments use case. The rail exists; the creator-owned toll booth does not.
+
+**Sluice is that toll booth + the meter underneath it + an agent on each side that decides.** It hits all six RFBs, leans into RFB 6, and maxes all four scoring axes.
+
+---
+
+## 1. Scoring-rubric map (build to this, literally)
+
+| Axis | Weight | How Sluice scores |
+|---|---|---|
+| **Agentic Sophistication** | 30% | Buyer agent is budget-bound and *reasons per resource* ("is this source worth $0.002 for my task?"), declines, negotiates, tracks ROI — visible reasoning trace. Broker/router agent picks providers and **stakes a reputation bond**. Not automation: genuine decisions. |
+| **Traction** | 30% | One **live OSS connector** + a hosted public demo where **real agents pay real creators in test USDC**, plus your teammate onboarding a handful of real creators/users. Every number on the dashboard is real on-chain testnet data — linkable on Arcscan. |
+| **Circle tool usage** | 20% | Near-total stack: **Wallets** (user-controlled embedded + dev-controlled agent fleet), **Gateway/Nanopayments** (the core), **x402** (the toll), **USDC + EURC** (settlement + multi-currency payout), **App Kit** (cross-chain withdraw via Bridge/Swap/Unified Balance), **Contracts** (ERC-8004 + splits + escrow), **CCTP**, **Circle Skills + MCP** (agent wiring). |
+| **Innovation** | 20% | The **Meter** primitive; **streaming-rate authorization** with proof-of-flow + auto-refund; **recursive royalty splits** from attribution metadata; the **open citation/crawl toll for the long tail** (RSL-compatible but actually settles); **reputation bonds**. Live, watchable agent-to-agent micro-economy. |
+
+---
+
+## 2. What's REAL vs ROADMAP (honesty contract — no fake data)
+
+**Ships real & working end-to-end (the spine):**
+- Landing page (cinematic, greyscale, 3D meter hero).
+- Wallet connect (Reown AppKit: email + social + wallet) **and** Circle user-controlled embedded wallet option.
+- Register a resource → set unit + price → get a live x402-protected endpoint.
+- The **Meter**: real per-unit accrual + Gateway batch settlement on Arc testnet (USDC).
+- The **buyer agent**: real LLM reasoning, real budget, real x402 payments, real reasoning trace.
+- **Citation/crawl toll** hero loop: a real agentic-search/RAG that settles a nanopayment to a source when it grounds an answer.
+- **One live OSS connector** (recommended: RSSHub feed toll *or* a Ghost/article paywall — pick the one your teammate can put real users on fastest).
+- Settlement explorer: every batch + receipt, linked to Arcscan ("don't trust, verify").
+- Docs (Fumadocs-style), whitepaper (PDF), changelog, FAQ.
+
+**Ships partially live with HONEST status (clearly labeled "beta"/"roadmap", never faked):**
+- Streaming per-second meter (works in demo; mark scope of proof-of-flow).
+- ERC-8004 reputation bonds (registry + bond deployed; slashing simple/semi-manual).
+- Additional OSS connectors (Navidrome, Owncast, PeerTube, Mastodon) shown as "available — connect" with real status, **stubbed not faked**.
+- Treasury extras (virtual cards, on/off-ramp) — optional, only if time; otherwise omit, don't fake.
+
+> **Rule borrowed from Archon: no dead controls.** Every button either works or is visibly disabled with a stated reason. The judges (and you, a non-pure-dev) must never hit a wall that silently does nothing.
+
+---
+
+## 3. Architecture (high level)
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  FRONTEND  (Next.js 15 App Router · TS strict · Tailwind · shadcn) │
+│  Landing · Operator console (/app) · Docs (Fumadocs)               │
+│  Reown AppKit (email/social/wallet) + Circle user-controlled wallet│
+└───────────────┬───────────────────────────────┬───────────────────┘
+                │ REST / RPC                     │ on-chain reads (viem/wagmi)
+┌───────────────▼───────────────┐   ┌────────────▼───────────────────┐
+│  CORE API  (NestJS or Fastify) │   │  Arc testnet (USDC = gas)       │
+│  • Resource registry           │   │  • ERC-8004 registries          │
+│  • THE METER (accrual engine)  │   │  • RoyaltySplitter contract     │
+│  • x402 facilitator client     │   │  • Escrow/Bond contract         │
+│  • Gateway nanopayments client │   └─────────────────────────────────┘
+│  • Connector webhooks (OSS)    │   ┌─────────────────────────────────┐
+│  • Settlement + receipts       │◄──┤  Circle Gateway (batch settle)   │
+└───────────────┬───────────────┘   │  Nanopayments · Unified balance  │
+                │                     └─────────────────────────────────┘
+┌───────────────▼───────────────┐   ┌─────────────────────────────────┐
+│  AGENT RUNTIME                 │   │  Circle Skills + MCP server      │
+│  • Buyer agent (budget+reason) │◄──┤  use-gateway · use-arc · use-usdc│
+│  • Broker/router agent (bond)  │   │  (live SDK sigs + addresses)     │
+│  • cheap model (gpt-4o-mini /  │   └─────────────────────────────────┘
+│    Haiku) · ROI + trace        │
+└────────────────────────────────┘   Store: Postgres or SQLite (state, meters, receipts)
+```
+
+**Design principles**
+- **Network-agnostic settlement.** Wrap chain/settlement behind one interface so Arc testnet → Base Sepolia → Arc mainnet is a config swap. Critical given Arc testnet just shipped v0.7.2 (Jun 18) and may be flaky.
+- **Meter decoupled from settlement backend.** The accrual logic must not care whether the final settle is Gateway-batched or a direct x402 call — so if Gateway-on-Arc misbehaves, you fall back to direct x402 settlement without rewriting the meter.
+- **Reference baseline:** start from `circlefin/arc-nanopayments` (Next.js paywalled APIs + seller dashboard + x402 + Gateway + Arc testnet + LangChain paying agent). It's the known-good scaffold; we build 10x on top, we don't reinvent the handshake.
+
+---
+
+## 4. The Meter (the primitive that makes this novel)
+
+The thing nobody built. A unit-agnostic accrual engine.
+
+- **Unit adapters:** `per_request`, `per_byte`, `per_second`, `per_token`, `per_citation`, `per_listen`, `per_view`. Each adapter knows how to count its unit from an event stream.
+- **Accrual:** charges below the settlement floor accumulate in an off-chain ledger keyed by (payer, resource). Buyer signs an EIP-3009 authorization up to a cap; the meter deducts against it.
+- **Batch trigger:** settle via Gateway when accrued ≥ threshold, on a timer, or on session end — whichever first. This is exactly the "single aggregated payment / deferred settlement" Cloudflare said x402 lacks.
+- **Streaming-rate authorization (RFB 4):** payer approves a *rate* (e.g. `$0.0001/sec`) and a *reserve*; meter runs while a **proof-of-flow heartbeat** confirms delivery; on heartbeat loss it **auto-pauses** (no charge for dead air); unused reserve **auto-refunds**. Demo: start / pause / stop a stream of value, watch it accrue live.
+- **Receipts:** every batch produces a verifiable receipt (resource, units, rate, batch tx hash) → Settlement Explorer + Arcscan link.
+
+> **Breathing room:** if real proof-of-flow is too heavy by deadline, ship heartbeat-ping pause/resume and label refund logic "beta." Don't block the spine on it.
+
+---
+
+## 5. The Agents (the 30% axis)
+
+**Buyer agent ("Spend").** Budget-bound autonomous consumer.
+- Discovers priced resources (x402 Bazaar-style discovery + Sluice registry).
+- For each candidate, **reasons**: relevance to current task × price × seller reputation → pay / skip / cap. Cheap model (gpt-4o-mini or Claude Haiku via API; cap tokens, cache).
+- Pays via x402 + Gateway, logs **why it paid, what it paid, what it got** (AgentCore-style trace).
+- Reports ROI: spend vs. value delivered.
+
+**Broker/router agent ("Reputation").**
+- Routes a buyer to a provider and **posts a USDC bond** behind the match (ERC-8004).
+- If the provider underdelivers (proof-of-flow / validation fails), the bond **slashes** automatically on resolve. Reputation = capital at risk, not a self-reported score. (RFB 3, the "nearly empty lane"; adjacent to Arbitrum's "Pact — risk layer for agentic payments," but creator/content-focused.)
+
+**Wiring:** use **Circle Skills + Circle MCP server** so the agent pulls live SDK signatures and contract addresses instead of hardcoding — and call this out in the demo (judges love correct Circle-native agent wiring; it's 20% of the score).
+
+---
+
+## 6. Page-by-page spec
+
+### Marketing (public)
+- **`/` Landing** — Cinematic greyscale. Hero: 3D *meter/flow* (particles flowing through a gate, settling drop by drop). Thesis headline. **Live real stats** (total settled, units metered, resources, agents, creators paid — all real testnet numbers). "One meter, every unit" section. The citation-toll hero, shown not told. 3-step how-it-works. "Don't trust the numbers — verify" (Arcscan links). CTAs: *Start earning* / *Run a paying agent*.
+
+### Operator console (`/app`)
+- **`/app` Overview** — KPI tiles (real), live settlement feed, quick actions, health.
+- **`/app/earn` Creator Studio** — register resource (article / feed / stream / endpoint / API); pick unit + price; choose connector or RSL/domain; set attribution splits; earnings + per-unit analytics; **withdraw cross-chain** (App Kit Bridge/Swap, USDC↔EURC).
+- **`/app/spend` Agent Console** — your buyer agent(s): budget, policies, discovered resources, **decision + reasoning trace**, ROI, spend log.
+- **`/app/meter/[id]` Live Meter** — one resource metering in real time: per-unit accrual, batch-settle countdown, proof-of-flow status, streaming start/pause/stop.
+- **`/app/discover` Bazaar** — discover priced resources & agent services (the RailBeam marketplace feel you liked): reputation, prices, bonds.
+- **`/app/agents` Fleet & Reputation** — agents, their wallets, ERC-8004 bonds (staked / slashed / history).
+- **`/app/treasury` Treasury** — unified USDC balance (Gateway), USDC/EURC, cross-chain withdraw, (optional) virtual cards / on-ramp — only if real.
+- **`/app/settlements` Settlement Explorer** — every batch, every receipt, Arcscan links. The trust surface.
+- **`/app/settings` Account** — wallet (Reown) + email/profile (consumer feel), network toggle (Arc mainnet/testnet), theme (Obsidian/greyscale + light).
+
+### Docs & trust
+- **`/docs`** Fumadocs (MDX, ⌘K search, scroll-spy, prev/next, reading-progress) — Quickstart, Concepts (Meter, Units, Streaming, Citation Toll, Splits, Reputation), Connectors, SDK, API + **MCP reference**, RSL compatibility, Self-hosting.
+- **Whitepaper** — premium PDF: the protocol + meter model + proof-of-flow + bond model.
+- **Changelog** — real, dated, shipped-during-hackathon entries.
+- **FAQ** — the honest, plain-English version (what's live, what's testnet, what's next).
+
+---
+
+## 7. UI / Theme system (greyscale, premium, Archon-discipline + Capricorn-cinema)
+
+A **monochrome system** — shades of grey, white, black — with a single restrained "signal" accent (a cold, desaturated near-platinum) used sparingly, plus locked semantic state colors.
+
+- **Tokens (dark "Graphite" default):** canvas `#0A0A0B` · surface-1 `#111113` · surface-2 `#17181B` · surface-3 `#1F2024` · code/terminal `#070708` · border-subtle `rgba(255,255,255,0.06)` · border-emphasis `#2A2C31`. Text: hi `#F4F5F6`, mid `#A7ABB2`, low `#6A6E76`. **Signal accent:** a single cold near-white/platinum `#E8EAED` for active/CTA, with `#9DA7B3` cool-steel for links/active-nav. (Optionally one whisper of cyan-grey for "live" dots only.)
+- **Semantic (locked, global):** success/settled `#4ADE80`-muted → use desaturated; pending `#F5B544`; failed `#FF6B6B`; info `#7FA8C9`. Render as pill: color at ~14% bg, full-opacity text, 1px border ~30%.
+- **Type:** heavy geometric grotesk (General Sans / Clash) for display; **Inter** for UI; **JetBrains Mono / Geist Mono** for amounts, hashes, rates, chain IDs (perfect for nanopayment figures like `$0.000001`). Eyebrows: small uppercase mono, +0.12em, in low-grey. Self-hosted fonts, no CDN, no layout shift.
+- **Motif:** thin luminous **horizon line** (Capricorn) + flowing **metered particles** through a gate (the "sluice"). Survives elsewhere as 1px line-art only.
+- **3D hero:** prefer a **performant** approach — react-three-fiber single particle-stream, or a 2.5D layered SVG/canvas meter. (Archon ruled heavy three.js a bundle/time trap; Capricorn got cinematic with a light particle field. Stay light; one orchestrated load animation; respect `prefers-reduced-motion` with a static state.)
+- **Shell:** 264px left sidebar (surface-1) + 64px top utility bar (workspace switcher, global ⌘K search, Arc network "Live" badge + dot, wallet chip). 12px card radius, hairline borders, soft shadows. Identical brand/badges/type across every page — "one platform, not ten mockups."
+- **Reusable primitives:** Logo, NetworkBadge (Arc live dot), MeterCard (live accrual + sparkline), AmountMono (tabular `$0.000001`), ReceiptCard (units/rate/batch tx/verified), BondCard (staked/slashed), AgentTrace (reasoning steps), Stepper, AddressChip (mono+copy), DataRow, Tabs, Tooltip, Skeleton, Toast, Modal, ThemeToggle. Dev-only `/app/_dev/tokens` page renders every primitive in every state (sign-off surface before features).
+
+---
+
+## 8. Stack
+
+- **Frontend:** Next.js 15 (App Router, TS strict) · Tailwind · shadcn/ui (restyled) · lucide-react · Recharts (analytics) · Framer Motion · react-three-fiber *or* light SVG/canvas (hero) · **viem/wagmi + Reown AppKit** (wallet: email/social/wallet) · self-hosted fonts.
+- **Wallets:** Reown AppKit (the modal in your screenshot) **+** Circle **user-controlled wallets** (Web2 login → embedded) for the consumer feel; Circle **dev-controlled wallets** for the agent fleet.
+- **Backend:** NestJS or Fastify (TS). Postgres (or SQLite for speed) for meter ledger, receipts, registry, agents. Redis optional (rate-limit / batch timers) — **no Docker required**; run on your VPS directly with pm2/systemd.
+- **Payments:** `@x402/*` SDKs + **Circle CLI** (`@circle-fin/cli`) + Gateway Nanopayments client. **ARC CLI** (Canteen-hosted testnet RPC + Arc context for the coding agent).
+- **Contracts:** Hardhat/Foundry · ERC-8004 (Identity/Reputation/Validation) — use a minimal reference impl · RoyaltySplitter · Bond/Escrow. Deploy to Arc testnet; verify on Arcscan.
+- **Agent:** lightweight runtime; **OpenAI gpt-4o-mini** (your $5 credit, capped) or Claude Haiku via API; Circle Skills + MCP for tool wiring.
+- **Hosting:** Frontend on Netlify/Vercel; API + agent on your 200GB VPS (pm2). Docs on the same Next app or a Fumadocs subroute.
+
+---
+
+## 9. Traction plan (the 30% — for your teammate)
+
+Goal: **real test-USDC flowing from real participants during the window**, linkable on Arcscan.
+
+1. **Pick ONE live OSS connector** and put real users on it. Fastest wins:
+   - *RSSHub citation toll* — wrap a real RSSHub feed; run real research agents that pay per citation. (Hero + technically clean.)
+   - *Ghost / article paywall* — a real blog with a few real readers + agents paying per read.
+2. **Seed both sides of the meter:** stand up 3–5 real priced resources; run the buyer agent continuously so there's a live, honest settlement feed from minute one.
+3. **Onboard a handful of real creators/streamers** (teammate's job): even 10–20 real users + payments = a strong traction narrative the judges can verify.
+4. **Citation-toll demo as the headline:** a public "ask the research agent" box → it grounds an answer in registered sources → nanopayments settle to those authors live on the dashboard. This is the screenshot moment.
+5. **Submit early and often** (the form allows it). Ship the spine, submit, keep adding breadth and re-submitting.
+
+---
+
+## 10. Six-day phased build (today = Jun 23; deadline Jun 29)
+
+> Sequenced so the **spine is demoable by end of Day 3**, then breadth + polish. Submit a working version early.
+
+- **Day 1 — Foundations.** Clone `circlefin/arc-nanopayments`; ARC CLI + Circle CLI; Arc testnet RPC + faucet USDC; Reown AppKit + Circle user-controlled wallet; design tokens + shell + `/app/_dev/tokens`; network-agnostic settlement interface.
+- **Day 2 — The Meter + settlement.** Accrual engine + `per_request`/`per_citation`/`per_second` adapters; Gateway batch settle on Arc; receipts; Settlement Explorer with Arcscan links. **Spine #1 alive: pay-per-unit settles for real.**
+- **Day 3 — Buyer agent + citation toll.** Buyer agent (budget + reasoning + trace + ROI); citation-toll loop (agentic search grounds → settles to source); Creator Studio register flow. **End-to-end demoable.** First public submission.
+- **Day 4 — One live OSS connector + Bazaar + Treasury.** RSSHub/Ghost connector live; Discover/Bazaar; cross-chain withdraw (App Kit); USDC/EURC. Teammate starts onboarding.
+- **Day 5 — Reputation bonds + streaming + Landing 3D.** ERC-8004 registry + bond/slash; streaming-rate meter (start/pause/stop, proof-of-flow heartbeat); the cinematic landing + 3D hero. Re-submit.
+- **Day 6 — Docs, whitepaper, changelog, FAQ, polish, QA.** Fumadocs; PDF whitepaper; changelog; FAQ; full "no dead controls" sweep; record <3-min demo video; final submission with live link + repo.
+
+---
+
+## 11. Risk register + deliberate breathing room (for the executor bot)
+
+| Risk | Mitigation / compromise the bot is allowed to make |
+|---|---|
+| Arc testnet flaky (v0.7.2 just shipped) | Network-agnostic settlement → swap to Base Sepolia or another Gateway testnet via config. Demo still settles. |
+| Gateway-on-Arc behaves differently than the 11 mainnet chains | Meter decoupled from backend → fall back to **direct x402 settlement** without touching accrual logic. |
+| ERC-8004 slashing too complex by deadline | Deploy registry + bond; ship **semi-manual/simple** slash on resolve; label "beta." Don't block spine. |
+| Proof-of-flow too heavy | Ship heartbeat pause/resume; mark refund logic "beta." |
+| OSS connector integration drags | Make **one** truly live; others **stubbed with honest status**, never faked. |
+| LLM agent cost (your $5) | Cheap model, hard token caps, cache, per-agent budget. Throttle the always-on buyer. |
+| Email/social login issues | Reown AppKit primary; **wallet-only as fallback** so connect never fully breaks. |
+| Time crunch | The spine (Days 1–3) is the non-negotiable; everything Day 4+ is additive and can be trimmed to honest "roadmap" without faking. |
+
+> **Standing instruction to the bot:** never fake data or fake a working integration to hit a deadline. A clearly-labeled "beta/roadmap" state always beats a fake. Prefer shipping the spine solid over shipping breadth broken.
+
+---
+
+## 12. Open decisions for you (the human)
+
+1. **Name** — pick from the top-10 (my pick: **Sluice**).
+2. **Live OSS connector** — RSSHub citation toll *or* Ghost/article paywall? (Which can your teammate put real users on fastest?)
+3. **Settlement target for the demo** — Arc testnet primary (yes), with which fallback chain pre-wired?
+
+Once these are set, the build follows this brief Day 1 → Day 6.
