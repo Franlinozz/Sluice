@@ -1,0 +1,131 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../../../../packages/ui/src/styles/tokens.css";
+
+/* Tailwind v4 must scan the shared UI package (outside the app root) for class usage. */
+@source "../../../../packages/ui/src";
+
+/* Map Graphite tokens → Tailwind utilities. `inline` so values follow data-theme at runtime. */
+@theme inline {
+  /* surfaces → bg-canvas, bg-surface-1, bg-terminal, ... */
+  --color-canvas: var(--canvas);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-terminal: var(--terminal);
+
+  /* borders → border-hairline, border-edge */
+  --color-hairline: var(--border-subtle);
+  --color-edge: var(--border-emphasis);
+
+  /* text → text-hi, text-mid, text-low */
+  --color-hi: var(--text-hi);
+  --color-mid: var(--text-mid);
+  --color-low: var(--text-low);
+
+  /* accents → text-signal, bg-signal, text-steel, bg-live, ... */
+  --color-signal: var(--signal);
+  --color-signal-contrast: var(--signal-contrast);
+  --color-steel: var(--steel);
+  --color-live: var(--live);
+
+  /* locked semantic states → text-settled, bg-pending, border-failed, ... */
+  --color-settled: var(--settled);
+  --color-pending: var(--pending);
+  --color-failed: var(--failed);
+  --color-info: var(--info);
+
+  /* type */
+  --font-display: var(--ff-display), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--ff-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--ff-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* radii */
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+}
+
+@layer base {
+  * {
+    border-color: var(--border-subtle);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--canvas);
+    color: var(--text-hi);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--signal) 26%, transparent);
+    color: var(--text-hi);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* premium thin scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-emphasis) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-emphasis);
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* small uppercase mono label, +0.12em tracking, low-grey */
+  .eyebrow {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.6875rem;
+    line-height: 1;
+    color: var(--text-low);
+  }
+
+  /* tabular numerals for amounts/figures so columns align */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* the thin luminous horizon line motif */
+  .horizon-line {
+    height: 1px;
+    width: 100%;
+    background: var(--horizon);
+  }
+}

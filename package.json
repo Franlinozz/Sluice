@@ -1,0 +1,32 @@
+{
+  "name": "sluice",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Sluice — the settlement layer for the agent-paid web (Arc · Circle · x402 · Gateway Nanopayments)",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20.18.2"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @sluice/web --filter @sluice/api run dev",
+    "dev:web": "pnpm --filter @sluice/web run dev",
+    "dev:api": "pnpm --filter @sluice/api run dev",
+    "dev:agent": "pnpm --filter @sluice/agent run dev",
+    "build": "pnpm --filter @sluice/web run build",
+    "start": "pnpm --filter @sluice/web run start",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "clean": "pnpm -r exec rm -rf node_modules dist .next .turbo && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "use-sync-external-store>react": "19"
+      }
+    }
+  }
+}

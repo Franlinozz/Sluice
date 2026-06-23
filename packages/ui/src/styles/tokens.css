@@ -1,0 +1,86 @@
+/**
+ * Sluice — "Graphite" design tokens (canonical source).
+ * Monochrome greyscale + ONE cold platinum signal accent + locked semantic states.
+ * Every color in the product resolves to one of these CSS variables.
+ * NO hardcoded hex anywhere outside this file (CLAUDE.md theme rule).
+ *
+ * next-themes sets <html data-theme="dark|light">. :root defaults to dark (pre-hydration),
+ * [data-theme="light"] overrides for the optional "Marble" light theme.
+ */
+
+:root,
+[data-theme="dark"] {
+  /* surfaces */
+  --canvas: #0a0a0b;
+  --surface-1: #111113;
+  --surface-2: #17181b;
+  --surface-3: #1f2024;
+  --terminal: #070708;
+
+  /* borders */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-emphasis: #2a2c31;
+
+  /* text */
+  --text-hi: #f4f5f6;
+  --text-mid: #a7abb2;
+  --text-low: #6a6e76;
+
+  /* accents (used sparingly) */
+  --signal: #e8eaed; /* CTA / active — cold near-platinum */
+  --signal-contrast: #0a0a0b; /* text/icon ON the signal accent */
+  --steel: #9da7b3; /* links / active-nav */
+  --live: #79b8c7; /* whisper of cyan-grey — "live" dot ONLY */
+
+  /* locked semantic states (rendered as pills via the pill utilities below) */
+  --settled: #57c98a;
+  --pending: #f5b544;
+  --failed: #ff6b6b;
+  --info: #7fa8c9;
+
+  /* effects */
+  --ring: rgba(232, 234, 237, 0.55);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --shadow-pop: 0 4px 12px rgba(0, 0, 0, 0.5), 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+  --horizon: linear-gradient(
+    90deg,
+    transparent,
+    rgba(232, 234, 237, 0.35) 50%,
+    transparent
+  );
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  /* "Marble" — optional light theme (dark ships first; this keeps the toggle honest) */
+  --canvas: #f6f7f8;
+  --surface-1: #ffffff;
+  --surface-2: #f0f1f3;
+  --surface-3: #e7e9ed;
+  --terminal: #14151a;
+
+  --border-subtle: rgba(15, 17, 21, 0.08);
+  --border-emphasis: #d6d9de;
+
+  --text-hi: #0e0f12;
+  --text-mid: #4a4e56;
+  --text-low: #888d96;
+
+  --signal: #14151a;
+  --signal-contrast: #f6f7f8;
+  --steel: #46566a;
+  --live: #2f8aa0;
+
+  --settled: #1f9d5e;
+  --pending: #b8791a;
+  --failed: #d64545;
+  --info: #3e6e96;
+
+  --ring: rgba(20, 21, 26, 0.45);
+  --shadow-soft: 0 1px 2px rgba(15, 17, 21, 0.06), 0 8px 24px -16px rgba(15, 17, 21, 0.18);
+  --shadow-pop: 0 4px 12px rgba(15, 17, 21, 0.1), 0 24px 48px -24px rgba(15, 17, 21, 0.22);
+  --horizon: linear-gradient(90deg, transparent, rgba(20, 21, 26, 0.25) 50%, transparent);
+
+  color-scheme: light;
+}

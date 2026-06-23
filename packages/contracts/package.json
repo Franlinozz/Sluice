@@ -1,0 +1,11 @@
+{
+  "name": "@sluice/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "lint": "forge fmt --check || true",
+    "typecheck": "node -e \"process.exit(0)\""
+  }
+}

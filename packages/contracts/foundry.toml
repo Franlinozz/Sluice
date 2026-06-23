@@ -1,0 +1,20 @@
+# Foundry config for Sluice contracts (ERC-8004, RoyaltySplitter, Bond/Escrow).
+# Stubs only in Phase 0 — deployed/verified to Arc testnet in a later phase.
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc = "0.8.28"
+optimizer = true
+optimizer_runs = 200
+evm_version = "cancun"
+
+[fmt]
+line_length = 100
+tab_width = 4
+
+[rpc_endpoints]
+arc_testnet = "${NEXT_PUBLIC_ARC_RPC_URL}"
+
+[etherscan]
+# Arcscan verification config goes here when we deploy.

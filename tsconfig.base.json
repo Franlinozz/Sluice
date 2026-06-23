@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": false,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "allowJs": false,
+    "paths": {
+      "@sluice/chain": ["./packages/chain/src/index.ts"],
+      "@sluice/chain/*": ["./packages/chain/src/*"],
+      "@sluice/money": ["./packages/money/src/index.ts"],
+      "@sluice/money/*": ["./packages/money/src/*"],
+      "@sluice/ui": ["./packages/ui/src/index.ts"],
+      "@sluice/ui/*": ["./packages/ui/src/*"]
+    }
+  }
+}

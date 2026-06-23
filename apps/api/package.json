@@ -1,0 +1,25 @@
+{
+  "name": "@sluice/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.0.1",
+    "@sluice/chain": "workspace:*",
+    "@sluice/money": "workspace:*",
+    "fastify": "^5.8.5",
+    "viem": "^2.53.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "~5.9.3"
+  }
+}

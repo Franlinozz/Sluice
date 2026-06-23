@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }],
+    "jsx": "preserve",
+    "incremental": true,
+    "types": ["node"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@sluice/chain": ["../../packages/chain/src/index.ts"],
+      "@sluice/money": ["../../packages/money/src/index.ts"],
+      "@sluice/ui": ["../../packages/ui/src/index.ts"],
+      "@sluice/ui/*": ["../../packages/ui/src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "*.ts",
+    "*.mjs",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
