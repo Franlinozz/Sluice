@@ -90,10 +90,16 @@
   - Verified end-to-end on Arc: post $0.02 bond → slash (buyer +$0.02, 1★) → release (5★) →
     reputation 2 matches/1 slash/50% reliability; real same-chain + cross-chain withdrawals.
 
-## Phase 6 (IN PROGRESS): cinematic public landing + 3D hero + "watch the economy".
-Spec: hero (thesis + 3D/2.5D meter particle viz, reduced-motion fallback, CTAs Start earning / Run a
-paying agent), live REAL stats strip (from DB/chain, ~1min refresh, never faked), "one meter every
-unit" line-art, citation-toll mini live ask embed, "watch the economy" realtime agents-pay-creators
-viz, "don't trust—verify" latest REAL receipt + batch tx/Arcscan, how-it-works 3 steps, footer.
-DoD: fast, no layout shift, no hydration errors, 3D respects reduced-motion, every number real &
-traceable, latest receipt is real on-chain, all CTAs route, premium + one product with /app. Then 7-9.
+- **Phase 6** (cinematic landing): public `/` rebuilt. Hero (thesis "Make the smallest unit
+  sellable…" + canvas HeroMeter particles→gate→settled, reduced-motion frame; CTAs Start earning
+  →/app/earn, Run a paying agent →/app/spend; real settled total from KPIs). LiveStats strip
+  (components/marketing/live-stats.tsx — polls /api/sluice/kpis every 60s, count-up, reduced-motion):
+  settled/units/settlements/resources/payers/creatorsPaid (added creatorsPaid to meter aggregate =
+  distinct payTo among settled receipts). One-meter-every-unit line-art. Citation toll = real AskBox
+  embedded. EconomyViz (components/marketing/economy-viz.tsx — canvas agents→creators from REAL
+  settled receipts, pulses=settlements, 30s refresh, reduced-motion static). VerifyReceipt
+  (components/marketing/verify-receipt.tsx — latest real receipt + Circle transfer ID + Arcscan
+  anchors: Gateway Wallet/BondEscrow/ReputationRegistry). How-it-works + 3-col footer + Arc Live
+  badge. Verified live: real Circle ref 40fe682d…, hero $0.050037, all CTAs route, no fakes.
+
+## Next: Phases 7-9 (unspecified). Await spec.
