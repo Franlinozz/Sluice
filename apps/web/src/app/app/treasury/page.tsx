@@ -4,12 +4,13 @@ import { explorerAddressUrl } from "@sluice/chain";
 import { sluiceApi } from "@/lib/api";
 import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
 import { AutoRefresh } from "@/components/auto-refresh";
+import { WithdrawPanel } from "@/components/treasury/withdraw-panel";
 
 export const metadata = { title: "Treasury" };
 export const dynamic = "force-dynamic";
 
 export default async function TreasuryPage() {
-  const bal = await sluiceApi.gatewayBalance(); // platform/seller default
+  const [bal, chains] = await Promise.all([sluiceApi.gatewayBalance(), sluiceApi.treasuryChains()]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -61,13 +62,20 @@ export default async function TreasuryPage() {
         </div>
       )}
 
+      {bal && (
+        <Section title="Withdraw" hint="Gateway Minter · instant Arc / cross-chain">
+          <WithdrawPanel available={bal.gateway.formattedAvailable} chains={chains ?? []} />
+        </Section>
+      )}
+
       <Section title="On-chain anchors">
         <Card className="p-5">
           <p className="text-sm leading-relaxed text-mid">
             Circle Gateway settles nanopayments gas-free via an attested ledger. Funds touch the chain
             at two points, both verifiable on Arcscan: the buyer&apos;s <strong>deposit</strong> into
-            the Gateway Wallet, and the seller&apos;s <strong>withdrawal</strong> (a Gateway Minter
-            mint to the recipient). A self-service, wallet-driven deposit &amp; withdraw flow ships next.
+            the Gateway Wallet, and the seller&apos;s <strong>withdrawal</strong> — a real Gateway
+            Minter mint to the recipient. Same-chain withdrawals are an instant Arc mint; cross-chain
+            burns gas-free on Circle&apos;s ledger, then mints on the target chain (which needs gas there).
           </p>
         </Card>
       </Section>

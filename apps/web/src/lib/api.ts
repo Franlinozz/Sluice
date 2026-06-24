@@ -279,6 +279,13 @@ export const sluiceApi = {
   reputation: (agentId?: number) =>
     getJSON<ProviderReputationDTO>(agentId ? `/reputation?agentId=${agentId}` : "/reputation"),
   contracts: () => getJSON<ContractsDTO>("/contracts"),
+  treasuryChains: () => getJSON<WithdrawChainDTO[]>("/treasury/chains"),
 };
+
+export interface WithdrawChainDTO {
+  name: string;
+  label: string;
+  sameChain: boolean;
+}
 
 export const apiBase = BASE;

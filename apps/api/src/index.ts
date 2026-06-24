@@ -54,6 +54,7 @@ import {
   getBondOnChain,
 } from "./agent/broker.ts";
 import { escrowReady, deployed } from "./contracts/escrow.ts";
+import { withdrawTreasury, WITHDRAW_CHAINS } from "./treasury/withdraw.ts";
 import type { Agent, Decision, Receipt, Resource, Run } from "./db/schema.ts";
 
 // Boot guard: server secrets must never be exposed as NEXT_PUBLIC_* (CLAUDE.md #12).
@@ -586,6 +587,21 @@ app.post("/sessions/:id/stop", async (req, reply) => {
     return { ...res, session: serializeSession(res.session) };
   } catch (err) {
     reply.code(404).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// ── Phase 5: Treasury withdrawals (Gateway Minter — instant Arc / cross-chain) ─
+app.get("/treasury/chains", async () =>
+  WITHDRAW_CHAINS.map((c) => ({ name: c.name, label: c.label, sameChain: c.sameChain })),
+);
+
+app.post("/treasury/withdraw", async (req, reply) => {
+  const body = (req.body ?? {}) as { amount?: string; chain?: string; recipient?: string };
+  if (!body.amount || !body.chain) return reply.code(400).send({ error: "amount and chain are required" });
+  try {
+    return await withdrawTreasury({ amount: body.amount, chain: body.chain, recipient: body.recipient });
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
