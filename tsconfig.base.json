@@ -24,7 +24,9 @@
       "@sluice/money": ["./packages/money/src/index.ts"],
       "@sluice/money/*": ["./packages/money/src/*"],
       "@sluice/ui": ["./packages/ui/src/index.ts"],
-      "@sluice/ui/*": ["./packages/ui/src/*"]
+      "@sluice/ui/*": ["./packages/ui/src/*"],
+      "@sluice/pay": ["./packages/sluice-pay/src/index.ts"],
+      "@sluice/pay/*": ["./packages/sluice-pay/src/*"]
     }
   }
 }
