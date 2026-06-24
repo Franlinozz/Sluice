@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiBase, type ReceiptDTO, type ResourceDTO } from "./api";
+import { apiBase, type AgentDTO, type ReceiptDTO, type ResourceDTO, type RunDTO } from "./api";
 
 async function call<T>(
   path: string,
@@ -48,6 +48,29 @@ export async function settleAction() {
     body: JSON.stringify({}),
   });
   if (res.ok) {
+    revalidatePath("/app/settlements");
+    revalidatePath("/app");
+  }
+  return res;
+}
+
+export interface CreateAgentFields {
+  name: string;
+  task: string;
+  budget: string;
+  policy?: string;
+}
+
+export async function createAgentAction(input: CreateAgentFields) {
+  const res = await call<AgentDTO>("/agents", { method: "POST", body: JSON.stringify(input) });
+  if (res.ok) revalidatePath("/app/spend");
+  return res;
+}
+
+export async function runAgentAction(agentId: string) {
+  const res = await call<RunDTO>(`/agents/${agentId}/run`, { method: "POST" });
+  if (res.ok) {
+    revalidatePath("/app/spend");
     revalidatePath("/app/settlements");
     revalidatePath("/app");
   }

@@ -68,6 +68,57 @@ export interface GatewayBalanceDTO {
   };
 }
 
+export interface DecisionDTO {
+  id: string;
+  resourceId: string | null;
+  resourceName: string;
+  decision: "pay" | "skip" | "capped";
+  relevance: number;
+  reason: string;
+  amount: string | null;
+  formattedAmount: string | null;
+  paid: boolean;
+  createdAt: string;
+}
+
+export interface RunDTO {
+  id: string;
+  agentId: string;
+  status: "running" | "paused" | "completed" | "failed";
+  spent: string;
+  formattedSpent: string;
+  value: number;
+  avgRelevance: number | null;
+  steps: number;
+  mode: "live" | "mock";
+  note: string | null;
+  paidCount: number | null;
+  startedAt: string;
+  finishedAt: string | null;
+  decisions?: DecisionDTO[];
+}
+
+export interface AgentRulesDTO {
+  priceCeiling: string | null;
+  formattedPriceCeiling: string | null;
+  allowedUnitTypes: string[] | null;
+  topics: string[];
+  relevanceThreshold: number;
+}
+
+export interface AgentDTO {
+  id: string;
+  name: string;
+  task: string;
+  budget: string;
+  formattedBudget: string;
+  policy: string | null;
+  rules: AgentRulesDTO;
+  buyer: string | null;
+  createdAt: string;
+  latestRun?: RunDTO | null;
+}
+
 async function getJSON<T>(path: string): Promise<T | null> {
   try {
     const r = await fetch(`${BASE}${path}`, { cache: "no-store" });
@@ -86,6 +137,8 @@ export const sluiceApi = {
     getJSON<GatewayBalanceDTO>(
       address ? `/gateway/balance?address=${encodeURIComponent(address)}` : "/gateway/balance",
     ),
+  agents: () => getJSON<AgentDTO[]>("/agents"),
+  agent: (id: string) => getJSON<AgentDTO>(`/agents/${id}`),
 };
 
 export const apiBase = BASE;

@@ -230,6 +230,20 @@ per-payment on-chain tx. Verified empirically:
 - EIP-3009 authorization window: Circle requires a LONG validity for batched auths — a 4-day
   window failed ("authorization_validity_too_short"); we use 30 days (MAX_TIMEOUT_SECONDS).
 
+## Phase 2 — the buyer agent (built, proven on Arc testnet)
+- apps/api/src/agent: reasoning core (gpt-4o-mini via raw fetch JSON mode + deterministic MOCK
+  fallback when no OPENAI_API_KEY), policy parsing (plain-English → enforceable rules), runner
+  (discover → reason → ENFORCE budget/ceiling/allowed-units deterministically → pay via
+  GatewayClient → persist trace). The LLM scores relevance + recommends; CODE enforces — raw
+  model output NEVER authorizes a payment (rule). Endpoints: POST/GET /agents, POST
+  /agents/:id/run, GET /agents/:id/runs, GET /runs/:id.
+- apps/agent: standalone CLI runtime (creates + runs agents via the API, streams the trace;
+  supports `--loop` for an always-on buyer). apps/web /app/spend: Agent Console (create, parsed
+  rules, run, live AgentTrace, budget bar, spend/value/avg-relevance).
+- Verified: live run pays relevant sources, skips off-topic (gossip), CAPS over-ceiling sources
+  even at high relevance; budget cap PAUSES the run; mock mode runs clean without a key; every
+  agent payment lands in /app/settlements. Agent pays its own paywall (buyer wallet → seller).
+
 ## Bug register (append real bugs + fixes here as we hit them)
 - [Phase 0, VERCEL 500] Every route 500'd in production (not in `next dev`). Cause: `useAppKit()`
   runs during SSR, but `createAppKit` was guarded behind `typeof window !== "undefined"` so it

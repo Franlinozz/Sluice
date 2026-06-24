@@ -21,7 +21,19 @@ import {
 } from "./meter/meter.ts";
 import { getSettlementBackend } from "./meter/backends.ts";
 import { readGatewayBalance } from "./gateway-balance.ts";
-import type { Receipt, Resource } from "./db/schema.ts";
+import {
+  agentRules,
+  createAgent,
+  getAgent,
+  getDecisions,
+  getRun,
+  latestRun,
+  listAgents,
+  listRuns,
+} from "./agent/store.ts";
+import { runAgentSession } from "./agent/runner.ts";
+import { buyerAddress } from "./agent/pay.ts";
+import type { Agent, Decision, Receipt, Resource, Run } from "./db/schema.ts";
 
 // Boot guard: server secrets must never be exposed as NEXT_PUBLIC_* (CLAUDE.md #12).
 for (const key of Object.keys(process.env)) {
@@ -204,6 +216,119 @@ app.get("/kpis", async () => {
 
 // Manually kick the reconciler (the timer also does this).
 app.post("/reconcile", async () => ({ updated: await reconcilePending() }));
+
+// ── Agents (Phase 2) ─────────────────────────────────────────────────────────
+function serializeAgent(a: Agent) {
+  const rules = agentRules(a);
+  return {
+    id: a.id,
+    name: a.name,
+    task: a.task,
+    budget: a.budget,
+    formattedBudget: formatUSD(BigInt(a.budget)),
+    policy: a.policy,
+    rules: {
+      ...rules,
+      formattedPriceCeiling: rules.priceCeiling ? formatUSD(BigInt(rules.priceCeiling)) : null,
+    },
+    buyer: buyerAddress() ?? null,
+    createdAt: a.createdAt,
+  };
+}
+
+function serializeRun(r: Run, paidCount?: number) {
+  // "Value delivered" = total relevance acquired; avgRelevance is the honest quality-of-spend metric.
+  const avgRelevance = paidCount && paidCount > 0 ? Math.round(r.value / paidCount) : null;
+  return {
+    id: r.id,
+    agentId: r.agentId,
+    status: r.status,
+    spent: r.spent,
+    formattedSpent: formatUSD(BigInt(r.spent)),
+    value: r.value,
+    avgRelevance,
+    steps: r.steps,
+    mode: r.mode,
+    note: r.note,
+    paidCount: paidCount ?? null,
+    startedAt: r.startedAt,
+    finishedAt: r.finishedAt,
+  };
+}
+
+function serializeDecision(d: Decision) {
+  return {
+    id: d.id,
+    resourceId: d.resourceId,
+    resourceName: d.resourceName,
+    decision: d.decision,
+    relevance: d.relevance,
+    reason: d.reason,
+    amount: d.amount,
+    formattedAmount: d.amount ? formatUSD(BigInt(d.amount)) : null,
+    paid: d.paid,
+    createdAt: d.createdAt,
+  };
+}
+
+app.post("/agents", async (req, reply) => {
+  try {
+    const body = req.body as Parameters<typeof createAgent>[0];
+    const agent = await createAgent(body);
+    reply.code(201).send(serializeAgent(agent));
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+app.get("/agents", async () =>
+  listAgents().map((a) => {
+    const run = latestRun(a.id);
+    return { ...serializeAgent(a), latestRun: run ? serializeRun(run) : null };
+  }),
+);
+
+app.get("/agents/:id", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const a = getAgent(id);
+  if (!a) return reply.code(404).send({ error: "agent not found" });
+  const run = latestRun(id);
+  return {
+    ...serializeAgent(a),
+    latestRun: run ? { ...serializeRun(run), decisions: getDecisions(run.id).map(serializeDecision) } : null,
+  };
+});
+
+app.post("/agents/:id/run", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  if (!getAgent(id)) return reply.code(404).send({ error: "agent not found" });
+  try {
+    const run = await runAgentSession(id);
+    const decisions = getDecisions(run.id);
+    return {
+      ...serializeRun(run, decisions.filter((d) => d.paid).length),
+      decisions: decisions.map(serializeDecision),
+    };
+  } catch (err) {
+    reply.code(500).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+app.get("/agents/:id/runs", async (req) => {
+  const { id } = req.params as { id: string };
+  return listRuns(id).map((r) => serializeRun(r));
+});
+
+app.get("/runs/:id", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const run = getRun(id);
+  if (!run) return reply.code(404).send({ error: "run not found" });
+  const decisions = getDecisions(id);
+  return {
+    ...serializeRun(run, decisions.filter((d) => d.paid).length),
+    decisions: decisions.map(serializeDecision),
+  };
+});
 
 app.get("/gateway/balance", async (req) => {
   const q = req.query as { address?: string };

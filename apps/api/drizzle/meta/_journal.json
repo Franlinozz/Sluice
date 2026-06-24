@@ -15,6 +15,13 @@
       "when": 1782276918913,
       "tag": "0001_dusty_turbo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782279384164,
+      "tag": "0002_fast_black_bird",
+      "breakpoints": true
     }
   ]
 }

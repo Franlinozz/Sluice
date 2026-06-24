@@ -112,6 +112,87 @@ export const receipts = sqliteTable(
   ],
 );
 
+// ── Phase 2: the buyer agent ─────────────────────────────────────────────────
+export const RUN_STATUS = ["running", "paused", "completed", "failed"] as const;
+export type RunStatus = (typeof RUN_STATUS)[number];
+
+export const DECISION_KINDS = ["pay", "skip", "capped"] as const;
+export type DecisionKind = (typeof DECISION_KINDS)[number];
+
+/** A configured buyer agent: a task, a budget, and an enforceable policy. */
+export const agents = sqliteTable("agents", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  /** The research/task description the agent reasons about. */
+  task: text("task").notNull(),
+  /** Per-run budget in 6-dp USDC base units (string). */
+  budget: text("budget").notNull(),
+  /** Plain-English spend policy. */
+  policy: text("policy"),
+  /** Parsed, enforceable rules (JSON): priceCeiling, allowedUnitTypes, topics, relevanceThreshold. */
+  rules: text("rules"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+});
+
+/** A single autonomous session. */
+export const runs = sqliteTable(
+  "runs",
+  {
+    id: text("id").primaryKey(),
+    agentId: text("agent_id")
+      .notNull()
+      .references(() => agents.id),
+    status: text("status").$type<RunStatus>().notNull().default("running"),
+    /** Spent so far (base units). */
+    spent: text("spent").notNull().default("0"),
+    /** Value acquired = sum of relevance of paid resources (0..N), stored as real. */
+    value: integer("value").notNull().default(0),
+    /** Steps (resources evaluated). */
+    steps: integer("steps").notNull().default(0),
+    /** "live" or "mock" reasoning. */
+    mode: text("mode").notNull().default("mock"),
+    note: text("note"),
+    startedAt: integer("started_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+    finishedAt: integer("finished_at", { mode: "timestamp_ms" }),
+  },
+  (t) => [index("runs_agent").on(t.agentId)],
+);
+
+/** One reasoning step / decision in a run (the visible trace). */
+export const decisions = sqliteTable(
+  "decisions",
+  {
+    id: text("id").primaryKey(),
+    runId: text("run_id")
+      .notNull()
+      .references(() => runs.id),
+    resourceId: text("resource_id"),
+    resourceName: text("resource_name").notNull(),
+    decision: text("decision").$type<DecisionKind>().notNull(),
+    /** 0..100 relevance (int) for tabular display. */
+    relevance: integer("relevance").notNull().default(0),
+    reason: text("reason").notNull(),
+    /** Amount paid (base units) if decision = pay. */
+    amount: text("amount"),
+    paid: integer("paid", { mode: "boolean" }).notNull().default(false),
+    /** Accrual/nonce reference for the payment, if paid. */
+    paymentRef: text("payment_ref"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+  },
+  (t) => [index("decisions_run").on(t.runId)],
+);
+
+export type Agent = typeof agents.$inferSelect;
+export type NewAgent = typeof agents.$inferInsert;
+export type Run = typeof runs.$inferSelect;
+export type Decision = typeof decisions.$inferSelect;
+
 export type Resource = typeof resources.$inferSelect;
 export type NewResource = typeof resources.$inferInsert;
 export type Accrual = typeof accruals.$inferSelect;
