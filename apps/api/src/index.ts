@@ -35,6 +35,15 @@ import { runAgentSession } from "./agent/runner.ts";
 import { buyerAddress } from "./agent/pay.ts";
 import { ingestFeed, listFeeds } from "./connectors/rss.ts";
 import { getResearch, recentResearch, resourceEarned, runResearch } from "./agent/research.ts";
+import {
+  createSession,
+  getSessionState,
+  heartbeat,
+  pauseSession,
+  reapStaleSessions,
+  resumeSession,
+  stopSession,
+} from "./meter/streaming.ts";
 import type { Agent, Decision, Receipt, Resource, Run } from "./db/schema.ts";
 
 // Boot guard: server secrets must never be exposed as NEXT_PUBLIC_* (CLAUDE.md #12).
@@ -58,6 +67,18 @@ const API_PUBLIC = process.env.API_PUBLIC_URL ?? `http://62.171.182.75:${port}`;
 
 const app = Fastify({ logger: true });
 await app.register(cors, { origin: origins });
+
+// Tolerate empty JSON bodies (bodyless POSTs like /heartbeat, /pause, /stop send no body but
+// clients often set content-type: application/json → Fastify would otherwise 400 before the handler).
+app.addContentTypeParser("application/json", { parseAs: "string" }, (_req, body, done) => {
+  const s = body as string;
+  if (!s || s.length === 0) return done(null, {});
+  try {
+    done(null, JSON.parse(s));
+  } catch (err) {
+    done(err as Error, undefined);
+  }
+});
 
 // ── serializers (format money + explorer links at the edge) ──────────────────
 function serializeResource(r: Resource) {
@@ -495,6 +516,69 @@ app.get("/resources/:id/earned", async (req, reply) => {
   return { resourceId: r.id, earned: earned.toString(), formattedEarned: formatUSD(earned) };
 });
 
+// ── Phase 4: streaming meter + proof-of-flow ─────────────────────────────────
+function serializeSession(st: NonNullable<ReturnType<typeof getSessionState>>) {
+  return {
+    ...st,
+    formattedRate: formatUSD(BigInt(st.rate)),
+    formattedReserve: formatUSD(BigInt(st.reserve)),
+    formattedAccrued: formatUSD(BigInt(st.accrued)),
+    formattedReserveRemaining: formatUSD(BigInt(st.reserveRemaining)),
+    formattedSettledAmount: st.settledAmount ? formatUSD(BigInt(st.settledAmount)) : null,
+  };
+}
+
+app.post("/sessions", async (req, reply) => {
+  const body = (req.body ?? {}) as { resourceId?: string; reserveSeconds?: number };
+  if (!body.resourceId) return reply.code(400).send({ error: "resourceId required" });
+  try {
+    const s = createSession({
+      resourceId: body.resourceId,
+      payer: buyerAddress() ?? "unknown",
+      reserveSeconds: body.reserveSeconds,
+    });
+    reply.code(201).send(serializeSession(getSessionState(s.id)!));
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+app.get("/sessions/:id", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const st = getSessionState(id);
+  if (!st) return reply.code(404).send({ error: "session not found" });
+  return serializeSession(st);
+});
+
+app.post("/sessions/:id/heartbeat", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  heartbeat(id);
+  const st = getSessionState(id);
+  return st ? serializeSession(st) : reply.code(404).send({ error: "session not found" });
+});
+app.post("/sessions/:id/pause", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  pauseSession(id);
+  const st = getSessionState(id);
+  return st ? serializeSession(st) : reply.code(404).send({ error: "session not found" });
+});
+app.post("/sessions/:id/resume", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  resumeSession(id);
+  const st = getSessionState(id);
+  return st ? serializeSession(st) : reply.code(404).send({ error: "session not found" });
+});
+
+app.post("/sessions/:id/stop", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  try {
+    const res = await stopSession(id);
+    return { ...res, session: serializeSession(res.session) };
+  } catch (err) {
+    reply.code(404).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 // ── timers: batch settle (the "timer" trigger) + reconcile on-chain ──────────
 if (SETTLE_INTERVAL_MS > 0) {
   setInterval(() => {
@@ -507,6 +591,14 @@ if (RECONCILE_INTERVAL_MS > 0) {
     reconcilePending().catch((e) => app.log.error({ err: String(e) }, "reconcile failed"));
   }, RECONCILE_INTERVAL_MS);
 }
+// Proof-of-flow watcher: auto-pause streaming sessions whose heartbeat went stale.
+setInterval(() => {
+  try {
+    reapStaleSessions();
+  } catch (e) {
+    app.log.error({ err: String(e) }, "session reaper failed");
+  }
+}, 1000);
 
 try {
   await app.listen({ port, host: "0.0.0.0" });

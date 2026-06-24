@@ -109,9 +109,47 @@ export const citations = sqliteTable(
   (t) => [index("citations_research").on(t.researchId), index("citations_resource").on(t.resourceId)],
 );
 
+export const SESSION_STATUS = ["flowing", "paused", "stopped"] as const;
+export type SessionStatus = (typeof SESSION_STATUS)[number];
+
+/** A streaming (per-second) metering session with proof-of-flow (Phase 4). */
+export const sessions = sqliteTable(
+  "sessions",
+  {
+    id: text("id").primaryKey(),
+    resourceId: text("resource_id")
+      .notNull()
+      .references(() => resources.id),
+    payer: text("payer").notNull(),
+    /** Rate in 6-dp USDC base units PER SECOND (string). */
+    rate: text("rate").notNull(),
+    /** Reserve cap in base units — the most that can be charged (never debited beyond this). */
+    reserve: text("reserve").notNull(),
+    /** Frozen flowed milliseconds (accrual only advances while flowing + heartbeat fresh). */
+    accruedMs: integer("accrued_ms").notNull().default(0),
+    status: text("status").$type<SessionStatus>().notNull().default("flowing"),
+    /** True when paused by heartbeat loss (auto) — resumes on heartbeat return; manual pause does not. */
+    flowPaused: integer("flow_paused", { mode: "boolean" }).notNull().default(false),
+    /** Epoch ms when the current flowing stretch began (for lazy accrual). */
+    lastTickAt: integer("last_tick_at").notNull(),
+    /** Epoch ms of the last proof-of-flow heartbeat. */
+    heartbeatAt: integer("heartbeat_at").notNull(),
+    /** Settlement results at stop. */
+    settledSeconds: integer("settled_seconds"),
+    settledAmount: text("settled_amount"),
+    receiptId: text("receipt_id"),
+    startedAt: integer("started_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+    stoppedAt: integer("stopped_at", { mode: "timestamp_ms" }),
+  },
+  (t) => [index("sessions_resource").on(t.resourceId), index("sessions_status").on(t.status)],
+);
+
 export type Feed = typeof feeds.$inferSelect;
 export type Research = typeof research.$inferSelect;
 export type Citation = typeof citations.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
 
 /**
  * A verified-but-not-yet-settled unit of value (the Meter ledger). Holds the signed

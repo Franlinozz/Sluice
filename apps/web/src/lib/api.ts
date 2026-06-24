@@ -160,6 +160,32 @@ export interface ResearchResultDTO {
   citations: ResearchCitationDTO[];
 }
 
+export interface StreamSessionDTO {
+  id: string;
+  resourceId: string;
+  payer: string;
+  rate: string;
+  reserve: string;
+  status: "flowing" | "paused" | "stopped";
+  flowPaused: boolean;
+  flowedSeconds: number;
+  flowedMs: number;
+  accrued: string;
+  reserveRemaining: string;
+  capped: boolean;
+  heartbeatFresh: boolean;
+  settledSeconds: number | null;
+  settledAmount: string | null;
+  receiptId: string | null;
+  startedAt: string;
+  stoppedAt: string | null;
+  formattedRate: string;
+  formattedReserve: string;
+  formattedAccrued: string;
+  formattedReserveRemaining: string;
+  formattedSettledAmount: string | null;
+}
+
 async function getJSON<T>(path: string): Promise<T | null> {
   try {
     const r = await fetch(`${BASE}${path}`, { cache: "no-store" });
@@ -180,6 +206,7 @@ export const sluiceApi = {
     ),
   agents: () => getJSON<AgentDTO[]>("/agents"),
   agent: (id: string) => getJSON<AgentDTO>(`/agents/${id}`),
+  session: (id: string) => getJSON<StreamSessionDTO>(`/sessions/${id}`),
 };
 
 export const apiBase = BASE;
