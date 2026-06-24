@@ -65,7 +65,29 @@
   interpolation, controls, simulate-flow-loss) via same-origin /api/sluice/[...] proxy. Verified on
   Arc: accrue→pause→resume→auto-pause(no dead air)→stop→$0.0007 settle.
 
-## Next: Phase 5 — ERC-8004 reputation bonds + Bazaar + Treasury. Then 6-9 unspecified.
-Brief's remaining scope: streaming per-second meter + proof-of-flow, ERC-8004 reputation bonds
-(broker agent), cinematic landing + 3D hero, Treasury cross-chain withdraw UI, Docs/whitepaper,
-more OSS connectors. Await the next phase spec.
+- **Phase 5** (reputation bonds + Bazaar + Treasury): "reputation = capital at risk."
+  - Contracts (Foundry, deployed + VERIFIED on Arcscan, chain 5042002):
+    IdentityRegistry `0x8e856716d653db35eb4dac7616648172cebeba34`,
+    ReputationRegistry `0x6593cd1eb1dec37797aee650d48ad2f4d910cbd4`,
+    BondEscrow `0x1bf29623c8a74c13bc4e27bbe72037a24976c0c1` (arbiter = buyer/operator).
+    ABI+bytecode in apps/api/src/contracts/{identity,reputation,bond-escrow}.ts; addresses in deployed.json.
+    Deploy: scripts/deploy-registries.ts. Verify: forge verify-contract --verifier blockscout
+    --verifier-url https://testnet.arcscan.app/api/ (Arcscan IS Blockscout).
+  - Broker (apps/api/src/agent/broker.ts) + drivers (contracts/escrow.ts): provider SELF-bonds
+    (broker=provider=seller, beneficiary=buyer/arbiter). createMatch → ensure ERC-8004 identity +
+    capitalize seller if short + approve + postBond. resolveMatch → arbiter slash(→buyer)/release(→provider)
+    + ERC-8004 feedback (1★ slash / 5★ release). Migration 0005 (matches). Endpoints: /contracts,
+    /reputation, /matches[/:id][/resolve], /treasury/{chains,withdraw}.
+  - UI: /app/discover Bazaar (registry strip, provider reputation glance, searchable resource grid
+    with real per-type actions, BrokerForm), /app/agents Fleet&Reputation (reputation summary + bond
+    ledger + Release/Slash). Treasury: real balance + WithdrawPanel.
+  - Treasury withdraw (apps/api/src/treasury/withdraw.ts): same-chain Arc = REAL instant Gateway
+    Minter mint (verified: tx 0x78bfcc…). Cross-chain = burn gas-free on Circle ledger then gatewayMint
+    on dest (NEEDS native gas on dest). We pre-flight dest gas + refuse before burning (no stranded funds).
+    GATED: no testnet gas on Base/Arb/Eth Sepolia → true cross-chain mint awaits dest gas funding.
+  - Verified end-to-end on Arc: post $0.02 bond → slash (buyer +$0.02, 1★) → release (5★) →
+    reputation 2 matches/1 slash/50% reliability; real $0.03 same-chain withdrawal.
+
+## Next: Phases 6-9 (unspecified — cinematic landing/3D hero, Docs/whitepaper, more OSS connectors).
+Await the next phase spec. To DEMONSTRATE a true cross-chain withdrawal, fund a little Base Sepolia
+(or Arb/Eth Sepolia) gas to the operator `0xBd88eAE165F8A00B1B33357Fb0880CD4fE5C5E70` — code is ready.
