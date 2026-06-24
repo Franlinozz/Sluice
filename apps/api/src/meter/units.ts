@@ -27,6 +27,8 @@ export function countUnits(unitType: UnitType, event: UnitEvent = {}): number {
     case "per_token":
       return n(event.tokens);
     case "per_citation":
+    case "per_read":
+    case "per_crawl":
       return n(event.citations, 1) || 1;
     case "per_listen":
       return n(event.listens, 1) || 1;
@@ -43,6 +45,8 @@ export const UNIT_LABEL: Record<UnitType, string> = {
   per_second: "second",
   per_token: "token",
   per_citation: "citation",
+  per_read: "read",
+  per_crawl: "crawl",
   per_listen: "listen",
   per_view: "view",
 };

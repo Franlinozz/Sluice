@@ -22,6 +22,13 @@
       "when": 1782279384164,
       "tag": "0002_fast_black_bird",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1782297245368,
+      "tag": "0003_special_marvex",
+      "breakpoints": true
     }
   ]
 }

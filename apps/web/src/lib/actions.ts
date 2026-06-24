@@ -1,7 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiBase, type AgentDTO, type ReceiptDTO, type ResourceDTO, type RunDTO } from "./api";
+import {
+  apiBase,
+  type AgentDTO,
+  type ReceiptDTO,
+  type ResearchResultDTO,
+  type ResourceDTO,
+  type RunDTO,
+} from "./api";
 
 async function call<T>(
   path: string,
@@ -72,6 +79,39 @@ export async function runAgentAction(agentId: string) {
   if (res.ok) {
     revalidatePath("/app/spend");
     revalidatePath("/app/settlements");
+    revalidatePath("/app");
+  }
+  return res;
+}
+
+export interface IngestRssFields {
+  feedUrl: string;
+  price: string;
+  unitType?: string;
+  limit?: number;
+  author?: string;
+}
+
+export async function ingestRssAction(input: IngestRssFields) {
+  const res = await call<{ registered: number; skipped: number; feed: { title: string } }>(
+    "/connectors/rss",
+    { method: "POST", body: JSON.stringify({ ...input, unitType: input.unitType ?? "per_citation" }) },
+  );
+  if (res.ok) {
+    revalidatePath("/app/earn");
+    revalidatePath("/app/discover");
+  }
+  return res;
+}
+
+export async function runResearchAction(question: string) {
+  const res = await call<ResearchResultDTO>("/research", {
+    method: "POST",
+    body: JSON.stringify({ question }),
+  });
+  if (res.ok) {
+    revalidatePath("/app/settlements");
+    revalidatePath("/app/earn");
     revalidatePath("/app");
   }
   return res;

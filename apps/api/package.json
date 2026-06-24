@@ -21,6 +21,7 @@
     "@x402/evm": "^2.6.0",
     "better-sqlite3": "^11.8.0",
     "drizzle-orm": "^0.45.2",
+    "fast-xml-parser": "^4.5.1",
     "fastify": "^5.8.5",
     "viem": "^2.53.1"
   },

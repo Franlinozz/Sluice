@@ -1,9 +1,11 @@
 /** Resource registry — register/list/get priced, x402-protected resources. */
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { Address } from "viem";
 import { parseUSDC, toBaseUnitString } from "@sluice/money";
 import { db } from "./db/client.ts";
 import { resources, UNIT_TYPES, type Resource, type UnitType } from "./db/schema.ts";
+import { deploySplitter, type SplitShare } from "./contracts/splitter.ts";
 
 export interface RegisterResourceInput {
   name: string;
@@ -16,6 +18,15 @@ export interface RegisterResourceInput {
   /** URL slug for the protected endpoint. */
   path: string;
   metadata?: Record<string, unknown>;
+  // Phase 3 (citation toll)
+  author?: string;
+  contentUrl?: string;
+  sourceType?: "url" | "feed_item" | "domain";
+  /** Attribution splits. ≥2 collaborators → deploy a RoyaltySplitter (unless splitterAddress given). */
+  splits?: SplitShare[];
+  /** Reuse a pre-deployed splitter (e.g. one per feed). */
+  splitterAddress?: string;
+  feedId?: string;
 }
 
 function slugify(s: string): string {
@@ -29,18 +40,34 @@ function slugify(s: string): string {
 const DEFAULT_SELLER =
   process.env.SELLER_ADDRESS ?? process.env.ARC_WALLET_ADDRESS ?? "";
 
-export function registerResource(input: RegisterResourceInput): Resource {
+function validateSplits(splits: SplitShare[]): void {
+  const total = splits.reduce((a, s) => a + s.pct, 0);
+  if (Math.abs(total - 100) > 0.5) throw new Error(`splits must sum to 100 (got ${total})`);
+  for (const s of splits) {
+    if (!/^0x[0-9a-fA-F]{40}$/.test(s.wallet)) throw new Error(`invalid wallet: ${s.wallet}`);
+    if (s.pct <= 0) throw new Error("each split pct must be > 0");
+  }
+}
+
+export async function registerResource(input: RegisterResourceInput): Promise<Resource> {
   if (!UNIT_TYPES.includes(input.unitType)) {
     throw new Error(`Invalid unitType: ${input.unitType}`);
   }
   const unitPrice = toBaseUnitString(parseUSDC(input.price)); // throws on bad price
-  const payTo = input.payTo ?? DEFAULT_SELLER;
-  if (!payTo) throw new Error("payTo is required (no SELLER_ADDRESS configured)");
   const path = slugify(input.path || input.name);
   if (!path) throw new Error("path is required");
+  if (getResourceByPath(path)) throw new Error(`A resource already exists at path "${path}"`);
 
-  const existing = getResourceByPath(path);
-  if (existing) throw new Error(`A resource already exists at path "${path}"`);
+  // Multi-collaborator → deploy (or reuse) a RoyaltySplitter; payTo = the splitter.
+  const splits = input.splits && input.splits.length >= 2 ? input.splits : null;
+  let splitterAddress = input.splitterAddress ?? null;
+  if (splits && !splitterAddress) {
+    validateSplits(splits);
+    splitterAddress = await deploySplitter(splits);
+  }
+
+  const payTo = splitterAddress ?? input.payTo ?? DEFAULT_SELLER;
+  if (!payTo) throw new Error("payTo is required (no SELLER_ADDRESS configured)");
 
   const id = randomUUID();
   db.insert(resources)
@@ -54,6 +81,12 @@ export function registerResource(input: RegisterResourceInput): Resource {
       path,
       status: "active",
       metadata: input.metadata ? JSON.stringify(input.metadata) : null,
+      author: input.author ?? null,
+      contentUrl: input.contentUrl ?? null,
+      sourceType: input.sourceType ?? "url",
+      splits: splits ? JSON.stringify(splits) : null,
+      splitterAddress,
+      feedId: input.feedId ?? null,
     })
     .run();
   return db.select().from(resources).where(eq(resources.id, id)).get()!;

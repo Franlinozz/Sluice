@@ -8,6 +8,8 @@ import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const UNIT_TYPES = [
   "per_request",
   "per_citation",
+  "per_read",
+  "per_crawl",
   "per_second",
   "per_byte",
   "per_token",
@@ -39,10 +41,77 @@ export const resources = sqliteTable("resources", {
   path: text("path").notNull().unique(),
   status: text("status").notNull().default("active"),
   metadata: text("metadata"),
+  // Phase 3 (citation toll): content source + attribution splits.
+  author: text("author"),
+  contentUrl: text("content_url"),
+  sourceType: text("source_type").default("url"), // url | feed_item | domain
+  /** Attribution splits (JSON [{label,wallet,pct}]). Null/empty = single author (payTo). */
+  splits: text("splits"),
+  /** Deployed RoyaltySplitter address for multi-collaborator resources. */
+  splitterAddress: text("splitter_address"),
+  feedId: text("feed_id"),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
 });
+
+/** An ingested RSS/Atom feed (RSSHub route or native) whose items become citable resources. */
+export const feeds = sqliteTable("feeds", {
+  id: text("id").primaryKey(),
+  feedUrl: text("feed_url").notNull().unique(),
+  title: text("title"),
+  itemCount: integer("item_count").notNull().default(0),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+});
+
+/** A research query answered by the agent (the citation-toll loop). */
+export const research = sqliteTable("research", {
+  id: text("id").primaryKey(),
+  question: text("question").notNull(),
+  answer: text("answer"),
+  mode: text("mode").notNull().default("mock"),
+  citationCount: integer("citation_count").notNull().default(0),
+  totalPaid: text("total_paid").notNull().default("0"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+});
+
+/** A single citation: a grounded source that was PAID to retrieve (the auditable record). */
+export const citations = sqliteTable(
+  "citations",
+  {
+    id: text("id").primaryKey(),
+    researchId: text("research_id")
+      .notNull()
+      .references(() => research.id),
+    resourceId: text("resource_id"),
+    resourceName: text("resource_name").notNull(),
+    sourceUrl: text("source_url"),
+    author: text("author"),
+    /** Amount paid for this citation (base units). */
+    amount: text("amount").notNull(),
+    /** "gateway" (single author, gas-free) | "onchain" (multi-collaborator via RoyaltySplitter). */
+    settlementType: text("settlement_type").notNull(),
+    /** On-chain tx (split distribute) when settlementType = onchain. */
+    txHash: text("tx_hash"),
+    splitterAddress: text("splitter_address"),
+    /** Split breakdown (JSON [{label,wallet,pct,amount}]) for display. */
+    splits: text("splits"),
+    /** Index of the cited source in the answer ([n]). */
+    marker: integer("marker").notNull().default(1),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+  },
+  (t) => [index("citations_research").on(t.researchId), index("citations_resource").on(t.resourceId)],
+);
+
+export type Feed = typeof feeds.$inferSelect;
+export type Research = typeof research.$inferSelect;
+export type Citation = typeof citations.$inferSelect;
 
 /**
  * A verified-but-not-yet-settled unit of value (the Meter ledger). Holds the signed

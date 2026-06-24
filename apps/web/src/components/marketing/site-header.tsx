@@ -12,6 +12,9 @@ export function SiteHeader() {
           <Logo />
         </Link>
         <nav className="ml-2 hidden items-center gap-6 text-sm text-mid md:flex">
+          <Link href="/ask" className="transition-colors hover:text-hi">
+            Ask the agent
+          </Link>
           <Link href="/app" className="transition-colors hover:text-hi">
             Console
           </Link>

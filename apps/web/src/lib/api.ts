@@ -51,6 +51,17 @@ export interface ResourceDTO {
   status: string;
   createdAt: string;
   endpoint: string;
+  author?: string | null;
+  contentUrl?: string | null;
+  sourceType?: string | null;
+  splits?: { label: string; wallet: string; pct: number }[] | null;
+  splitterAddress?: string | null;
+  splitterUrl?: string | null;
+  feedId?: string | null;
+  earned?: string;
+  formattedEarned?: string;
+  rslUrl?: string;
+  llmsTxtUrl?: string;
 }
 
 export interface GatewayBalanceDTO {
@@ -117,6 +128,36 @@ export interface AgentDTO {
   buyer: string | null;
   createdAt: string;
   latestRun?: RunDTO | null;
+}
+
+export interface SplitBreakdownDTO {
+  label: string;
+  wallet: string;
+  pct: number;
+  amount: string;
+}
+
+export interface ResearchCitationDTO {
+  marker: number;
+  resourceName: string;
+  sourceUrl: string | null;
+  author: string | null;
+  amount: string;
+  formattedAmount: string;
+  settlementType: "gateway" | "onchain";
+  txHash: string | null;
+  explorerUrl: string | null;
+  splits: SplitBreakdownDTO[] | null;
+}
+
+export interface ResearchResultDTO {
+  id: string;
+  question: string;
+  answer: string;
+  mode: "live" | "mock";
+  totalPaid: string;
+  formattedTotalPaid: string;
+  citations: ResearchCitationDTO[];
 }
 
 async function getJSON<T>(path: string): Promise<T | null> {

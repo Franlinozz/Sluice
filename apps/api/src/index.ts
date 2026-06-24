@@ -6,7 +6,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import type { Address } from "viem";
 import { formatUSD } from "@sluice/money";
-import { arcConfig, explorerTxUrl, getClient } from "@sluice/chain";
+import { arcConfig, explorerAddressUrl, explorerTxUrl, getClient } from "@sluice/chain";
 import { runMigrations } from "./db/client.ts";
 import { getResource, getResourceByPath, listResources, registerResource } from "./registry.ts";
 import { applyPaywall } from "./payments/paywall.ts";
@@ -33,6 +33,8 @@ import {
 } from "./agent/store.ts";
 import { runAgentSession } from "./agent/runner.ts";
 import { buyerAddress } from "./agent/pay.ts";
+import { ingestFeed, listFeeds } from "./connectors/rss.ts";
+import { getResearch, recentResearch, resourceEarned, runResearch } from "./agent/research.ts";
 import type { Agent, Decision, Receipt, Resource, Run } from "./db/schema.ts";
 
 // Boot guard: server secrets must never be exposed as NEXT_PUBLIC_* (CLAUDE.md #12).
@@ -51,6 +53,8 @@ const origins = (process.env.API_CORS_ORIGINS ?? "http://localhost:3000,https://
   .filter(Boolean);
 const SELLER = (process.env.SELLER_ADDRESS ?? process.env.ARC_WALLET_ADDRESS ?? "") as Address;
 const SETTLE_INTERVAL_MS = Number(process.env.METER_SETTLE_INTERVAL_MS ?? "60000");
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sluice-six.vercel.app";
+const API_PUBLIC = process.env.API_PUBLIC_URL ?? `http://62.171.182.75:${port}`;
 
 const app = Fastify({ logger: true });
 await app.register(cors, { origin: origins });
@@ -70,6 +74,17 @@ function serializeResource(r: Resource) {
     status: r.status,
     createdAt: r.createdAt,
     endpoint: `/paid/${r.path}`,
+    author: r.author,
+    contentUrl: r.contentUrl,
+    sourceType: r.sourceType,
+    splits: r.splits ? (JSON.parse(r.splits) as unknown[]) : null,
+    splitterAddress: r.splitterAddress,
+    splitterUrl: r.splitterAddress ? explorerAddressUrl(r.splitterAddress) : null,
+    feedId: r.feedId,
+    earned: resourceEarned(r.id).toString(),
+    formattedEarned: formatUSD(resourceEarned(r.id)),
+    rslUrl: `${API_PUBLIC}/resources/${r.id}/rsl`,
+    llmsTxtUrl: `${API_PUBLIC}/resources/${r.id}/llms.txt`,
   };
 }
 
@@ -111,7 +126,7 @@ app.get("/health", async () => ({
 app.post("/resources", async (req, reply) => {
   try {
     const body = req.body as Parameters<typeof registerResource>[0];
-    const resource = registerResource(body);
+    const resource = await registerResource(body);
     reply.code(201).send(serializeResource(resource));
   } catch (err) {
     reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
@@ -335,6 +350,149 @@ app.get("/gateway/balance", async (req) => {
   const address = (q.address ?? SELLER) as Address;
   if (!address) return { error: "no address" };
   return readGatewayBalance(address);
+});
+
+// ── Phase 3: citation toll, RSS connector, RSL/llms.txt, badge ───────────────
+void APP_URL;
+
+app.post("/connectors/rss", async (req, reply) => {
+  try {
+    const body = req.body as Parameters<typeof ingestFeed>[0];
+    const res = await ingestFeed(body);
+    reply.code(201).send(res);
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+app.get("/feeds", async () => listFeeds());
+
+function serializeCitation(c: {
+  marker: number;
+  resourceName: string;
+  sourceUrl: string | null;
+  author: string | null;
+  amount: string;
+  settlementType: string;
+  txHash: string | null;
+  splits: unknown;
+}) {
+  return {
+    ...c,
+    formattedAmount: formatUSD(BigInt(c.amount)),
+    explorerUrl: c.txHash ? explorerTxUrl(c.txHash) : null,
+  };
+}
+
+app.post("/research", async (req, reply) => {
+  const body = (req.body ?? {}) as { question?: string };
+  if (!body.question || !body.question.trim()) {
+    return reply.code(400).send({ error: "question is required" });
+  }
+  try {
+    const r = await runResearch(body.question.trim());
+    return {
+      ...r,
+      formattedTotalPaid: formatUSD(BigInt(r.totalPaid)),
+      citations: r.citations.map(serializeCitation),
+    };
+  } catch (err) {
+    reply.code(500).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+app.get("/research", async () => recentResearch());
+
+app.get("/research/:id", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const r = getResearch(id);
+  if (!r) return reply.code(404).send({ error: "research not found" });
+  return {
+    research: { ...r.research, formattedTotalPaid: formatUSD(BigInt(r.research.totalPaid)) },
+    citations: r.citations.map((c) =>
+      serializeCitation({
+        marker: c.marker,
+        resourceName: c.resourceName,
+        sourceUrl: c.sourceUrl,
+        author: c.author,
+        amount: c.amount,
+        settlementType: c.settlementType,
+        txHash: c.txHash,
+        splits: c.splits ? JSON.parse(c.splits) : null,
+      }),
+    ),
+  };
+});
+
+// RSL-compatible policy file (declares terms AND points crawlers/agents at the Sluice toll).
+app.get("/resources/:id/rsl", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const r = getResource(id);
+  if (!r) return reply.code(404).send({ error: "resource not found" });
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rsl xmlns="https://rslstandard.org/rsl">
+  <content url="${r.contentUrl ?? `${API_PUBLIC}/paid/${r.path}`}">
+    <license server="${API_PUBLIC}/paid/${r.path}">
+      <permits type="usage">ai-train,ai-use,search,crawl</permits>
+      <payment type="${r.unitType.replace("per_", "per-")}">
+        <amount currency="USDC">${(Number(r.unitPrice) / 1e6).toFixed(6)}</amount>
+        <network>${arcConfig.caip2}</network>
+        <endpoint>${API_PUBLIC}/paid/${r.path}</endpoint>
+      </payment>
+    </license>
+  </content>
+</rsl>
+`;
+  reply.header("Content-Type", "application/xml; charset=utf-8").send(xml);
+});
+
+app.get("/resources/:id/llms.txt", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const r = getResource(id);
+  if (!r) return reply.code(404).send({ error: "resource not found" });
+  const price = (Number(r.unitPrice) / 1e6).toFixed(6);
+  const txt = `# ${r.name} — metered content (Sluice citation toll)
+# AI agents & crawlers: this content is licensed per use and SETTLED on Arc (USDC) via x402.
+Resource: ${r.name}
+Author: ${r.author ?? "—"}
+Content: ${r.contentUrl ?? "—"}
+Unit: ${r.unitType}
+Price: ${price} USDC
+Network: Arc Testnet (${arcConfig.caip2})
+Toll-Endpoint: ${API_PUBLIC}/paid/${r.path}
+RSL: ${API_PUBLIC}/resources/${r.id}/rsl
+Badge: ${API_PUBLIC}/badge/${r.id}
+# RSL-compatible: declares terms AND points to real settlement (unlike declare-only schemes).
+`;
+  reply.header("Content-Type", "text/plain; charset=utf-8").send(txt);
+});
+
+// Embeddable greyscale "Pay-per-cite" badge with a live, REAL earned counter.
+app.get("/badge/:id", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const r = getResource(id);
+  const earned = r ? formatUSD(resourceEarned(r.id)) : "$0.00";
+  const label = r ? r.name.slice(0, 22) : "Unknown";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="268" height="46" role="img" aria-label="Pay-per-cite">
+  <rect width="268" height="46" rx="10" fill="#111113" stroke="#2a2c31"/>
+  <circle cx="20" cy="23" r="3" fill="#e8eaed"/>
+  <text x="34" y="18" font-family="ui-monospace,Menlo,monospace" font-size="8" letter-spacing="1.4" fill="#6a6e76">PAY-PER-CITE · SLUICE</text>
+  <text x="34" y="34" font-family="Inter,system-ui,sans-serif" font-size="12" fill="#f4f5f6">${label.replace(/[<&>]/g, "")}</text>
+  <text x="258" y="20" text-anchor="end" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#f4f5f6">${earned}</text>
+  <text x="258" y="34" text-anchor="end" font-family="ui-monospace,Menlo,monospace" font-size="8" fill="#57c98a">earned · Arc</text>
+</svg>`;
+  reply
+    .header("Content-Type", "image/svg+xml")
+    .header("Cache-Control", "no-store, max-age=0")
+    .send(svg);
+});
+
+app.get("/resources/:id/earned", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const r = getResource(id);
+  if (!r) return reply.code(404).send({ error: "resource not found" });
+  const earned = resourceEarned(r.id);
+  return { resourceId: r.id, earned: earned.toString(), formattedEarned: formatUSD(earned) };
 });
 
 // ── timers: batch settle (the "timer" trigger) + reconcile on-chain ──────────
