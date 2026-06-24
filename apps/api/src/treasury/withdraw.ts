@@ -35,8 +35,9 @@ function chainByName(name: string): WithdrawChain | undefined {
 }
 
 function treasuryKey(): Hex {
-  // The Treasury represents the seller/platform earnings shown on the balance card.
-  const k = (process.env.SELLER_PRIVATE_KEY ?? process.env.BUYER_PRIVATE_KEY ?? process.env.ARC_WALLET_PRIVATE_KEY) as
+  // The Treasury is the platform/operator wallet — it holds the unified Gateway balance and, for
+  // cross-chain withdrawals, submits the destination mint (so it must hold the destination gas).
+  const k = (process.env.BUYER_PRIVATE_KEY ?? process.env.ARC_WALLET_PRIVATE_KEY ?? process.env.SELLER_PRIVATE_KEY) as
     | Hex
     | undefined;
   if (!k) throw new Error("no treasury key");

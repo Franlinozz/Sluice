@@ -10,7 +10,7 @@ export const metadata = { title: "Treasury" };
 export const dynamic = "force-dynamic";
 
 export default async function TreasuryPage() {
-  const [bal, chains] = await Promise.all([sluiceApi.gatewayBalance(), sluiceApi.treasuryChains()]);
+  const [bal, chains] = await Promise.all([sluiceApi.treasuryBalance(), sluiceApi.treasuryChains()]);
 
   return (
     <div className="flex flex-col gap-8">

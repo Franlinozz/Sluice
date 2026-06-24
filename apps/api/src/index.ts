@@ -54,7 +54,7 @@ import {
   getBondOnChain,
 } from "./agent/broker.ts";
 import { escrowReady, deployed } from "./contracts/escrow.ts";
-import { withdrawTreasury, WITHDRAW_CHAINS } from "./treasury/withdraw.ts";
+import { withdrawTreasury, treasuryAddress, WITHDRAW_CHAINS } from "./treasury/withdraw.ts";
 import type { Agent, Decision, Receipt, Resource, Run } from "./db/schema.ts";
 
 // Boot guard: server secrets must never be exposed as NEXT_PUBLIC_* (CLAUDE.md #12).
@@ -594,6 +594,8 @@ app.post("/sessions/:id/stop", async (req, reply) => {
 app.get("/treasury/chains", async () =>
   WITHDRAW_CHAINS.map((c) => ({ name: c.name, label: c.label, sameChain: c.sameChain })),
 );
+
+app.get("/treasury/balance", async () => readGatewayBalance(treasuryAddress()));
 
 app.post("/treasury/withdraw", async (req, reply) => {
   const body = (req.body ?? {}) as { amount?: string; chain?: string; recipient?: string };
