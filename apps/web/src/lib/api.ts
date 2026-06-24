@@ -186,6 +186,73 @@ export interface StreamSessionDTO {
   formattedSettledAmount: string | null;
 }
 
+export type MatchStatus = "active" | "released" | "slashed";
+
+export interface MatchDTO {
+  id: string;
+  matchId: string;
+  matchIdShort: string;
+  resourceId: string | null;
+  need: string;
+  providerWallet: string;
+  beneficiaryWallet: string;
+  agentId: number | null;
+  amount: string;
+  formattedAmount: string;
+  status: MatchStatus;
+  reason: string | null;
+  approveTx: string | null;
+  postTx: string | null;
+  resolveTx: string | null;
+  feedbackTx: string | null;
+  postTxUrl: string | null;
+  resolveTxUrl: string | null;
+  feedbackTxUrl: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  onchain?: {
+    broker: string;
+    provider: string;
+    beneficiary: string;
+    amount: string;
+    status: number;
+    statusLabel: string;
+    createdAt: number;
+    resolvedAt: number;
+    reason: string;
+  } | null;
+}
+
+export interface ProviderReputationDTO {
+  provider: string;
+  matches: number;
+  slashes: number;
+  reliabilityBps: number;
+  bonded: string;
+  active: string;
+  slashed: string;
+  released: string;
+  formattedBonded: string;
+  formattedActive: string;
+  formattedSlashed: string;
+  formattedReleased: string;
+  reliabilityPct: number;
+  feedbackAverage: number;
+  feedbackCount: number;
+}
+
+export interface ContractsDTO {
+  ready: boolean;
+  chainId?: number;
+  explorer?: string;
+  deployedAt?: string;
+  contracts?: {
+    identityRegistry: { address: string; url: string };
+    reputationRegistry: { address: string; url: string };
+    bondEscrow: { address: string; url: string };
+  };
+}
+
 async function getJSON<T>(path: string): Promise<T | null> {
   try {
     const r = await fetch(`${BASE}${path}`, { cache: "no-store" });
@@ -207,6 +274,11 @@ export const sluiceApi = {
   agents: () => getJSON<AgentDTO[]>("/agents"),
   agent: (id: string) => getJSON<AgentDTO>(`/agents/${id}`),
   session: (id: string) => getJSON<StreamSessionDTO>(`/sessions/${id}`),
+  matches: () => getJSON<MatchDTO[]>("/matches"),
+  match: (id: string) => getJSON<MatchDTO>(`/matches/${id}`),
+  reputation: (agentId?: number) =>
+    getJSON<ProviderReputationDTO>(agentId ? `/reputation?agentId=${agentId}` : "/reputation"),
+  contracts: () => getJSON<ContractsDTO>("/contracts"),
 };
 
 export const apiBase = BASE;
