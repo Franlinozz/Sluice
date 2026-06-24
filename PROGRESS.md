@@ -37,4 +37,27 @@
   (wallet keys, Reown id, Vercel token, OpenAI key). Vercel root dir = `apps/web`, framework nextjs.
 - Reusable scripts: `apps/api/scripts/{buyer,withdraw,watch-transfers,find-settlement-tx,check-wallet,test-mock}.ts`.
 
-## Next: Phase 3 — citation toll + RSSHub connector + royalty splits (the hero). See CLAUDE.md.
+- **Phase 3** (the hero): citation toll + RSS connector + on-chain royalty splits. AI agents pay
+  creators PER CITATION on Arc. `RoyaltySplitter.sol` (Foundry) deployed per multi-collaborator
+  resource; single-author citations gas-free via Gateway, multi via on-chain splitter (real
+  Arcscan tx, fans out by share). RSS/Atom ingester (`POST /connectors/rss`). Citation-toll loop
+  (`POST /research`): agent pays the toll to retrieve each grounded source (payment == citation ==
+  auditable). RSL + llms.txt generators + embeddable SVG badge with REAL earned counter. Public
+  `/ask` surface; Creator Studio (RSS ingest, citable sources, badge/RSL/llms.txt, splitter link);
+  `/badge/[id]` https proxy. Migration 0003 (resources +contentUrl/splits/sourceType/splitter;
+  feeds; research; citations). Units +per_read/per_crawl. Verified live: 2-source answer with real
+  Gateway + on-chain-split settlements; 70/30 split on-chain.
+
+## P3 facts
+- Citation settlement: single-author → Gateway (gas-free); multi-collaborator → on-chain
+  RoyaltySplitter (transfer USDC to splitter + distribute(); buyer wallet relays, pays gas).
+- Contract ABI+bytecode committed at apps/api/src/contracts/royalty-splitter.ts (from forge build).
+  Deploy/split helpers: apps/api/src/contracts/splitter.ts. Test: scripts/test-split.ts.
+- Research loop: apps/api/src/agent/research.ts (reason → pay-to-retrieve → synthesize, cap
+  RESEARCH_MAX_CITATIONS=4). Endpoints: /research, /connectors/rss, /resources/:id/{rsl,llms.txt,earned}, /badge/:id.
+- API_PUBLIC_URL (for RSL/llms.txt/badge links) defaults to http://62.171.182.75:3001.
+
+## Next: Phases 4-9 unspecified (build pack runs to 9; user pastes one phase spec at a time).
+Brief's remaining scope: streaming per-second meter + proof-of-flow, ERC-8004 reputation bonds
+(broker agent), cinematic landing + 3D hero, Treasury cross-chain withdraw UI, Docs/whitepaper,
+more OSS connectors. Await the next phase spec.
