@@ -4,7 +4,19 @@
  * (CLAUDE.md #3 + anticipated bugs · Arc). This client is for SERVER/agent contexts;
  * the browser reads through wagmi's configured transport.
  */
-import { createPublicClient, fallback, http, erc20Abi, type Address, type PublicClient } from "viem";
+import {
+  createPublicClient,
+  createWalletClient,
+  fallback,
+  http,
+  erc20Abi,
+  type Account,
+  type Address,
+  type Hex,
+  type PublicClient,
+  type WalletClient,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { arcConfig } from "./config.ts";
 import { arcTestnet } from "./chain.ts";
 
@@ -25,6 +37,21 @@ export function createArcPublicClient(): PublicClient {
 /** Shared singleton public client (server/agent use). */
 export function arcPublicClient(): PublicClient {
   return (cached ??= createArcPublicClient());
+}
+
+/** Convenience alias — the canonical read client for Arc. */
+export function getClient(): PublicClient {
+  return arcPublicClient();
+}
+
+/** A viem wallet client bound to a private key, for direct on-chain ops on Arc. */
+export function getWalletClient(privateKey: Hex): WalletClient {
+  const account: Account = privateKeyToAccount(privateKey);
+  return createWalletClient({
+    account,
+    chain: arcTestnet,
+    transport: http(arcConfig.rpcUrl, { retryCount: 3, retryDelay: 300, timeout: 10_000 }),
+  });
 }
 
 /**

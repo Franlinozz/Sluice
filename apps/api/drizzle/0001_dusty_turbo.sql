@@ -1,0 +1,1 @@
+ALTER TABLE `receipts` ADD `settlement_ref` text;

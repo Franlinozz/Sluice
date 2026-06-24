@@ -8,17 +8,26 @@
     "start": "tsx src/index.ts",
     "build": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@circle-fin/x402-batching": "^2.0.4",
     "@fastify/cors": "^11.0.1",
     "@sluice/chain": "workspace:*",
     "@sluice/money": "workspace:*",
+    "@x402/core": "^2.6.0",
+    "@x402/evm": "^2.6.0",
+    "better-sqlite3": "^11.8.0",
+    "drizzle-orm": "^0.45.2",
     "fastify": "^5.8.5",
     "viem": "^2.53.1"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.10.0",
+    "drizzle-kit": "^0.30.5",
     "tsx": "^4.19.2",
     "typescript": "~5.9.3"
   }

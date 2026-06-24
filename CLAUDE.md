@@ -210,6 +210,26 @@ Eyebrows = small uppercase mono, +0.12em, text-low. Self-host all fonts (next/fo
 - General: configure CORS allowed origins explicitly. Assert at boot that server secrets aren't
   NEXT_PUBLIC_. Reconcile optimistic UI against chain/DB on an interval. Empty states look intentional.
 
+## Gateway settlement reality (VERIFIED on Arc testnet, Phase 1 — important)
+Circle Gateway nanopayments settle via a **gas-free, Circle-attested off-chain ledger**, NOT a
+per-payment on-chain tx. Verified empirically:
+- `BatchFacilitatorClient.settle()` returns a Circle **transfer id** (UUID), not a tx hash.
+- A transfer goes `received → completed` in ~40s; its API object exposes NO on-chain tx hash.
+- Per-payment settlement debits the payer's Gateway balance and credits the payee's Gateway
+  balance (both on-chain state inside the Gateway Wallet contract, updated by Circle's attester).
+- The seller address appears in ZERO logs on the USDC token / Gateway Wallet / Gateway Minter —
+  i.e. there is NO per-payment on-chain tx referencing payer/payee.
+- On-chain materialization happens ONLY at **deposit** (payer → Gateway Wallet) and **withdrawal**
+  (Gateway Minter mints USDC out, references the recipient). Those ARE real Arcscan-linkable txs.
+- Arc testnet contracts (from CHAIN_CONFIGS.arcTestnet): USDC `0x3600…0000`, Gateway Wallet
+  `0x0077777d7EBA4688BDeF3E311b846F25870A19B9`, **Gateway Minter `0x0022222ABE238Cc2C7Bb1f21003F0a260052475B`**, domain 26.
+- IMPLICATION for the UI/receipts: a settled receipt is "settled via Gateway (attested)"; its
+  on-chain anchors are the deposit tx and the withdrawal/mint tx. Do NOT fake a per-payment tx
+  hash. `batchTxHash` stays null; link receipts to the payee + the deposit/withdraw txs. This
+  corrects the build pack's "a real batch tx appears per settlement" assumption.
+- EIP-3009 authorization window: Circle requires a LONG validity for batched auths — a 4-day
+  window failed ("authorization_validity_too_short"); we use 30 days (MAX_TIMEOUT_SECONDS).
+
 ## Bug register (append real bugs + fixes here as we hit them)
 - [Phase 0, VERCEL 500] Every route 500'd in production (not in `next dev`). Cause: `useAppKit()`
   runs during SSR, but `createAppKit` was guarded behind `typeof window !== "undefined"` so it

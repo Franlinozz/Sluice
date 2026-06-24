@@ -27,6 +27,12 @@ packages/contracts/out/
 packages/contracts/cache/
 packages/contracts/broadcast/
 
+# local data (sqlite)
+.data/
+*.db
+*.db-shm
+*.db-wal
+
 # os / editor
 .DS_Store
 Thumbs.db
