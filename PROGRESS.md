@@ -57,7 +57,15 @@
   RESEARCH_MAX_CITATIONS=4). Endpoints: /research, /connectors/rss, /resources/:id/{rsl,llms.txt,earned}, /badge/:id.
 - API_PUBLIC_URL (for RSL/llms.txt/badge links) defaults to http://62.171.182.75:3001.
 
-## Next: Phases 4-9 unspecified (build pack runs to 9; user pastes one phase spec at a time).
+- **Phase 4** (streaming meter + proof-of-flow): per-second accrual with reserve cap; heartbeat
+  loss auto-pauses (freezes at last heartbeat → no dead-air charge), heartbeat return auto-resumes;
+  manual pause/resume/stop; stop settles flowed whole seconds via the Gateway per_second toll (real).
+  apps/api/src/meter/streaming.ts; sessions migration 0004; 1s reaper, 4s heartbeat timeout. Fastify
+  tolerates empty JSON bodies. Live Meter /app/meter + /app/meter/[id] (real ticking + smooth
+  interpolation, controls, simulate-flow-loss) via same-origin /api/sluice/[...] proxy. Verified on
+  Arc: accrue→pause→resume→auto-pause(no dead air)→stop→$0.0007 settle.
+
+## Next: Phase 5 — ERC-8004 reputation bonds + Bazaar + Treasury. Then 6-9 unspecified.
 Brief's remaining scope: streaming per-second meter + proof-of-flow, ERC-8004 reputation bonds
 (broker agent), cinematic landing + 3D hero, Treasury cross-chain withdraw UI, Docs/whitepaper,
 more OSS connectors. Await the next phase spec.
