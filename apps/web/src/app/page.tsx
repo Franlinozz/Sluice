@@ -1,11 +1,35 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, ShieldCheck } from "lucide-react";
-import { Button, Card, Horizon, Logo } from "@sluice/ui";
-import { arcConfig } from "@sluice/chain";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  ShieldCheck,
+  BookOpen,
+  Timer,
+  Quote,
+  Headphones,
+  Eye,
+  Webhook,
+} from "lucide-react";
+import { Button, Card, Horizon, Logo, LiveDot } from "@sluice/ui";
+import { arcConfig, explorerAddressUrl } from "@sluice/chain";
+import { sluiceApi } from "@/lib/api";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { HeroMeter } from "@/components/marketing/hero-meter";
+import { LiveStats } from "@/components/marketing/live-stats";
+import { EconomyViz } from "@/components/marketing/economy-viz";
+import { VerifyReceipt, type VerifyReceiptData, type VerifyAnchor } from "@/components/marketing/verify-receipt";
+import { AskBox } from "@/components/ask/ask-box";
 
-const UNITS = ["a read", "a second", "a citation", "a listen", "a view", "an API call"];
+export const dynamic = "force-dynamic";
+
+const UNITS = [
+  { icon: BookOpen, label: "per read" },
+  { icon: Timer, label: "per second" },
+  { icon: Quote, label: "per citation" },
+  { icon: Headphones, label: "per listen" },
+  { icon: Eye, label: "per view" },
+  { icon: Webhook, label: "per call" },
+];
 
 const STEPS = [
   {
@@ -25,37 +49,68 @@ const STEPS = [
   },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const [kpis, receipts, resources, contracts] = await Promise.all([
+    sluiceApi.kpis(),
+    sluiceApi.receipts(),
+    sluiceApi.resources(),
+    sluiceApi.contracts(),
+  ]);
+
+  const resList = (resources ?? []).map((r) => ({ id: r.id, name: r.name, payTo: r.payTo }));
+  const nameById = new Map(resList.map((r) => [r.id, r.name] as const));
+
+  const latest = (receipts ?? []).find((r) => r.status === "settled") ?? null;
+  const verifyData: VerifyReceiptData | null = latest
+    ? {
+        resourceName: nameById.get(latest.resourceId) ?? "Resource",
+        formattedAmount: latest.formattedAmount,
+        units: latest.units,
+        unitType: latest.unitType,
+        settledAt: latest.settledAt,
+        settlementRef: latest.settlementRef ?? [],
+        backend: latest.backend,
+      }
+    : null;
+
+  const anchors: VerifyAnchor[] = [
+    { label: "Gateway Wallet", href: explorerAddressUrl(arcConfig.gatewayWallet) },
+  ];
+  if (contracts?.ready && contracts.contracts) {
+    anchors.push({ label: "BondEscrow", href: contracts.contracts.bondEscrow.url });
+    anchors.push({ label: "ReputationRegistry", href: contracts.contracts.reputationRegistry.url });
+  }
+
   return (
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
 
       <main className="flex-1">
-        {/* Hero */}
+        {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
           <div>
             <p className="eyebrow">Arc · Circle · x402 · Gateway nanopayments</p>
-            <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-tight text-hi sm:text-5xl lg:text-6xl">
-              The settlement layer for the agent-paid web.
+            <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.04] tracking-tight text-hi sm:text-5xl lg:text-[3.4rem]">
+              Make the smallest unit sellable — for humans and machines, settled on Arc.
             </h1>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-mid sm:text-lg">
-              Any unit of value — a read, a second, a citation, a listen, a call — metered and
-              settled on Arc in USDC. Creators get paid per use. Agents pay per use, and decide for
-              themselves.
+              A read, a second, a citation, a listen, a call — metered and settled on Arc in USDC.
+              Creators get paid per use. Agents pay per use, and decide for themselves.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button asChild size="lg">
-                <Link href="/ask">
-                  Ask the research agent <ArrowRight className="size-4" />
+                <Link href="/app/earn">
+                  Start earning <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="/app/earn">Start earning</Link>
+                <Link href="/app/spend">Run a paying agent</Link>
               </Button>
             </div>
-            <p className="mt-6 flex items-center gap-1.5 text-xs text-low">
+            <p className="mt-6 flex flex-wrap items-center gap-1.5 text-xs text-low">
               <ShieldCheck className="size-3.5 text-settled" />
-              Live on Arc testnet · $0.00 settled so far —{" "}
+              Live on Arc testnet · {kpis ? `$${(Number(kpis.totalSettled) / 1e6).toFixed(6)}` : "$0.00"} settled so
+              far —{" "}
               <a
                 href={arcConfig.explorerUrl}
                 target="_blank"
@@ -67,7 +122,6 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* The sluice */}
           <div className="relative">
             <Card className="relative overflow-hidden">
               <div className="absolute left-5 top-5 z-10">
@@ -81,27 +135,92 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <Horizon className="mx-auto max-w-6xl" />
+        {/* ── Live REAL stats ──────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6">
+          <LiveStats initial={kpis} />
+        </section>
 
-        {/* One meter, every unit */}
+        <Horizon className="mx-auto mt-12 max-w-6xl" />
+
+        {/* ── One meter, every unit ────────────────────────────── */}
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <p className="eyebrow">One meter, every unit</p>
           <h2 className="mt-3 max-w-2xl font-display text-2xl font-semibold tracking-tight text-hi sm:text-3xl">
             If it can be counted, it can be paid for — per use.
           </h2>
-          <div className="mt-8 flex flex-wrap gap-2.5">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {UNITS.map((u) => (
-              <span
-                key={u}
-                className="rounded-pill border border-edge bg-surface-1 px-4 py-2 font-mono text-sm text-mid"
+              <div
+                key={u.label}
+                className="flex flex-col items-center gap-3 rounded-card border border-hairline bg-surface-1/40 px-4 py-6 text-center"
               >
-                {u}
-              </span>
+                <u.icon className="size-6 text-steel" strokeWidth={1.25} />
+                <span className="font-mono text-xs text-mid">{u.label}</span>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* How it works */}
+        {/* ── The citation toll, shown not told ────────────────── */}
+        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="flex flex-col gap-2">
+            <p className="eyebrow">The citation toll — shown, not told</p>
+            <h2 className="max-w-2xl font-display text-2xl font-semibold tracking-tight text-hi sm:text-3xl">
+              Ask a research agent. Watch it pay each source it cites.
+            </h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-mid">
+              Every answer below settles a real nanopayment to the creators it grounds on — a live
+              citation toll on Arc. This is the same agent that runs the console.
+            </p>
+          </div>
+          <div className="mt-8">
+            <AskBox />
+          </div>
+        </section>
+
+        <Horizon className="mx-auto max-w-6xl" />
+
+        {/* ── Watch the economy ────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="eyebrow">Watch the economy</p>
+              <h2 className="mt-3 max-w-2xl font-display text-2xl font-semibold tracking-tight text-hi sm:text-3xl">
+                Agents paying creators, in real time.
+              </h2>
+            </div>
+            <span className="hidden items-center gap-2 text-xs text-low sm:flex">
+              <LiveDot status="live" /> from real settlements
+            </span>
+          </div>
+          <Card className="mt-8 overflow-hidden p-0">
+            <EconomyViz receipts={receipts ?? []} resources={resList} className="h-[320px] w-full sm:h-[380px]" />
+          </Card>
+          <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-low">
+            <span>● left: paying agents</span>
+            <span>● right: creators earning</span>
+            <span>every pulse is a real settled payment</span>
+          </div>
+        </section>
+
+        {/* ── Don't trust — verify ─────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+            <div>
+              <p className="eyebrow">Don&apos;t trust the numbers — verify</p>
+              <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-hi sm:text-3xl">
+                Every figure on this page is real and re-checkable.
+              </h2>
+              <p className="mt-4 max-w-md text-sm leading-relaxed text-mid">
+                No mock data, no vanity counters. The latest real settlement is shown with its Circle
+                transfer ID, and the on-chain anchors are open on Arcscan for anyone to inspect.
+              </p>
+            </div>
+            <VerifyReceipt data={verifyData} anchors={anchors} />
+          </div>
+        </section>
+
+        {/* ── How it works ─────────────────────────────────────── */}
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <p className="eyebrow">How it works</p>
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -115,7 +234,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* CTA band */}
+        {/* ── CTA band ─────────────────────────────────────────── */}
         <section className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6">
           <Card className="flex flex-col items-start justify-between gap-6 p-8 sm:flex-row sm:items-center">
             <div>
@@ -135,25 +254,82 @@ export default function LandingPage() {
         </section>
       </main>
 
+      {/* ── Footer ─────────────────────────────────────────────── */}
       <footer className="border-t border-hairline">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-4 py-8 sm:flex-row sm:items-center sm:px-6">
-          <Logo />
-          <p className="text-xs text-low">
-            Settled on Arc in USDC · Circle Gateway nanopayments · x402
-          </p>
-          <div className="flex items-center gap-5 text-xs text-mid">
-            <Link href="/app" className="hover:text-hi">
-              Console
-            </Link>
-            <Link href="/docs" className="hover:text-hi">
-              Docs
-            </Link>
-            <a href={arcConfig.explorerUrl} target="_blank" rel="noreferrer" className="hover:text-hi">
-              Arcscan
-            </a>
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
+          <div className="col-span-2 flex flex-col gap-3 md:col-span-1">
+            <Logo />
+            <p className="max-w-xs text-xs leading-relaxed text-low">
+              The settlement layer for the agent-paid web. Settled on Arc in USDC via Circle Gateway.
+            </p>
+            <span className="mt-1 inline-flex w-fit items-center gap-2 rounded-pill border border-hairline bg-surface-1 px-3 py-1 text-xs text-mid">
+              <LiveDot status="live" /> Arc testnet · Live
+            </span>
+          </div>
+
+          <FooterCol
+            title="Product"
+            links={[
+              { label: "Console", href: "/app" },
+              { label: "Bazaar", href: "/app/discover" },
+              { label: "Streams", href: "/app/meter" },
+              { label: "Treasury", href: "/app/treasury" },
+            ]}
+          />
+          <FooterCol
+            title="Developers"
+            links={[
+              { label: "Ask the agent", href: "/ask" },
+              { label: "Docs", href: "/docs" },
+              { label: "Run an agent", href: "/app/spend" },
+              { label: "Earn", href: "/app/earn" },
+            ]}
+          />
+          <FooterCol
+            title="Trust"
+            links={[
+              { label: "Arcscan", href: arcConfig.explorerUrl, external: true },
+              { label: "Settlements", href: "/app/settlements" },
+              { label: "Reputation", href: "/app/agents" },
+            ]}
+          />
+        </div>
+        <div className="border-t border-hairline">
+          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-2 px-4 py-5 text-xs text-low sm:flex-row sm:items-center sm:px-6">
+            <span>Settled on Arc in USDC · Circle Gateway nanopayments · x402</span>
+            <span>© {new Date().getFullYear()} Sluice</span>
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function FooterCol({
+  title,
+  links,
+}: {
+  title: string;
+  links: { label: string; href: string; external?: boolean }[];
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="text-xs font-medium text-hi">{title}</div>
+      <ul className="flex flex-col gap-2">
+        {links.map((l) => (
+          <li key={l.label}>
+            {l.external ? (
+              <a href={l.href} target="_blank" rel="noreferrer" className="text-xs text-mid hover:text-hi">
+                {l.label}
+              </a>
+            ) : (
+              <Link href={l.href} className="text-xs text-mid hover:text-hi">
+                {l.label}
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

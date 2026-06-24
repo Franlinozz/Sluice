@@ -12,6 +12,7 @@ export interface Kpis {
   settlements: number;
   batching: number;
   payers: number;
+  creatorsPaid: number;
   pendingAccruals: number;
   formattedTotalSettled: string;
   formattedBatchingAmount: string;

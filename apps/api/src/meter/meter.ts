@@ -257,6 +257,7 @@ export interface MeterAggregates {
   settlements: number;
   batching: number;
   payers: number;
+  creatorsPaid: number;
   pendingAccruals: number;
 }
 
@@ -269,16 +270,21 @@ export function aggregates(): MeterAggregates {
   const batchingAmount = batchingReceipts.reduce((acc, r) => acc + BigInt(r.grossAmount), 0n);
   const unitsMetered = allAccruals.reduce((acc, a) => acc + a.units, 0);
   const payers = new Set(allAccruals.map((a) => a.payer)).size;
-  const resourceCount = db.select().from(resources).all().length;
+  const allResources = db.select().from(resources).all();
+  const payToById = new Map(allResources.map((r) => [r.id, r.payTo] as const));
+  const creatorsPaid = new Set(
+    settledReceipts.map((r) => payToById.get(r.resourceId)).filter((p): p is string => Boolean(p)),
+  ).size;
   const pending = allAccruals.filter((a) => a.status === "authorized").length;
   return {
     totalSettled: toBaseUnitString(totalSettled),
     batchingAmount: toBaseUnitString(batchingAmount),
     unitsMetered,
-    resources: resourceCount,
+    resources: allResources.length,
     settlements: settledReceipts.length,
     batching: batchingReceipts.length,
     payers,
+    creatorsPaid,
     pendingAccruals: pending,
   };
 }
