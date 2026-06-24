@@ -1,0 +1,26 @@
+{
+  "name": "@sluice/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sluice MCP server — let any MCP-capable agent (Claude Code, Cursor, Codex) discover and pay Sluice/x402 resources on Arc.",
+  "bin": {
+    "sluice-mcp": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@sluice/pay": "workspace:*",
+    "viem": "^2.53.1",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "~5.9.3"
+  }
+}
