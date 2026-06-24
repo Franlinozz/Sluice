@@ -81,13 +81,19 @@
   - UI: /app/discover Bazaar (registry strip, provider reputation glance, searchable resource grid
     with real per-type actions, BrokerForm), /app/agents Fleet&Reputation (reputation summary + bond
     ledger + Release/Slash). Treasury: real balance + WithdrawPanel.
-  - Treasury withdraw (apps/api/src/treasury/withdraw.ts): same-chain Arc = REAL instant Gateway
-    Minter mint (verified: tx 0x78bfcc…). Cross-chain = burn gas-free on Circle ledger then gatewayMint
-    on dest (NEEDS native gas on dest). We pre-flight dest gas + refuse before burning (no stranded funds).
-    GATED: no testnet gas on Base/Arb/Eth Sepolia → true cross-chain mint awaits dest gas funding.
+  - Treasury (apps/api/src/treasury/withdraw.ts): treasury account = OPERATOR (buyer 0xBd88…) — holds
+    the unified Gateway balance AND submits the destination mint (so it needs dest gas). GET
+    /treasury/balance shows it. Same-chain Arc = REAL instant mint (tx 0x78bfcc…). Cross-chain = burn
+    gas-free on Circle ledger then gatewayMint on dest; PRE-FLIGHTS dest gas + refuses before burning.
+    PROVEN cross-chain: Arc → Base Sepolia mint tx 0xa6e27ea6… (status success, block 43283562,
+    Gateway Minter 0x0022222abe…). Operator funded with Base+Eth Sepolia gas (Arbitrum still 0).
   - Verified end-to-end on Arc: post $0.02 bond → slash (buyer +$0.02, 1★) → release (5★) →
-    reputation 2 matches/1 slash/50% reliability; real $0.03 same-chain withdrawal.
+    reputation 2 matches/1 slash/50% reliability; real same-chain + cross-chain withdrawals.
 
-## Next: Phases 6-9 (unspecified — cinematic landing/3D hero, Docs/whitepaper, more OSS connectors).
-Await the next phase spec. To DEMONSTRATE a true cross-chain withdrawal, fund a little Base Sepolia
-(or Arb/Eth Sepolia) gas to the operator `0xBd88eAE165F8A00B1B33357Fb0880CD4fE5C5E70` — code is ready.
+## Phase 6 (IN PROGRESS): cinematic public landing + 3D hero + "watch the economy".
+Spec: hero (thesis + 3D/2.5D meter particle viz, reduced-motion fallback, CTAs Start earning / Run a
+paying agent), live REAL stats strip (from DB/chain, ~1min refresh, never faked), "one meter every
+unit" line-art, citation-toll mini live ask embed, "watch the economy" realtime agents-pay-creators
+viz, "don't trust—verify" latest REAL receipt + batch tx/Arcscan, how-it-works 3 steps, footer.
+DoD: fast, no layout shift, no hydration errors, 3D respects reduced-motion, every number real &
+traceable, latest receipt is real on-chain, all CTAs route, premium + one product with /app. Then 7-9.
