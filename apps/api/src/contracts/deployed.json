@@ -1,0 +1,20 @@
+{
+  "chainId": 5042002,
+  "explorer": "https://testnet.arcscan.app",
+  "deployer": "0xBd88eAE165F8A00B1B33357Fb0880CD4fE5C5E70",
+  "arbiter": "0xBd88eAE165F8A00B1B33357Fb0880CD4fE5C5E70",
+  "usdcToken": "0x3600000000000000000000000000000000000000",
+  "deployedAt": "2026-06-24T20:00:39.311Z",
+  "identityRegistry": {
+    "address": "0x8e856716d653db35eb4dac7616648172cebeba34",
+    "tx": "0x95c8f628a4a8d7d1323e711cb186fd1a96c9273abb45897a79f8acae21478daf"
+  },
+  "reputationRegistry": {
+    "address": "0x6593cd1eb1dec37797aee650d48ad2f4d910cbd4",
+    "tx": "0x293a4035b8d2065da84346c2ebd3fe60fb89f138c43986df6d1401dfe5d0c87f"
+  },
+  "bondEscrow": {
+    "address": "0x1bf29623c8a74c13bc4e27bbe72037a24976c0c1",
+    "tx": "0x41c8c0429b47c8a3200a13566f997cc6a17818926b841027c2096d5d387d91f4"
+  }
+}

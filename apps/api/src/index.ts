@@ -44,6 +44,16 @@ import {
   resumeSession,
   stopSession,
 } from "./meter/streaming.ts";
+import {
+  createMatch,
+  getMatch,
+  listMatches,
+  resolveMatch,
+  serializeMatch,
+  providerReputation,
+  getBondOnChain,
+} from "./agent/broker.ts";
+import { escrowReady, deployed } from "./contracts/escrow.ts";
 import type { Agent, Decision, Receipt, Resource, Run } from "./db/schema.ts";
 
 // Boot guard: server secrets must never be exposed as NEXT_PUBLIC_* (CLAUDE.md #12).
@@ -576,6 +586,74 @@ app.post("/sessions/:id/stop", async (req, reply) => {
     return { ...res, session: serializeSession(res.session) };
   } catch (err) {
     reply.code(404).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// ── Phase 5: broker matches + reputation bonds (BondEscrow + ERC-8004) ───────
+app.get("/contracts", async () => {
+  if (!escrowReady()) return { ready: false };
+  const d = deployed();
+  const ex = d.explorer.replace(/\/$/, "");
+  const addr = (a: string) => `${ex}/address/${a}`;
+  return {
+    ready: true,
+    chainId: d.chainId,
+    explorer: ex,
+    deployedAt: d.deployedAt,
+    contracts: {
+      identityRegistry: { address: d.identityRegistry.address, url: addr(d.identityRegistry.address) },
+      reputationRegistry: { address: d.reputationRegistry.address, url: addr(d.reputationRegistry.address) },
+      bondEscrow: { address: d.bondEscrow.address, url: addr(d.bondEscrow.address) },
+    },
+  };
+});
+
+app.get("/reputation", async (req, reply) => {
+  if (!escrowReady()) return reply.code(503).send({ error: "contracts not deployed" });
+  const { agentId } = req.query as { agentId?: string };
+  return providerReputation(agentId ? Number(agentId) : undefined);
+});
+
+app.post("/matches", async (req, reply) => {
+  if (!escrowReady()) return reply.code(503).send({ error: "contracts not deployed" });
+  const body = (req.body ?? {}) as { resourceId?: string; need?: string; bondUsd?: string };
+  if (!body.need?.trim()) return reply.code(400).send({ error: "need is required" });
+  try {
+    const m = await createMatch({ resourceId: body.resourceId, need: body.need, bondUsd: body.bondUsd });
+    reply.code(201).send(serializeMatch(m));
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+app.get("/matches", async () => listMatches().then((ms) => ms.map(serializeMatch)));
+
+app.get("/matches/:id", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const m = await getMatch(id);
+  if (!m) return reply.code(404).send({ error: "match not found" });
+  let onchain: Record<string, unknown> | null = null;
+  try {
+    const b = await getBondOnChain(m.matchId as `0x${string}`);
+    const statusNames = ["none", "active", "released", "slashed"] as const;
+    onchain = { ...b, amount: b.amount.toString(), statusLabel: statusNames[b.status] ?? "unknown" };
+  } catch {
+    onchain = null;
+  }
+  return { ...serializeMatch(m), onchain };
+});
+
+app.post("/matches/:id/resolve", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const body = (req.body ?? {}) as { outcome?: "release" | "slash"; reason?: string };
+  if (body.outcome !== "release" && body.outcome !== "slash") {
+    return reply.code(400).send({ error: "outcome must be 'release' or 'slash'" });
+  }
+  try {
+    const m = await resolveMatch(id, { outcome: body.outcome, reason: body.reason ?? "" });
+    return serializeMatch(m);
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 

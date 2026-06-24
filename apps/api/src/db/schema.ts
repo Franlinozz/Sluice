@@ -146,10 +146,50 @@ export const sessions = sqliteTable(
   (t) => [index("sessions_resource").on(t.resourceId), index("sessions_status").on(t.status)],
 );
 
+export const MATCH_STATUS = ["active", "released", "slashed"] as const;
+export type MatchStatus = (typeof MATCH_STATUS)[number];
+
+/**
+ * A broker match (Phase 5): a buyer's need paired with a provider who self-bonds USDC guaranteeing
+ * delivery. Mirrors the on-chain BondEscrow bond; the chain is the source of truth, this row is the
+ * indexed/displayable copy (need text, txs, reputation context).
+ */
+export const matches = sqliteTable(
+  "matches",
+  {
+    id: text("id").primaryKey(),
+    /** bytes32 match id used on-chain (BondEscrow key). */
+    matchId: text("match_id").notNull().unique(),
+    resourceId: text("resource_id").references(() => resources.id),
+    /** Free-text description of what the buyer is hiring the provider to deliver. */
+    need: text("need").notNull(),
+    providerWallet: text("provider_wallet").notNull(),
+    beneficiaryWallet: text("beneficiary_wallet").notNull(),
+    /** ERC-8004 agentId of the provider (if registered). */
+    agentId: integer("agent_id"),
+    /** Bond amount in 6-dp USDC base units (string). */
+    amount: text("amount").notNull(),
+    status: text("status").$type<MatchStatus>().notNull().default("active"),
+    reason: text("reason"),
+    approveTx: text("approve_tx"),
+    postTx: text("post_tx"),
+    resolveTx: text("resolve_tx"),
+    /** ERC-8004 feedback tx recorded on resolution. */
+    feedbackTx: text("feedback_tx"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+    resolvedAt: integer("resolved_at", { mode: "timestamp_ms" }),
+  },
+  (t) => [index("matches_provider").on(t.providerWallet), index("matches_status").on(t.status)],
+);
+
 export type Feed = typeof feeds.$inferSelect;
 export type Research = typeof research.$inferSelect;
 export type Citation = typeof citations.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
+export type Match = typeof matches.$inferSelect;
+export type NewMatch = typeof matches.$inferInsert;
 
 /**
  * A verified-but-not-yet-settled unit of value (the Meter ledger). Holds the signed
