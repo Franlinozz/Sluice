@@ -4,6 +4,7 @@ import {
   Coins,
   Compass,
   Cpu,
+  HeartHandshake,
   Landmark,
   LayoutDashboard,
   Radio,
@@ -26,6 +27,7 @@ export const primaryNav: NavItem[] = [
   { label: "Streams", href: "/app/meter", icon: Radio },
   { label: "Discover", href: "/app/discover", icon: Compass },
   { label: "Agents", href: "/app/agents", icon: Cpu },
+  { label: "Funding", href: "/app/funding", icon: HeartHandshake },
   { label: "Treasury", href: "/app/treasury", icon: Landmark },
   { label: "Settlements", href: "/app/settlements", icon: ReceiptText },
 ];

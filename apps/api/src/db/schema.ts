@@ -184,12 +184,53 @@ export const matches = sqliteTable(
   (t) => [index("matches_provider").on(t.providerWallet), index("matches_status").on(t.status)],
 );
 
+/** Quadratic funding (Phase 10): a contribution from a backer to a creator within a round. */
+export const fundingTips = sqliteTable(
+  "funding_tips",
+  {
+    id: text("id").primaryKey(),
+    round: integer("round").notNull().default(1),
+    backer: text("backer").notNull(),
+    creator: text("creator").notNull(),
+    resourceId: text("resource_id").references(() => resources.id),
+    label: text("label"),
+    /** tip amount in 6-dp USDC base units (string). */
+    amount: text("amount").notNull(),
+    /** sybil weight in basis points (10000 = full). */
+    weightBps: integer("weight_bps").notNull().default(10000),
+    tx: text("tx"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+  },
+  (t) => [index("funding_tips_round").on(t.round), index("funding_tips_creator").on(t.creator)],
+);
+
+export const FUNDING_ROUND_STATUS = ["open", "settled"] as const;
+export type FundingRoundStatus = (typeof FUNDING_ROUND_STATUS)[number];
+
+export const fundingRounds = sqliteTable("funding_rounds", {
+  round: integer("round").primaryKey(),
+  status: text("status").$type<FundingRoundStatus>().notNull().default("open"),
+  /** matching budget in base units at settlement (string). */
+  budget: text("budget"),
+  matchTotal: text("match_total"),
+  fundTx: text("fund_tx"),
+  distributeTx: text("distribute_tx"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+  settledAt: integer("settled_at", { mode: "timestamp_ms" }),
+});
+
 export type Feed = typeof feeds.$inferSelect;
 export type Research = typeof research.$inferSelect;
 export type Citation = typeof citations.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type Match = typeof matches.$inferSelect;
 export type NewMatch = typeof matches.$inferInsert;
+export type FundingTip = typeof fundingTips.$inferSelect;
+export type FundingRound = typeof fundingRounds.$inferSelect;
 
 /**
  * A verified-but-not-yet-settled unit of value (the Meter ledger). Holds the signed

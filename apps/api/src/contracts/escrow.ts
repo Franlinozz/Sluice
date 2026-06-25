@@ -28,6 +28,7 @@ export interface DeployedContracts {
   identityRegistry: { address: Address; tx: Hex };
   reputationRegistry: { address: Address; tx: Hex };
   bondEscrow: { address: Address; tx: Hex };
+  fundingPool?: { address: Address; tx: Hex };
 }
 
 let _deployed: DeployedContracts | undefined;

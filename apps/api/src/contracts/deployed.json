@@ -16,5 +16,9 @@
   "bondEscrow": {
     "address": "0x1bf29623c8a74c13bc4e27bbe72037a24976c0c1",
     "tx": "0x41c8c0429b47c8a3200a13566f997cc6a17818926b841027c2096d5d387d91f4"
+  },
+  "fundingPool": {
+    "address": "0xf7ef1d456e74736bbf346c29f74e28c60ce3ade8",
+    "tx": "0x337f9ec597ac70bc972830f4e190f32fe449b3b4b51638c291f17e6226243c9b"
   }
 }

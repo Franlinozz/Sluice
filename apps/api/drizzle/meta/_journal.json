@@ -43,6 +43,13 @@
       "when": 1782331567403,
       "tag": "0005_high_black_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1782375992281,
+      "tag": "0006_absent_frank_castle",
+      "breakpoints": true
     }
   ]
 }

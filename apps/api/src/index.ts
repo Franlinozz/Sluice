@@ -55,6 +55,7 @@ import {
 } from "./agent/broker.ts";
 import { escrowReady, deployed } from "./contracts/escrow.ts";
 import { withdrawTreasury, treasuryAddress, WITHDRAW_CHAINS } from "./treasury/withdraw.ts";
+import { poolReady, fundingState, addTipFromOperator, settleRound } from "./funding/pool.ts";
 import type { Agent, Decision, Receipt, Resource, Run } from "./db/schema.ts";
 
 // Boot guard: server secrets must never be exposed as NEXT_PUBLIC_* (CLAUDE.md #12).
@@ -684,6 +685,39 @@ app.post("/matches/:id/resolve", spendLimit, async (req, reply) => {
   try {
     const m = await resolveMatch(id, { outcome: body.outcome, reason: body.reason ?? "" });
     return serializeMatch(m);
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// ── Phase 10: quadratic funding pool ─────────────────────────────────────────
+app.get("/funding", async () => {
+  if (!poolReady()) return { ready: false };
+  return { ready: true, ...(await fundingState()) };
+});
+
+app.post("/funding/tip", spendLimit, async (req, reply) => {
+  if (!poolReady()) return reply.code(503).send({ error: "funding pool not deployed" });
+  const b = (req.body ?? {}) as { creator?: string; amountUsd?: string; label?: string; resourceId?: string };
+  if (!b.creator || !b.amountUsd) return reply.code(400).send({ error: "creator and amountUsd are required" });
+  try {
+    const tip = await addTipFromOperator({
+      creator: b.creator as `0x${string}`,
+      amountUsd: b.amountUsd,
+      label: b.label,
+      resourceId: b.resourceId,
+    });
+    return { ok: true, tip };
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+app.post("/funding/settle", spendLimit, async (req, reply) => {
+  if (!poolReady()) return reply.code(503).send({ error: "funding pool not deployed" });
+  const b = (req.body ?? {}) as { round?: number };
+  try {
+    return await settleRound(b.round);
   } catch (err) {
     reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
   }

@@ -282,12 +282,53 @@ export const sluiceApi = {
   contracts: () => getJSON<ContractsDTO>("/contracts"),
   treasuryChains: () => getJSON<WithdrawChainDTO[]>("/treasury/chains"),
   treasuryBalance: () => getJSON<GatewayBalanceDTO>("/treasury/balance"),
+  funding: () => getJSON<FundingDTO>("/funding"),
 };
 
 export interface WithdrawChainDTO {
   name: string;
   label: string;
   sameChain: boolean;
+}
+
+export interface FundingCreatorDTO {
+  creator: string;
+  label: string | null;
+  backers: number;
+  raised: string;
+  formattedRaised: string;
+  match: string;
+  formattedMatch: string;
+  total: string;
+  formattedTotal: string;
+}
+export interface FundingDTO {
+  ready: boolean;
+  pool?: { address: string | null; url: string | null; balance: string; formattedBalance: string };
+  round?: number;
+  status?: "open" | "settled";
+  alpha?: number;
+  matchTotal?: string;
+  formattedMatchTotal?: string;
+  creators?: FundingCreatorDTO[];
+  tips?: {
+    backer: string;
+    creator: string;
+    label: string | null;
+    amount: string;
+    formattedAmount: string;
+    weightBps: number;
+    tx: string | null;
+    txUrl: string | null;
+  }[];
+  history?: {
+    round: number;
+    matchTotal: string | null;
+    formattedMatchTotal: string;
+    distributeTx: string | null;
+    distributeTxUrl: string | null;
+    settledAt: string | null;
+  }[];
 }
 
 export const apiBase = BASE;
