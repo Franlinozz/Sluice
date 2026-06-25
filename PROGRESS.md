@@ -125,4 +125,12 @@
   honesty section). CHANGELOG.md. Tagged v1.0.0.
   CAVEATS (need user/browser): Lighthouse (no headless Chrome here); filing the hackathon form.
 
-## STATUS: Phases 0-9 complete. Sluice is live + verified on Arc. Tag v1.0.0.
+- **Phase 10** (stretch — quadratic funding): FundingPool.sol (deployed+verified Arcscan
+  `0xf7ef1d456e74736bbf346c29f74e28c60ce3ade8`): fund() + distribute(round,creators[],amounts[])
+  single-tx sweep. funding/quadratic.ts (match=(Σ√(wc))²−Σc, α-scaled, integer isqrt). funding/pool.ts
+  (real on-chain tips, sybil weight via ERC-8004 identity/nonce — honest heuristic, ROUND BUDGET
+  committed then pool funded at settle). Migration 0006 (funding_tips, funding_rounds). Endpoints
+  /funding[/tip][/settle]. UI /app/funding + nav. Verified: 3×$0.01 backers matched $0.0339 vs
+  1×$0.03 matched $0.00 (breadth>size); sweep 0xa97deb20…. deployed.json now has fundingPool.
+
+## STATUS: Phases 0-10 done + live on Arc (tag v1.0.0). Phase 11 (stretch, OSS connectors) IN PROGRESS.

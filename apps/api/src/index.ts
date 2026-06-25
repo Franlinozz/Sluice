@@ -34,6 +34,8 @@ import {
 import { runAgentSession } from "./agent/runner.ts";
 import { buyerAddress } from "./agent/pay.ts";
 import { ingestFeed, listFeeds } from "./connectors/rss.ts";
+import { ingestPeerTube } from "./connectors/peertube.ts";
+import { ingestNavidrome, ingestOwncast, connectorCatalog } from "./connectors/oss.ts";
 import { getResearch, recentResearch, resourceEarned, runResearch } from "./agent/research.ts";
 import {
   createSession,
@@ -91,6 +93,9 @@ if (RATE_MAX > 0) {
     // payment/spend routes get their own (lower) ceilings via route config.
   });
 }
+
+// Tighter per-route ceiling for money-moving / spend routes (used as a route option below).
+const spendLimit = RATE_MAX > 0 ? { config: { rateLimit: { max: 20, timeWindow: "1 minute" } } } : {};
 
 // Tolerate empty JSON bodies (bodyless POSTs like /heartbeat, /pause, /stop send no body but
 // clients often set content-type: application/json → Fastify would otherwise 400 before the handler).
@@ -412,6 +417,40 @@ app.post("/connectors/rss", async (req, reply) => {
 
 app.get("/feeds", async () => listFeeds());
 
+// Phase 11: OSS media connectors (PeerTube live; Navidrome/Owncast available).
+app.get("/connectors", async () => connectorCatalog());
+
+app.post("/connectors/peertube", spendLimit, async (req, reply) => {
+  try {
+    const body = (req.body ?? {}) as { instance?: string; count?: number; pricePerSecond?: string };
+    return await ingestPeerTube(body);
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+app.post("/connectors/navidrome", spendLimit, async (req, reply) => {
+  const body = (req.body ?? {}) as Parameters<typeof ingestNavidrome>[0];
+  if (!body?.baseUrl || !body?.user || !body?.token || !body?.salt) {
+    return reply.code(400).send({ error: "navidrome requires baseUrl, user, token, salt (point it at your instance)" });
+  }
+  try {
+    return await ingestNavidrome(body);
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+app.post("/connectors/owncast", spendLimit, async (req, reply) => {
+  const body = (req.body ?? {}) as { instance?: string; pricePerSecond?: string };
+  if (!body?.instance) return reply.code(400).send({ error: "owncast requires instance (your Owncast URL)" });
+  try {
+    return await ingestOwncast({ instance: body.instance, pricePerSecond: body.pricePerSecond });
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 function serializeCitation(c: {
   marker: number;
   resourceName: string;
@@ -428,8 +467,6 @@ function serializeCitation(c: {
     explorerUrl: c.txHash ? explorerTxUrl(c.txHash) : null,
   };
 }
-
-const spendLimit = RATE_MAX > 0 ? { config: { rateLimit: { max: 20, timeWindow: "1 minute" } } } : {};
 
 app.post("/research", spendLimit, async (req, reply) => {
   const body = (req.body ?? {}) as { question?: string };

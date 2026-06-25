@@ -407,29 +407,52 @@ await sluice.pay(id, {
     slug: "connectors",
     title: "Connectors",
     group: "Build",
-    description: "Turn existing content into priced, citable resources.",
+    description: "Turn existing content into priced, metered resources.",
     headings: [
-      { id: "rss", text: "RSS / RSSHub" },
-      { id: "more", text: "More" },
+      { id: "rss", text: "RSS / RSSHub (live)" },
+      { id: "peertube", text: "PeerTube (live)" },
+      { id: "oss", text: "Navidrome & Owncast (available)" },
     ],
     Body: () => (
       <>
-        <Lead>Connectors ingest external content and mint citable, priced resources.</Lead>
+        <Lead>
+          Connectors ingest external content and mint priced resources that reuse the Meter and the
+          streaming engine. <InlineCode>GET /connectors</InlineCode> returns the catalog with each
+          one&apos;s status.
+        </Lead>
         <H2 id="rss">RSS / RSSHub (live)</H2>
-        <P>
-          Point Sluice at any RSS/Atom feed or RSSHub route; each item becomes a citable resource the
-          research agent can pay to ground on.
-        </P>
+        <P>Any RSS/Atom feed or RSSHub route → per-citation citable resources.</P>
         <CodeBlock
           lang="bash"
           code={`curl -X POST ${API}/connectors/rss -H 'content-type: application/json' \\
   -d '{"feedUrl":"https://hnrss.org/frontpage"}'`}
         />
-        <H2 id="more">More</H2>
+        <H2 id="peertube">PeerTube (live)</H2>
         <P>
-          The connector interface is generic (sitemaps, APIs, object stores). RSSHub is live today;
-          others are available on request — the same registry + paywall applies.
+          Ingest real videos from any public PeerTube instance as <InlineCode>per_second</InlineCode>{" "}
+          streaming resources (no keys — PeerTube&apos;s public API is open). They&apos;re then
+          meterable with a live streaming session.
         </P>
+        <CodeBlock
+          lang="bash"
+          code={`curl -X POST ${API}/connectors/peertube -H 'content-type: application/json' \\
+  -d '{"instance":"https://framatube.org","count":6}'`}
+        />
+        <H2 id="oss">Navidrome &amp; Owncast (available)</H2>
+        <P>
+          Navidrome (per-listen music royalties) and Owncast (per-second live streaming) ship as real
+          adapters — point them at your own instance. They&apos;re labeled <em>available</em> rather
+          than live because they need your server (we don&apos;t fake a running instance).
+        </P>
+        <CodeBlock
+          lang="bash"
+          code={`# Owncast — your instance URL
+curl -X POST ${API}/connectors/owncast -d '{"instance":"https://live.example.com"}'
+
+# Navidrome — Subsonic credentials
+curl -X POST ${API}/connectors/navidrome \\
+  -d '{"baseUrl":"https://music.example.com","user":"u","token":"<md5>","salt":"<salt>"}'`}
+        />
       </>
     ),
   },
