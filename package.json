@@ -20,6 +20,8 @@
     "clean": "pnpm -r exec rm -rf node_modules dist .next .turbo && rm -rf node_modules"
   },
   "devDependencies": {
+    "@types/pdfkit": "^0.17.6",
+    "pdfkit": "^0.19.1",
     "typescript": "~5.9.3"
   },
   "pnpm": {

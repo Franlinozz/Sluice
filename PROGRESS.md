@@ -102,4 +102,13 @@
   anchors: Gateway Wallet/BondEscrow/ReputationRegistry). How-it-works + 3-col footer + Arc Live
   badge. Verified live: real Circle ref 40fe682d…, hero $0.050037, all CTAs route, no fakes.
 
-## Next: Phases 7-9 (unspecified). Await spec.
+- **Phase 7** (SDK + MCP): `@sluice/pay` (packages/sluice-pay) — one-call x402 payment of a Sluice
+  resource, deposit-aware, budget+reason hooks; discover/getPrice/balance/deposit/pay/receipts.
+  NOTE: GatewayClient.pay() returns `amount` as bigint atomic + `formattedAmount` string. Verified:
+  examples/pay.ts real $0.001. `@sluice/mcp` (apps/mcp) — stdio MCP server, tools discover_resources/
+  get_price/pay_resource/get_receipts/register_resource; needs SLUICE_PRIVATE_KEY for pay. Verified
+  via scripts/smoke.mts (MCP client → discover→pay→receipt, real $0.001). READMEs added. tsconfig.base
+  path `@sluice/pay`; mcp tsconfig has NO rootDir (path-mapped sources live outside).
+
+## Phase 8 (IN PROGRESS): Fumadocs /docs + whitepaper PDF + changelog + FAQ (Graphite themed).
+## Phase 9 (next): E2E QA on Arc, no-dead-controls sweep, a11y/perf/security, demo + submission.

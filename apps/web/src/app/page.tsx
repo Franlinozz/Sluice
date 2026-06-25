@@ -288,6 +288,7 @@ export default async function LandingPage() {
           <FooterCol
             title="Trust"
             links={[
+              { label: "Whitepaper (PDF)", href: "/sluice-whitepaper.pdf", external: true },
               { label: "Arcscan", href: arcConfig.explorerUrl, external: true },
               { label: "Settlements", href: "/app/settlements" },
               { label: "Reputation", href: "/app/agents" },
