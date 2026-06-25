@@ -79,6 +79,18 @@ const API_PUBLIC = process.env.API_PUBLIC_URL ?? `http://62.171.182.75:${port}`;
 const app = Fastify({ logger: true });
 await app.register(cors, { origin: origins });
 
+// Rate-limit public endpoints (basic abuse protection). Per-route configs below tighten the
+// money-moving routes; this is the global default. Disable in tests via RATE_LIMIT_MAX=0.
+const RATE_MAX = Number(process.env.RATE_LIMIT_MAX ?? "240");
+if (RATE_MAX > 0) {
+  await app.register(import("@fastify/rate-limit"), {
+    global: true,
+    max: RATE_MAX,
+    timeWindow: "1 minute",
+    // payment/spend routes get their own (lower) ceilings via route config.
+  });
+}
+
 // Tolerate empty JSON bodies (bodyless POSTs like /heartbeat, /pause, /stop send no body but
 // clients often set content-type: application/json → Fastify would otherwise 400 before the handler).
 app.addContentTypeParser("application/json", { parseAs: "string" }, (_req, body, done) => {
@@ -416,7 +428,9 @@ function serializeCitation(c: {
   };
 }
 
-app.post("/research", async (req, reply) => {
+const spendLimit = RATE_MAX > 0 ? { config: { rateLimit: { max: 20, timeWindow: "1 minute" } } } : {};
+
+app.post("/research", spendLimit, async (req, reply) => {
   const body = (req.body ?? {}) as { question?: string };
   if (!body.question || !body.question.trim()) {
     return reply.code(400).send({ error: "question is required" });
@@ -597,7 +611,7 @@ app.get("/treasury/chains", async () =>
 
 app.get("/treasury/balance", async () => readGatewayBalance(treasuryAddress()));
 
-app.post("/treasury/withdraw", async (req, reply) => {
+app.post("/treasury/withdraw", spendLimit, async (req, reply) => {
   const body = (req.body ?? {}) as { amount?: string; chain?: string; recipient?: string };
   if (!body.amount || !body.chain) return reply.code(400).send({ error: "amount and chain are required" });
   try {
@@ -632,7 +646,7 @@ app.get("/reputation", async (req, reply) => {
   return providerReputation(agentId ? Number(agentId) : undefined);
 });
 
-app.post("/matches", async (req, reply) => {
+app.post("/matches", spendLimit, async (req, reply) => {
   if (!escrowReady()) return reply.code(503).send({ error: "contracts not deployed" });
   const body = (req.body ?? {}) as { resourceId?: string; need?: string; bondUsd?: string };
   if (!body.need?.trim()) return reply.code(400).send({ error: "need is required" });
@@ -661,7 +675,7 @@ app.get("/matches/:id", async (req, reply) => {
   return { ...serializeMatch(m), onchain };
 });
 
-app.post("/matches/:id/resolve", async (req, reply) => {
+app.post("/matches/:id/resolve", spendLimit, async (req, reply) => {
   const { id } = req.params as { id: string };
   const body = (req.body ?? {}) as { outcome?: "release" | "slash"; reason?: string };
   if (body.outcome !== "release" && body.outcome !== "slash") {

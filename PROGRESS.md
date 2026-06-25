@@ -110,5 +110,19 @@
   via scripts/smoke.mts (MCP client → discover→pay→receipt, real $0.001). READMEs added. tsconfig.base
   path `@sluice/pay`; mcp tsconfig has NO rootDir (path-mapped sources live outside).
 
-## Phase 8 (IN PROGRESS): Fumadocs /docs + whitepaper PDF + changelog + FAQ (Graphite themed).
-## Phase 9 (next): E2E QA on Arc, no-dead-controls sweep, a11y/perf/security, demo + submission.
+- **Phase 8** (docs + trust): bespoke Graphite docs (NOT Fumadocs — chosen for cohesion + Next16/
+  Tailwind4 reliability) at /docs/[[...slug]]: sidebar, ⌘K search, scroll-spy TOC, prev/next, reading
+  progress. Content in lib/docs.tsx (Quickstart, Concepts×4, Build×4, Compatibility×2, Trust×2).
+  Components in components/docs/. Whitepaper PDF via pdfkit (scripts/generate-whitepaper.mjs →
+  apps/web/public/sluice-whitepaper.pdf, 8pp, real 2026 facts only). CHANGELOG.md + in-docs changelog
+  + FAQ. All live + verified.
+
+- **Phase 9** (QA + submission): Security — no secrets in client bundle (verified; only NEXT_PUBLIC_),
+  @fastify/rate-limit added (240/min global, 20/min on /research,/matches,/matches/:id/resolve,
+  /treasury/withdraw; RATE_LIMIT_MAX=0 disables). E2E verified live on Arc: all 14 web routes 200;
+  streaming start→heartbeat→stop settled 3s/$0.0003 paid; reputation/treasury/receipts/contracts real.
+  SUBMISSION.md (live link, repo, demo script <3min, no-dead-controls checklist, real tx artifacts,
+  honesty section). CHANGELOG.md. Tagged v1.0.0.
+  CAVEATS (need user/browser): Lighthouse (no headless Chrome here); filing the hackathon form.
+
+## STATUS: Phases 0-9 complete. Sluice is live + verified on Arc. Tag v1.0.0.

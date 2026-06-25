@@ -15,6 +15,7 @@
   "dependencies": {
     "@circle-fin/x402-batching": "^2.0.4",
     "@fastify/cors": "^11.0.1",
+    "@fastify/rate-limit": "^11.0.0",
     "@sluice/chain": "workspace:*",
     "@sluice/money": "workspace:*",
     "@x402/core": "^2.6.0",
