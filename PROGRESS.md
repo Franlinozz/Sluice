@@ -133,4 +133,12 @@
   /funding[/tip][/settle]. UI /app/funding + nav. Verified: 3×$0.01 backers matched $0.0339 vs
   1×$0.03 matched $0.00 (breadth>size); sweep 0xa97deb20…. deployed.json now has fundingPool.
 
-## STATUS: Phases 0-10 done + live on Arc (tag v1.0.0). Phase 11 (stretch, OSS connectors) IN PROGRESS.
+- **Phase 11** (stretch — OSS connectors): PeerTube LIVE (connectors/peertube.ts — ingest real
+  videos from any public PeerTube instance as per_second resources, open API no keys; verified 5 from
+  framatube.org). Navidrome (per_listen) + Owncast (per_second) real adapters in connectors/oss.ts,
+  labeled "available" (need your instance — not faked). GET /connectors catalog; POST /connectors/
+  {peertube,navidrome,owncast}. Docs Connectors page updated. Ingested resources auto-surface in
+  Bazaar + Streams.
+
+## STATUS: Phases 0-11 COMPLETE + live on Arc. Tags v1.0.0 (core), v1.1.0 (stretch). Spend routes
+rate-limited; spendLimit defined near top (TDZ-safe). FundingPool in deployed.json.
