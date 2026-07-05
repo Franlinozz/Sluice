@@ -22,6 +22,8 @@
   "devDependencies": {
     "@types/pdfkit": "^0.17.6",
     "pdfkit": "^0.19.1",
+    "playwright": "^1.61.1",
+    "tsx": "^4.19.2",
     "typescript": "~5.9.3"
   },
   "pnpm": {

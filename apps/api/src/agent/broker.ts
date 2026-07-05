@@ -28,7 +28,7 @@ import {
 } from "../contracts/escrow.ts";
 
 const DEFAULT_BOND_USD = process.env.BROKER_DEFAULT_BOND ?? "0.02";
-const API_PUBLIC = process.env.API_PUBLIC_URL ?? "http://62.171.182.75:3001";
+const API_PUBLIC = process.env.API_PUBLIC_URL ?? "https://sluice-six.vercel.app/gw";
 
 export interface CreateMatchInput {
   resourceId?: string;

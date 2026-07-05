@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Search, Radio, Quote, FileText, ExternalLink, ArrowRight } from "lucide-react";
+import { Search, Radio, Quote, FileText, ExternalLink, ArrowRight, Bot } from "lucide-react";
 import { Badge, Button, Card } from "@sluice/ui";
 import type { ResourceDTO } from "@/lib/api";
+import { sanitizeExcerpt, sanitizeLabel } from "@/lib/sanitize";
 
 type Filter = "all" | "stream" | "cite" | "other";
 
@@ -21,7 +22,10 @@ function action(r: ResourceDTO): { href: string; label: string; Icon: typeof Rad
   const b = bucket(r.unitType);
   if (b === "stream") return { href: "/app/meter", label: "Stream", Icon: Radio };
   if (b === "cite") return { href: "/ask", label: "Ask & cite", Icon: Quote };
-  return { href: r.contentUrl ?? r.endpoint, label: "Open", Icon: ExternalLink, external: true };
+  // per_request-style resources: open the source if it has one, else run the paying agent on it
+  // (r.endpoint is an API path, not a web route — never link it directly).
+  if (r.contentUrl) return { href: r.contentUrl, label: "Open", Icon: ExternalLink, external: true };
+  return { href: "/app/spend", label: "Agent pays", Icon: Bot };
 }
 
 const FILTERS: { key: Filter; label: string }[] = [
@@ -66,6 +70,7 @@ export function BazaarGrid({ resources }: { resources: ResourceDTO[] }) {
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
+              aria-pressed={filter === f.key}
               className={
                 "rounded-full border px-3 py-1 text-xs font-medium transition-colors " +
                 (filter === f.key
@@ -82,21 +87,23 @@ export function BazaarGrid({ resources }: { resources: ResourceDTO[] }) {
       {filtered.length === 0 ? (
         <Card className="p-8 text-center text-sm text-mid">No resources match your search.</Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((r) => {
             const a = action(r);
             return (
               <Card key={r.id} className="flex flex-col gap-3 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="truncate font-display text-sm font-medium text-hi">{r.name}</div>
-                    {r.author && <div className="mt-0.5 truncate text-xs text-low">by {r.author}</div>}
+                    <div className="truncate font-display text-sm font-medium text-hi">{sanitizeLabel(r.name)}</div>
+                    {r.author && <div className="mt-0.5 truncate text-xs text-low">by {sanitizeLabel(r.author, 60)}</div>}
                   </div>
                   <Badge>{r.rateLabel}</Badge>
                 </div>
 
-                {r.description && (
-                  <p className="line-clamp-2 text-xs leading-relaxed text-mid">{r.description}</p>
+                {sanitizeExcerpt(r.description) && (
+                  <p className="line-clamp-2 min-w-0 text-xs leading-relaxed text-mid [overflow-wrap:anywhere]">
+                    {sanitizeExcerpt(r.description)}
+                  </p>
                 )}
 
                 <div className="mt-auto flex items-center justify-between gap-2 pt-1">

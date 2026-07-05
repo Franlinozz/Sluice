@@ -6,6 +6,7 @@ import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { RegisterForm } from "@/components/earn/register-form";
 import { RssForm } from "@/components/earn/rss-form";
+import { sanitizeLabel } from "@/lib/sanitize";
 
 export const metadata = { title: "Earn · Creator Studio" };
 export const dynamic = "force-dynamic";
@@ -17,9 +18,9 @@ function CitableCard({ r }: { r: ResourceDTO }) {
     <Card className="p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="font-display text-sm font-medium text-hi">{r.name}</div>
+          <div className="font-display text-sm font-medium text-hi">{sanitizeLabel(r.name)}</div>
           <div className="mt-0.5 text-xs text-low">
-            {r.author ? `by ${r.author} · ` : ""}
+            {r.author ? `by ${sanitizeLabel(r.author, 60)} · ` : ""}
             {r.rateLabel}
           </div>
         </div>
@@ -102,7 +103,7 @@ export default async function EarnPage() {
             description="Ingest a feed or register a per-citation resource above to get a toll endpoint, RSL file, and badge."
           />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {citable.map((r) => (
               <CitableCard key={r.id} r={r} />
             ))}
@@ -112,11 +113,11 @@ export default async function EarnPage() {
 
       {others.length > 0 && (
         <Section title="Other resources" hint={`${others.length}`}>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {others.map((r) => (
               <Card key={r.id} className="p-5">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="font-display text-sm font-medium text-hi">{r.name}</div>
+                  <div className="font-display text-sm font-medium text-hi">{sanitizeLabel(r.name)}</div>
                   <span className="rounded-md border border-edge bg-surface-2 px-2 py-0.5 font-mono text-xs text-mid">
                     {r.rateLabel}
                   </span>

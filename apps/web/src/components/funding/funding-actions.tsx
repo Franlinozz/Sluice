@@ -53,7 +53,7 @@ export function TipForm() {
         <Label htmlFor="creator">Creator address</Label>
         <Input id="creator" value={creator} onChange={(e) => setCreator(e.target.value)} placeholder="0x…" disabled={pending} />
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="famount">Amount (USDC)</Label>
           <Input id="famount" type="number" min="0.001" step="0.001" value={amount} onChange={(e) => setAmount(e.target.value)} disabled={pending} />

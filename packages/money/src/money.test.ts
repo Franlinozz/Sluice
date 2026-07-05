@@ -83,3 +83,15 @@ test("bigint round-trips losslessly through JSON", () => {
   assert.equal(back.count, 42);
   assert.equal(back.payer, "0xabc");
 });
+
+// ── Overhaul R0(a): the money formatter must NEVER emit a second "$". ─────────
+test("formatUSD emits exactly one leading $ (no double-dollar, ever)", () => {
+  for (const base of [0n, 1n, 2n, 1000n, 58_356n, 1_500_000n, 1_234_567_000n, -2n]) {
+    const out = formatUSD(base);
+    assert.match(out, /^-?\$[^$]*$/, `formatUSD(${base}) → "${out}" must contain exactly one $`);
+    assert.equal((out.match(/\$/g) ?? []).length, 1, `formatUSD(${base}) → "${out}"`);
+  }
+  // and the plain formatter must never include a symbol at all
+  assert.doesNotMatch(formatUSDC(58_356n), /\$/);
+  assert.equal(formatUSD(2n), "$0.000002");
+});

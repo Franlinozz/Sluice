@@ -15,7 +15,7 @@ export interface DocPage {
   Body: React.FC;
 }
 
-const API = "http://62.171.182.75:3001";
+const API = "https://sluice-six.vercel.app/gw";
 
 export const docPages: DocPage[] = [
   // ── Getting started ──────────────────────────────────────────

@@ -16,7 +16,7 @@ on Arc natively. Payments are real x402 nanopayments settled by Circle Gateway.
 ## Run
 
 ```bash
-SLUICE_API=http://62.171.182.75:3001 \
+SLUICE_API=https://sluice-six.vercel.app/gw \
 SLUICE_PRIVATE_KEY=0xYOUR_AGENT_KEY \
   pnpm --filter @sluice/mcp start
 ```
@@ -36,7 +36,7 @@ Without `SLUICE_PRIVATE_KEY` the server still runs read-only (discover/price/rec
       "args": ["--filter", "@sluice/mcp", "start"],
       "cwd": "/path/to/Sluice",
       "env": {
-        "SLUICE_API": "http://62.171.182.75:3001",
+        "SLUICE_API": "https://sluice-six.vercel.app/gw",
         "SLUICE_PRIVATE_KEY": "0xYOUR_AGENT_KEY"
       }
     }

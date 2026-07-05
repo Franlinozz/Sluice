@@ -33,9 +33,9 @@ export function CreateAgentForm() {
             }
           })
         }
-        className="grid gap-4"
+        className="grid grid-cols-1 gap-4"
       >
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="name">Name</Label>
             <Input id="name" name="name" required placeholder="Citation Research Agent" />

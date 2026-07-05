@@ -37,7 +37,9 @@ export function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () =
 
 export function Sidebar() {
   return (
-    <aside className="hidden w-[264px] shrink-0 flex-col border-r border-hairline bg-surface-1 lg:flex">
+    // sticky + h-dvh: the rail never scrolls away with the page; its own nav scrolls if it ever
+    // overflows, and the footer ("Settlement layer") stays pinned at the viewport bottom.
+    <aside className="sticky top-0 hidden h-dvh w-[264px] shrink-0 flex-col self-start border-r border-hairline bg-surface-1 lg:flex">
       <div className="flex h-16 items-center px-5">
         <Link href="/" aria-label="Sluice home">
           <Logo />

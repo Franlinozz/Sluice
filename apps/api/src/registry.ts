@@ -92,7 +92,13 @@ export async function registerResource(input: RegisterResourceInput): Promise<Re
   return db.select().from(resources).where(eq(resources.id, id)).get()!;
 }
 
+/** Active (non-archived) resources — what Bazaar/Streams/Studio show. */
 export function listResources(): Resource[] {
+  return db.select().from(resources).where(eq(resources.archived, false)).all();
+}
+
+/** Everything, including archived (receipts lookups, admin/curation). */
+export function listAllResources(): Resource[] {
   return db.select().from(resources).all();
 }
 

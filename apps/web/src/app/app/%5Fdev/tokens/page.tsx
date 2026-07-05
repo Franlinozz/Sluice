@@ -285,7 +285,7 @@ export default function TokensPage() {
       </Group>
 
       <Group title="Stepper & sparkline">
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <Stepper
             current={1}
             steps={[
@@ -309,7 +309,7 @@ export default function TokensPage() {
       </Group>
 
       <Group title="Composite cards">
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <MeterCard
             title="RSSHub · Tech feed"
             unit="per citation"

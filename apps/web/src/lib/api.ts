@@ -23,6 +23,8 @@ export type ReceiptStatus = "batching" | "settled" | "failed";
 export interface ReceiptDTO {
   id: string;
   resourceId: string;
+  /** Resolved server-side even for archived resources (receipts are immutable history). */
+  resourceName: string | null;
   payer: string;
   unitType: string;
   units: number;
@@ -50,6 +52,7 @@ export interface ResourceDTO {
   payTo: string;
   path: string;
   status: string;
+  archived?: boolean;
   createdAt: string;
   endpoint: string;
   author?: string | null;

@@ -44,3 +44,6 @@ Thumbs.db
 coverage/
 *.pem
 .vercel
+
+# site-audit screenshots (DEFECTS.md is committed; artifacts are not)
+audit-artifacts/

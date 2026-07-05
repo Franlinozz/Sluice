@@ -19,7 +19,7 @@
 import { GatewayClient } from "@circle-fin/x402-batching/client";
 import type { Address, Hex } from "viem";
 
-export const DEFAULT_API_BASE = "http://62.171.182.75:3001";
+export const DEFAULT_API_BASE = "https://sluice-six.vercel.app/gw";
 
 export interface SluiceResource {
   id: string;

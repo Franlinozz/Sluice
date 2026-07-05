@@ -40,6 +40,11 @@ export const resources = sqliteTable("resources", {
   /** URL slug for the protected endpoint (unique). */
   path: text("path").notNull().unique(),
   status: text("status").notNull().default("active"),
+  /**
+   * Curation flag (Overhaul rule 15): archived resources disappear from Bazaar/Streams/Studio but
+   * their RECEIPTS REMAIN in Settlements — settlement history is immutable, resources are not.
+   */
+  archived: integer("archived", { mode: "boolean" }).notNull().default(false),
   metadata: text("metadata"),
   // Phase 3 (citation toll): content source + attribution splits.
   author: text("author"),

@@ -36,7 +36,7 @@ export function RssForm() {
             }
           })
         }
-        className="grid gap-4 sm:grid-cols-2"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2"
       >
         <div className="flex flex-col gap-1.5 sm:col-span-2">
           <Label htmlFor="feedUrl">Feed URL</Label>

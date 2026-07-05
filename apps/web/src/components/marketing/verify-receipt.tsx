@@ -39,7 +39,8 @@ export function VerifyReceipt({ data, anchors }: { data: VerifyReceiptData | nul
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="text-xs text-low">{data.resourceName}</div>
-              <div className="mt-1 font-mono text-3xl tabular-nums text-hi">${data.formattedAmount}</div>
+              {/* formattedAmount already includes the "$" (formatUSD) — never prefix another. */}
+              <div className="mt-1 font-mono text-3xl tabular-nums text-hi">{data.formattedAmount}</div>
               <div className="mt-1 text-xs text-mid">
                 {data.units.toLocaleString()} × {data.unitType.replace("per_", "per ")}
                 {data.settledAt ? ` · ${new Date(data.settledAt).toLocaleString()}` : ""}

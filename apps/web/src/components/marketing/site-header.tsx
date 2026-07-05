@@ -7,11 +7,12 @@ import { WalletButton } from "@/components/wallet/wallet-button";
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-hairline bg-canvas/70 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
+      <div className="relative mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
         <Link href="/" aria-label="Sluice home">
           <Logo />
         </Link>
-        <nav className="ml-2 hidden items-center gap-6 text-sm text-mid md:flex">
+        {/* Truly centered between the logo and the right-side controls. */}
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 text-sm text-mid md:flex">
           <Link href="/ask" className="transition-colors hover:text-hi">
             Ask the agent
           </Link>

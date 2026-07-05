@@ -4,7 +4,7 @@
  * Sluice natively: discover priced resources, check prices, PAY for them on Arc (real x402
  * nanopayments via @sluice/pay), read receipts, and register new resources.
  *
- * Run:  SLUICE_API=http://62.171.182.75:3001 SLUICE_PRIVATE_KEY=0x... pnpm --filter @sluice/mcp start
+ * Run:  SLUICE_API=https://sluice-six.vercel.app/gw SLUICE_PRIVATE_KEY=0x... pnpm --filter @sluice/mcp start
  * Wire into an MCP client (e.g. Claude Code) as a stdio server pointing at this command.
  *
  * Payments are REAL (CLAUDE.md: no fakes) and require SLUICE_PRIVATE_KEY (the agent's wallet).

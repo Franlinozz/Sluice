@@ -7,7 +7,7 @@ Gateway**. Humans and agents pay per use; creators get paid per use.
 - **Live app:** https://sluice-six.vercel.app
 - **Docs:** https://sluice-six.vercel.app/docs · **Whitepaper:** https://sluice-six.vercel.app/sluice-whitepaper.pdf
 - **Repo:** https://github.com/Franlinozz/Sluice
-- **API:** http://62.171.182.75:3001 · **Network:** Arc testnet (chain 5042002)
+- **API:** https://sluice-six.vercel.app/gw · **Network:** Arc testnet (chain 5042002)
 
 ## What's real (verifiable on Arcscan)
 

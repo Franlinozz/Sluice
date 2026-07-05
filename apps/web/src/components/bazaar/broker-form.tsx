@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Handshake, Loader2 } from "lucide-react";
 import { Button, Card, Input, Label } from "@sluice/ui";
+import { sanitizeLabel } from "@/lib/sanitize";
 
 export interface BrokerResourceOption {
   id: string;
@@ -73,7 +74,7 @@ export function BrokerForm({ resources }: { resources: BrokerResourceOption[] })
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="resource">Resource (optional)</Label>
           <select
@@ -86,7 +87,7 @@ export function BrokerForm({ resources }: { resources: BrokerResourceOption[] })
             <option value="">— none —</option>
             {resources.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.name}
+                {sanitizeLabel(r.name, 80)}
               </option>
             ))}
           </select>

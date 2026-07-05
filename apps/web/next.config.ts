@@ -15,6 +15,13 @@ const optionalWalletDeps = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Public API proxy (Overhaul rule 14): the VPS API is reachable at /gw/* on this domain so no
+  // raw IP:port ever appears in docs, samples, or UI. The origin lives in env only (API_URL).
+  async rewrites() {
+    const api = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+    if (!api) return [];
+    return [{ source: "/gw/:path*", destination: `${api.replace(/\/$/, "")}/:path*` }];
+  },
   // Workspace packages are shipped as TS source and transpiled by Next.
   transpilePackages: ["@sluice/ui", "@sluice/chain", "@sluice/money"],
   experimental: {

@@ -5,7 +5,7 @@ Phases 0–11 are **complete, live, and tagged**. This file is your brain. Read 
 `CLAUDE.md` (rules/constants) and `PROGRESS.md` (per-phase state) before touching anything.
 
 - **Live app:** https://sluice-six.vercel.app
-- **API (VPS, pm2 `sluice-api`):** http://62.171.182.75:3001
+- **API (VPS, pm2 `sluice-api`):** https://sluice-six.vercel.app/gw
 - **Repo:** https://github.com/Franlinozz/Sluice — default branch `main`, tags `v1.0.0` (core 0–9),
   `v1.1.0` (stretch 10–11). HEAD `d421b0a`.
 - **Network:** Arc testnet, chainId `5042002`, USDC `0x3600000000000000000000000000000000000000` (6dp).
@@ -155,7 +155,7 @@ git history / `scripts/deploy-*.ts`) → deploy via a tsx script using `getWalle
   Owncast (per_second) real adapters in `connectors/oss.ts`, labeled **available** (need your
   instance). `GET /connectors` catalog; `POST /connectors/{peertube,navidrome,owncast}`.
 
-## 6) API surface (base http://62.171.182.75:3001)
+## 6) API surface (base https://sluice-six.vercel.app/gw)
 
 `GET /health /kpis /resources[/:id] /receipts[/:id] /gateway/balance /feeds /connectors` ·
 `GET|POST /paid/:path` (x402 402→pay→200) · `POST /resources /research /connectors/{rss,peertube,
@@ -207,8 +207,8 @@ labeled — never fake. Keep `PROGRESS.md` updated as the durable anchor when co
 ## 9) How to prove things are real (sanity commands)
 
 ```bash
-curl -s http://62.171.182.75:3001/kpis            # real settled totals
-curl -s http://62.171.182.75:3001/funding         # QF pool + live match preview
-curl -s http://62.171.182.75:3001/contracts       # verified contract addresses + Arcscan urls
+curl -s https://sluice-six.vercel.app/gw/kpis            # real settled totals
+curl -s https://sluice-six.vercel.app/gw/funding         # QF pool + live match preview
+curl -s https://sluice-six.vercel.app/gw/contracts       # verified contract addresses + Arcscan urls
 # then open any address/tx on https://testnet.arcscan.app to verify independently
 ```

@@ -77,7 +77,8 @@ const origins = (process.env.API_CORS_ORIGINS ?? "http://localhost:3000,https://
 const SELLER = (process.env.SELLER_ADDRESS ?? process.env.ARC_WALLET_ADDRESS ?? "") as Address;
 const SETTLE_INTERVAL_MS = Number(process.env.METER_SETTLE_INTERVAL_MS ?? "60000");
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sluice-six.vercel.app";
-const API_PUBLIC = process.env.API_PUBLIC_URL ?? `http://62.171.182.75:${port}`;
+// Public links (RSL/llms.txt/badge) go through the app-domain /gw proxy — never a raw IP (rule 14).
+const API_PUBLIC = process.env.API_PUBLIC_URL ?? `${APP_URL}/gw`;
 
 const app = Fastify({ logger: true });
 await app.register(cors, { origin: origins });
@@ -122,6 +123,7 @@ function serializeResource(r: Resource) {
     payTo: r.payTo,
     path: r.path,
     status: r.status,
+    archived: r.archived,
     createdAt: r.createdAt,
     endpoint: `/paid/${r.path}`,
     author: r.author,
@@ -142,6 +144,8 @@ function serializeReceipt(r: Receipt) {
   return {
     id: r.id,
     resourceId: r.resourceId,
+    // Resolved regardless of archived state — receipts are immutable history (rule 15).
+    resourceName: getResource(r.resourceId)?.name ?? null,
     payer: r.payer,
     unitType: r.unitType,
     units: r.units,

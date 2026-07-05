@@ -1,0 +1,1 @@
+ALTER TABLE `resources` ADD `archived` integer DEFAULT false NOT NULL;

@@ -4,6 +4,7 @@ import { Card } from "@sluice/ui";
 import { sluiceApi } from "@/lib/api";
 import { PageHeader, EmptyState } from "@/components/shell/page-parts";
 import { StartStream } from "@/components/meter/start-stream";
+import { sanitizeLabel } from "@/lib/sanitize";
 
 export const metadata = { title: "Streams · Live Meter" };
 export const dynamic = "force-dynamic";
@@ -29,11 +30,11 @@ export default async function MeterIndexPage() {
           description="Register a per_second resource in Creator Studio (set the unit to per_second) to start a live metering session."
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {streams.map((r) => (
             <Card key={r.id} className="flex items-center justify-between gap-4 p-5">
               <div className="min-w-0">
-                <div className="font-display text-sm font-medium text-hi">{r.name}</div>
+                <div className="font-display text-sm font-medium text-hi">{sanitizeLabel(r.name)}</div>
                 <div className="mt-0.5 font-mono text-xs text-low">{r.formattedPrice}/sec</div>
               </div>
               <StartStream resourceId={r.id} />

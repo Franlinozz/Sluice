@@ -72,9 +72,10 @@ export default async function TreasuryPage() {
         <Card className="p-5">
           <p className="text-sm leading-relaxed text-mid">
             Circle Gateway settles nanopayments gas-free via an attested ledger. Funds touch the chain
-            at two points, both verifiable on Arcscan: the buyer&apos;s <strong>deposit</strong> into
-            the Gateway Wallet, and the seller&apos;s <strong>withdrawal</strong> — a real Gateway
-            Minter mint to the recipient. Same-chain withdrawals are an instant Arc mint; cross-chain
+            at two points, both verifiable on Arcscan: the buyer&apos;s <strong>deposit</strong>
+            {" "}into the Gateway Wallet, and the seller&apos;s <strong>withdrawal</strong>
+            {" "}— a real Gateway Minter mint to the recipient. Same-chain withdrawals are an
+            instant Arc mint; cross-chain
             burns gas-free on Circle&apos;s ledger, then mints on the target chain (which needs gas there).
           </p>
         </Card>
