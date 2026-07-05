@@ -290,6 +290,14 @@ async function main() {
     const ctx = await browser.newContext({
       viewport: { width: vp.width, height: vp.height },
       permissions: ["clipboard-read", "clipboard-write"],
+      // Vercel Protection Bypass for Automation (never committed — lives in the secrets env).
+      // Lets the harness crawl the LIVE deployment without tripping the WAF challenge (HTTP 708).
+      extraHTTPHeaders: process.env.VERCEL_BYPASS_SECRET
+        ? {
+            "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_SECRET,
+            "x-vercel-set-bypass-cookie": "true",
+          }
+        : undefined,
       deviceScaleFactor: 1,
       userAgent:
         vp.name === "mobile"
