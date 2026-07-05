@@ -70,13 +70,13 @@ for (const key of Object.keys(process.env)) {
 runMigrations();
 
 const port = Number(process.env.API_PORT ?? 3001);
-const origins = (process.env.API_CORS_ORIGINS ?? "http://localhost:3000,https://sluice-six.vercel.app")
+const origins = (process.env.API_CORS_ORIGINS ?? "http://localhost:3000,https://sluiceflow.vercel.app")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 const SELLER = (process.env.SELLER_ADDRESS ?? process.env.ARC_WALLET_ADDRESS ?? "") as Address;
 const SETTLE_INTERVAL_MS = Number(process.env.METER_SETTLE_INTERVAL_MS ?? "60000");
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sluice-six.vercel.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sluiceflow.vercel.app";
 // Public links (RSL/llms.txt/badge) go through the app-domain /gw proxy — never a raw IP (rule 14).
 const API_PUBLIC = process.env.API_PUBLIC_URL ?? `${APP_URL}/gw`;
 

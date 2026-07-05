@@ -4,8 +4,8 @@
 > **CLAUDE.md** (read it first). This file = what's done + how it's wired + what's next.
 
 ## Live
-- Web (Vercel): **https://sluice-six.vercel.app** — auto-deploys on push to `main`.
-- API (VPS, pm2 `sluice-api`): public at **https://sluice-six.vercel.app/gw**, gateway backend, SQLite/Drizzle.
+- Web (Vercel): **https://sluiceflow.vercel.app** — auto-deploys on push to `main`.
+- API (VPS, pm2 `sluice-api`): public at **https://sluiceflow.vercel.app/gw**, gateway backend, SQLite/Drizzle.
 - Vercel env `API_URL` / `NEXT_PUBLIC_API_URL` = the VPS API; web fetches it **server-side** (SC +
   server actions) to avoid https→http mixed content. `pm2 restart sluice-api` to reload.
 - Other pm2 apps on the VPS (archon-web:3000, tessera-*) are OTHER projects — never touch.
@@ -55,7 +55,7 @@
   Deploy/split helpers: apps/api/src/contracts/splitter.ts. Test: scripts/test-split.ts.
 - Research loop: apps/api/src/agent/research.ts (reason → pay-to-retrieve → synthesize, cap
   RESEARCH_MAX_CITATIONS=4). Endpoints: /research, /connectors/rss, /resources/:id/{rsl,llms.txt,earned}, /badge/:id.
-- API_PUBLIC_URL (for RSL/llms.txt/badge links) defaults to https://sluice-six.vercel.app/gw.
+- API_PUBLIC_URL (for RSL/llms.txt/badge links) defaults to https://sluiceflow.vercel.app/gw.
 
 - **Phase 4** (streaming meter + proof-of-flow): per-second accrual with reserve cap; heartbeat
   loss auto-pauses (freezes at last heartbeat → no dead-air charge), heartbeat return auto-resumes;

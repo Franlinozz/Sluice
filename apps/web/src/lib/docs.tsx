@@ -15,7 +15,7 @@ export interface DocPage {
   Body: React.FC;
 }
 
-const API = "https://sluice-six.vercel.app/gw";
+const API = "https://sluiceflow.vercel.app/gw";
 
 export const docPages: DocPage[] = [
   // ── Getting started ──────────────────────────────────────────

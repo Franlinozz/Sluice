@@ -38,7 +38,7 @@ function atomLink(link: unknown): string {
 
 export async function fetchFeed(feedUrl: string): Promise<{ title: string; items: FeedItem[] }> {
   const res = await fetch(feedUrl, {
-    headers: { "user-agent": "Sluice/1.0 (+https://sluice-six.vercel.app)" },
+    headers: { "user-agent": "Sluice/1.0 (+https://sluiceflow.vercel.app)" },
     signal: AbortSignal.timeout(15_000),
   });
   if (!res.ok) throw new Error(`feed fetch failed: ${res.status}`);

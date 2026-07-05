@@ -4,10 +4,10 @@
 a second, a citation, a listen, a call — metered and settled on **Arc** in USDC via **Circle
 Gateway**. Humans and agents pay per use; creators get paid per use.
 
-- **Live app:** https://sluice-six.vercel.app
-- **Docs:** https://sluice-six.vercel.app/docs · **Whitepaper:** https://sluice-six.vercel.app/sluice-whitepaper.pdf
+- **Live app:** https://sluiceflow.vercel.app
+- **Docs:** https://sluiceflow.vercel.app/docs · **Whitepaper:** https://sluiceflow.vercel.app/sluice-whitepaper.pdf
 - **Repo:** https://github.com/Franlinozz/Sluice
-- **API:** https://sluice-six.vercel.app/gw · **Network:** Arc testnet (chain 5042002)
+- **API:** https://sluiceflow.vercel.app/gw · **Network:** Arc testnet (chain 5042002)
 
 ## What's real (verifiable on Arcscan)
 

@@ -5,7 +5,7 @@
  * button in SAFE MODE (all POSTs to our API are intercepted — no real money can move). Outputs
  * DEFECTS.md + audit-artifacts/defects.json + screenshots.
  *
- *   AUDIT_BASE=https://sluice-six.vercel.app pnpm exec tsx scripts/site-audit.ts
+ *   AUDIT_BASE=https://sluiceflow.vercel.app pnpm exec tsx scripts/site-audit.ts
  *   AUDIT_BASE=http://localhost:3005 pnpm exec tsx scripts/site-audit.ts   # local prod build
  *   AUDIT_CLICKS=0  → skip the click audit (faster smoke)
  */
@@ -13,7 +13,7 @@ import { chromium, type Browser, type Page, type BrowserContext } from "playwrig
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const BASE = (process.env.AUDIT_BASE ?? "https://sluice-six.vercel.app").replace(/\/$/, "");
+const BASE = (process.env.AUDIT_BASE ?? "https://sluiceflow.vercel.app").replace(/\/$/, "");
 const DO_CLICKS = process.env.AUDIT_CLICKS !== "0";
 /** Gentle mode for the LIVE deployment: throttle everything so Vercel's WAF/bot filter doesn't
  *  403-challenge the crawl (observed: rapid headless bursts trip it; the app itself is fine). */

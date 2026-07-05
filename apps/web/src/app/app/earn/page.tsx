@@ -65,7 +65,7 @@ function CitableCard({ r }: { r: ResourceDTO }) {
 
       <div className="mt-3 rounded-md border border-hairline bg-terminal p-2.5">
         <code className="block break-all font-mono text-[11px] text-mid">
-          {`<img src="https://sluice-six.vercel.app/badge/${r.id}" alt="Pay-per-cite"/>`}
+          {`<img src="https://sluiceflow.vercel.app/badge/${r.id}" alt="Pay-per-cite"/>`}
         </code>
       </div>
     </Card>
