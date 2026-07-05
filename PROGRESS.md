@@ -155,3 +155,21 @@ rate-limited; spendLimit defined near top (TDZ-safe). FundingPool in deployed.js
   layout, grid-cols-1 minmax(0,1fr) fix (line-clamp min-content 669px overflow), navbar links truly
   centered, sidebar sticky h-dvh (footer always visible). DOMAIN RENAMED: sluiceflow.vercel.app
   (sluice-six 307s; same Vercel project). VERCEL_BYPASS_SECRET in secrets env.
+
+- **Phase R1** (brand + visual foundation): all 8 docs/ images opened+verified (rule 18) →
+  /public/brand canon via scripts/build-brand.mjs (sharp+potrace+opentype.js, rerunnable): glyph
+  alpha-extracted (noise floor <28) + vectorized; SLUICE wordmark RE-SET IN MICHROMA everywhere
+  (lockups, banner — old text erased via clean-patch fill, verified by eye; og-card 1200x630 with
+  subtle halftone + flow hairline; favicon set + webmanifest; texture-dots.webp 85KB). packages/ui
+  logo-paths.ts GENERATED → <Logo>/<LogoMark> = inline currentColor vectors (zero flash). 404 +
+  loading pages. Design v2: --flow (#6FE3F0/#0E7490) ONLY on live dots (--live=flow), steel-link
+  hover, CTA hover glow, live meter ticking digits. .texture-layer fixed site-wide (dark invert+
+  screen 5.5%, light multiply 0.5, radial vignette, translateZ(0)). .card-v2 gradient hairline +
+  top-light + hover lift/flow-glow — one Card primitive, all surfaces. Audit: ZERO defects local.
+  GOTCHAS: sharp ops apply in libvips FIXED order (sequence via separate passes); librsvg needs
+  style="color:" for currentColor; Vercel WAF/Bot Filter 403/708-challenges headless browsers AND
+  (after repeated crawls) curl from this IP — harness auto-falls-back to HTTP parity; bypass secret
+  VERCEL_BYPASS_SECRET in secrets env (deployment-protection scope). NEXT_PUBLIC_APP_URL env fixed
+  → https://sluiceflow.vercel.app (og:image canonical; re-verify visually when WAF cools).
+
+## NEXT: R2 (motion system) — user has pasted the spec. Then R3+ when provided.
