@@ -273,3 +273,63 @@ per-payment on-chain tx. Verified empirically:
 - [Phase 0] Non-Next packages that touch `process`/`node:test` need `@types/node` in their OWN
   devDeps (pnpm won't resolve `types:["node"]` otherwise). api/agent tsconfig must NOT set
   `rootDir` (it pulls workspace `.ts` sources outside the dir → TS6059).
+
+## OVERHAUL ADDENDUM (July 2026) — read alongside everything above
+
+### New non-negotiable rules
+13. SANITIZE ALL FEED CONTENT. Any text ingested from RSS/external sources must be
+    stripped of HTML tags and truncated to a clean excerpt before display. Raw
+    `<p>`/`<a href=` must never render as literal text in any card. Single utility:
+    lib/sanitize.ts (strip tags, decode entities, collapse whitespace, truncate ~140 chars).
+14. NO RAW IPs OR PORTS anywhere user-visible (docs, code samples, UI, README).
+    Proxy the VPS API through the Vercel domain via next.config rewrites
+    (e.g. /gw/* -> http://<VPS>:3001/*) and reference ONLY the public domain in
+    all docs/samples. The IP lives in env/config only.
+15. CURATION IS NOT FAKING. Junk/duplicate TEST RESOURCES may be archived/hidden to
+    clean the story (e.g. 9x "Live Compute Stream", "Stream Debug", random PeerTube
+    videos). RECEIPTS ARE IMMUTABLE — never delete or edit settlement history; archive
+    resources only. Add an `archived` flag; archived resources disappear from Bazaar/
+    Streams/Studio but their receipts remain in Settlements.
+16. TRACTION IS REAL HUMANS ONLY. One profile = one human. Multiple wallets belonging
+    to one profile count as ONE user in all "users/creators/agents" counts. Never build
+    or assist any mechanism to make one person appear as several. Distinct-user metrics
+    must be conservative and judge-defensible.
+17. MOTION RULES: every animation must respect prefers-reduced-motion (static fallback),
+    run at 60fps (transform/opacity only; no layout-thrashing), and serve comprehension
+    (guide the eye to what changed). No gratuitous confetti. One orchestrated entrance
+    per view; count-ups on real numbers only.
+18. ASSET DISCIPLINE: brand assets live in /public/brand with canonical names (below).
+    Before using any user-committed image, OPEN AND LOOK AT IT (view tool), describe it,
+    verify it matches its intended role (dark-bg vs light-bg), then rename/organize.
+19. WHITEPAPER VERIFICATION LOOP: after generating the PDF, rasterize EVERY page
+    (pdftoppm -png) and visually inspect each image. Blank/broken pages = regenerate
+    and re-inspect. Never ship a PDF you have not looked at page by page.
+20. SELF-TEST BEFORE CLAIMING DONE: the Playwright crawler (Phase R0) must pass with
+    zero console errors and zero defects open before any phase is declared complete.
+
+### Design system v2 ("Graphite + Glacial")
+- Base stays greyscale (canvas/surfaces/text tokens unchanged).
+- ONE new accent: "flow" — a cold glacial cyan for anything alive/moving/settling.
+  Dark theme: --flow: #6FE3F0 (glow rgba(111,227,240,0.16)); Light: --flow: #0E7490.
+  Usage ONLY: live dots, flowing particles, meter ticks, link hover, primary CTA
+  hover-glow, "settled" pulse. Everything else remains greyscale. Do not rainbow.
+- Background depth: /public/brand/texture-dots.webp applied as a FIXED, full-viewport
+  layer site-wide (marketing + app + docs): light theme opacity ~0.5 as-is; dark theme
+  filter: invert(1), mix-blend-mode: screen, opacity 0.045-0.07. Add a subtle radial
+  vignette mask so content zones stay clean. Compress to webp <=180KB. Zero scroll jank
+  (transform: translateZ(0), background-attachment fixed or a fixed positioned div).
+- Cards v2: 1px gradient hairline borders (white 8% -> 2%), soft inner top-light,
+  hover: translateY(-2px) + border brightens + flow glow at 6%; 12px radius kept.
+- Numerals: tabular mono everywhere money/units appear; animated count-up on change.
+- Logo wordmark font: "Michroma" (Google Fonts) — the SLUICE wordmark uses Michroma
+  (same family direction as the Archon wordmark), not plain capitals.
+
+### Canonical brand asset names (/public/brand/)
+- logo-mark-dark.png|svg    (white/light glyph FOR DARK backgrounds)
+- logo-mark-light.png|svg   (dark glyph FOR LIGHT backgrounds)
+- logo-full-dark.png|svg    (glyph + wordmark for dark)
+- logo-full-light.png|svg
+- banner-hero.png           (wide banner; also used for README + OG)
+- texture-dots.webp         (the halftone background texture)
+- og-card.png               (1200x630, generated from banner + tagline)
+- favicon set generated from logo-mark (ico, 16/32/180/512, site.webmanifest)
