@@ -8,7 +8,8 @@ const button = cva(
   {
     variants: {
       variant: {
-        signal: "bg-signal text-signal-contrast hover:opacity-90 active:opacity-100",
+        signal:
+          "bg-signal text-signal-contrast hover:opacity-90 active:opacity-100 hover:shadow-[0_0_24px_var(--flow-glow)] motion-reduce:hover:shadow-none",
         secondary: "bg-surface-2 text-hi border border-edge hover:bg-surface-3",
         outline: "border border-edge text-hi hover:bg-surface-2",
         ghost: "text-mid hover:text-hi hover:bg-surface-2",

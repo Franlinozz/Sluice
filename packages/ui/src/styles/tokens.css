@@ -30,7 +30,18 @@
   --signal: #e8eaed; /* CTA / active — cold near-platinum */
   --signal-contrast: #0a0a0b; /* text/icon ON the signal accent */
   --steel: #9da7b3; /* links / active-nav */
-  --live: #79b8c7; /* whisper of cyan-grey — "live" dot ONLY */
+  /* Glacial "flow" accent (design v2) — ONLY for: live dots, flowing particles, meter ticks,
+     link hover, primary-CTA hover glow, settled pulse. Everything else stays greyscale. */
+  --flow: #6fe3f0;
+  --flow-glow: rgba(111, 227, 240, 0.16);
+  --flow-glow-soft: rgba(111, 227, 240, 0.06);
+  --live: var(--flow); /* the live dot IS a flow signal */
+
+  /* cards v2 */
+  --card-hairline-top: rgba(255, 255, 255, 0.08);
+  --card-hairline-bottom: rgba(255, 255, 255, 0.02);
+  --card-hairline-top-hover: rgba(255, 255, 255, 0.16);
+  --card-toplight: rgba(255, 255, 255, 0.045);
 
   /* locked semantic states (rendered as pills via the pill utilities below) */
   --settled: #57c98a;
@@ -70,7 +81,15 @@
   --signal: #14151a;
   --signal-contrast: #f6f7f8;
   --steel: #46566a;
-  --live: #2f8aa0;
+  --flow: #0e7490;
+  --flow-glow: rgba(14, 116, 144, 0.16);
+  --flow-glow-soft: rgba(14, 116, 144, 0.06);
+  --live: var(--flow);
+
+  --card-hairline-top: rgba(10, 12, 16, 0.12);
+  --card-hairline-bottom: rgba(10, 12, 16, 0.04);
+  --card-hairline-top-hover: rgba(10, 12, 16, 0.22);
+  --card-toplight: rgba(255, 255, 255, 0.65);
 
   --settled: #1f9d5e;
   --pending: #b8791a;
@@ -83,4 +102,59 @@
   --horizon: linear-gradient(90deg, transparent, rgba(20, 21, 26, 0.25) 50%, transparent);
 
   color-scheme: light;
+}
+
+
+/* ── Cards v2 (Overhaul R1): gradient hairline, inner top-light, hover lift + flow glow ── */
+.card-v2 {
+  position: relative;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-1), var(--surface-1)) padding-box,
+    linear-gradient(180deg, var(--card-hairline-top), var(--card-hairline-bottom)) border-box;
+  box-shadow: inset 0 1px 0 var(--card-toplight), var(--shadow-soft);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+@media (hover: hover) {
+  .card-v2:hover {
+    transform: translateY(-2px);
+    background:
+      linear-gradient(var(--surface-1), var(--surface-1)) padding-box,
+      linear-gradient(180deg, var(--card-hairline-top-hover), var(--card-hairline-bottom)) border-box;
+    box-shadow:
+      inset 0 1px 0 var(--card-toplight),
+      var(--shadow-pop),
+      0 0 24px var(--flow-glow-soft);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-v2,
+  .card-v2:hover {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ── Texture depth layer (Overhaul R1): fixed halftone, felt not seen ── */
+.texture-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("/brand/texture-dots.webp");
+  background-repeat: repeat;
+  background-size: 1100px auto;
+  transform: translateZ(0);
+  /* vignette: keep the content zone clean, let depth breathe at the edges */
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 42%, transparent 28%, black 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 42%, transparent 28%, black 80%);
+  /* dark (default): inverted dots, screen-blended, whisper-level */
+  filter: invert(1);
+  mix-blend-mode: screen;
+  opacity: 0.055;
+}
+[data-theme="light"] .texture-layer {
+  filter: none;
+  mix-blend-mode: multiply;
+  opacity: 0.5;
 }

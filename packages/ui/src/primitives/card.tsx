@@ -5,7 +5,7 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
   return (
     <div
       className={cn(
-        "rounded-card border border-hairline bg-surface-1 shadow-[var(--shadow-soft)]",
+        "card-v2 rounded-card", // v2: gradient hairline + top-light + hover lift/glow (tokens.css)
         className,
       )}
       {...props}

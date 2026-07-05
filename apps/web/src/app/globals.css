@@ -27,6 +27,7 @@
   --color-signal: var(--signal);
   --color-signal-contrast: var(--signal-contrast);
   --color-steel: var(--steel);
+  --color-flow: var(--flow);
   --color-live: var(--live);
 
   /* locked semantic states → text-settled, bg-pending, border-failed, ... */
@@ -128,4 +129,10 @@
     width: 100%;
     background: var(--horizon);
   }
+}
+
+/* Glacial link hover (allowed flow use): steel links warm to flow on hover. */
+a.text-steel:hover,
+a .text-steel:hover {
+  color: var(--flow);
 }

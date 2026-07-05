@@ -67,6 +67,7 @@ const COLORS = [
   ["text-low", "--text-low"],
   ["signal", "--signal"],
   ["steel", "--steel"],
+  ["flow", "--flow"],
   ["live", "--live"],
   ["settled", "--settled"],
   ["pending", "--pending"],

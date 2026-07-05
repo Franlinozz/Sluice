@@ -105,7 +105,13 @@ export function LiveMeter({ initial }: { initial: StreamSessionDTO }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="eyebrow mb-2">accrued · live</div>
-            <AmountMono value={formatUSD(displayBase)} size="2xl" dimDecimals />
+            {/* flow accent on the ticking meter digits — allowed use (design v2) */}
+            <AmountMono
+              value={formatUSD(displayBase)}
+              size="2xl"
+              dimDecimals
+              className={flowing ? "text-flow" : undefined}
+            />
             <div className="mt-1 text-xs text-low">
               {s.formattedRate}/sec · {s.flowedSeconds}s flowed
             </div>
