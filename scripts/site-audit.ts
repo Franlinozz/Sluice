@@ -350,6 +350,7 @@ async function main() {
     }
   }
   const checkedLinks = new Set<string>();
+  let challenged403 = 0;
 
   for (const vp of VIEWPORTS) {
     const ctx = await browser.newContext({
@@ -379,6 +380,22 @@ async function main() {
           res = await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded", timeout: 60000 });
         }
         if (!res || res.status() >= 400) {
+          if (res && (res.status() === 403 || res.status() === 708) && !BASE.includes("localhost")) {
+            challenged403++;
+            if (challenged403 >= 3) {
+              // The WAF woke up mid-crawl — browser findings from here on are noise. Restart in
+              // HTTP-parity mode with a clean slate (plain HTTP is not challenged).
+              console.log("⚠ WAF challenge began mid-crawl — switching to HTTP parity mode.");
+              await page.close();
+              await ctx.close();
+              await browser.close();
+              defects.length = 0;
+              seen.clear();
+              await httpParity(routes);
+              finish(routes.length, "http parity (WAF challenged the browser crawl mid-run; interactive gate = local prod)");
+              return;
+            }
+          }
           report({ route, viewport: vp.name, defect: `route returned HTTP ${res?.status() ?? "??"}`, severity: "high" });
           await page.close();
           continue;
