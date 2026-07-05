@@ -10,7 +10,7 @@ import {
   Eye,
   Webhook,
 } from "lucide-react";
-import { Button, Card, Horizon, Logo, LiveDot } from "@sluice/ui";
+import { Button, Card, Horizon, Logo, LiveDot, Reveal } from "@sluice/ui";
 import { arcConfig, explorerAddressUrl } from "@sluice/chain";
 import { sluiceApi } from "@/lib/api";
 import { SiteHeader } from "@/components/marketing/site-header";
@@ -149,14 +149,13 @@ export default async function LandingPage() {
             If it can be counted, it can be paid for — per use.
           </h2>
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {UNITS.map((u) => (
-              <div
-                key={u.label}
-                className="flex flex-col items-center gap-3 rounded-card border border-hairline bg-surface-1/40 px-4 py-6 text-center"
-              >
-                <u.icon className="size-6 text-steel" strokeWidth={1.25} />
-                <span className="font-mono text-xs text-mid">{u.label}</span>
-              </div>
+            {UNITS.map((u, i) => (
+              <Reveal key={u.label} delay={i * 60}>
+                <div className="flex flex-col items-center gap-3 rounded-card border border-hairline bg-surface-1/40 px-4 py-6 text-center">
+                  <u.icon className="size-6 text-steel" strokeWidth={1.25} />
+                  <span className="font-mono text-xs text-mid">{u.label}</span>
+                </div>
+              </Reveal>
             ))}
           </div>
         </section>
@@ -193,9 +192,11 @@ export default async function LandingPage() {
               <LiveDot status="live" /> from real settlements
             </span>
           </div>
-          <Card className="mt-8 overflow-hidden p-0">
+          <Reveal className="mt-8">
+          <Card className="overflow-hidden p-0">
             <EconomyViz receipts={receipts ?? []} resources={resList} className="h-[320px] w-full sm:h-[380px]" />
           </Card>
+          </Reveal>
           <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-low">
             <span>● left: paying agents</span>
             <span>● right: creators earning</span>
@@ -216,7 +217,9 @@ export default async function LandingPage() {
                 transfer ID, and the on-chain anchors are open on Arcscan for anyone to inspect.
               </p>
             </div>
-            <VerifyReceipt data={verifyData} anchors={anchors} />
+            <Reveal delay={80}>
+              <VerifyReceipt data={verifyData} anchors={anchors} />
+            </Reveal>
           </div>
         </section>
 
@@ -224,12 +227,14 @@ export default async function LandingPage() {
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <p className="eyebrow">How it works</p>
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-            {STEPS.map((s) => (
-              <Card key={s.n} className="p-6">
-                <div className="font-mono text-sm text-steel">{s.n}</div>
-                <h3 className="mt-3 font-display text-lg font-medium text-hi">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-mid">{s.body}</p>
-              </Card>
+            {STEPS.map((s, i) => (
+              <Reveal key={s.n} delay={i * 90}>
+                <Card className="h-full p-6">
+                  <div className="font-mono text-sm text-steel">{s.n}</div>
+                  <h3 className="mt-3 font-display text-lg font-medium text-hi">{s.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-mid">{s.body}</p>
+                </Card>
+              </Reveal>
             ))}
           </div>
         </section>

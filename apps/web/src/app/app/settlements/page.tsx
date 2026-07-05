@@ -62,8 +62,12 @@ export default async function SettlementsPage() {
         <>
           {/* Mobile: card layout (tables don't survive 390px honestly) */}
           <div className="flex flex-col gap-3 md:hidden">
-            {receipts.map((r) => (
-              <Card key={r.id} className="flex flex-col gap-3 p-4">
+            {receipts.map((r, i) => (
+              <Card
+                key={r.id}
+                className="flex flex-col gap-3 p-4 motion-safe:animate-[sluice-row-enter_0.4s_ease-out_both]"
+                style={{ animationDelay: `${Math.min(i, 12) * 45}ms` }}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium text-hi">{receiptName(r, nameOf)}</div>
@@ -102,8 +106,12 @@ export default async function SettlementsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {receipts.map((r) => (
-                    <tr key={r.id} className="border-b border-hairline last:border-0 hover:bg-surface-2/40">
+                  {receipts.map((r, i) => (
+                    <tr
+                      key={r.id}
+                      className="border-b border-hairline last:border-0 hover:bg-surface-2/40 motion-safe:animate-[sluice-row-enter_0.4s_ease-out_both]"
+                      style={{ animationDelay: `${Math.min(i, 12) * 45}ms` }}
+                    >
                       <td className="max-w-[220px] truncate px-4 py-3 text-hi">{receiptName(r, nameOf)}</td>
                       <td className="px-4 py-3">
                         <StatusPill status={r.status} />

@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowUpRight, Pause, Play, Square, ZapOff } from "lucide-react";
-import { AmountMono, Button, Card, LiveDot, Pill, cn } from "@sluice/ui";
+import { TickerDigits, PulseDot, AmountMono, Button, Card, LiveDot, Pill, cn } from "@sluice/ui";
 import { formatUSD } from "@sluice/money";
 import type { StreamSessionDTO } from "@/lib/api";
 
@@ -105,12 +105,10 @@ export function LiveMeter({ initial }: { initial: StreamSessionDTO }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="eyebrow mb-2">accrued · live</div>
-            {/* flow accent on the ticking meter digits — allowed use (design v2) */}
-            <AmountMono
+            {/* per-digit odometer; flow accent while flowing — pausing freezes it exactly (R2) */}
+            <TickerDigits
               value={formatUSD(displayBase)}
-              size="2xl"
-              dimDecimals
-              className={flowing ? "text-flow" : undefined}
+              className={"text-3xl tracking-tight " + (flowing ? "text-flow" : "text-hi")}
             />
             <div className="mt-1 text-xs text-low">
               {s.formattedRate}/sec · {s.flowedSeconds}s flowed
@@ -119,7 +117,7 @@ export function LiveMeter({ initial }: { initial: StreamSessionDTO }) {
           <div className="flex flex-col items-end gap-2">
             {flowing ? (
               <span className="inline-flex items-center gap-2 text-sm text-hi">
-                <LiveDot status={heartbeating ? "live" : "connecting"} /> Flowing
+                <PulseDot active={heartbeating} /> Flowing
               </span>
             ) : stopped ? (
               <Pill tone="settled" dot>

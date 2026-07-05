@@ -60,3 +60,10 @@ export { MeterCard, type MeterCardProps } from "./primitives/meter-card.tsx";
 export { ReceiptCard, type ReceiptCardProps } from "./primitives/receipt-card.tsx";
 export { BondCard, type BondStatus, type BondCardProps } from "./primitives/bond-card.tsx";
 export { AgentTrace, type TraceKind, type TraceStep } from "./primitives/agent-trace.tsx";
+
+// motion (Overhaul R2) — CSS/rAF primitives, transform+opacity only, reduced-motion safe
+export { Reveal } from "./motion/reveal.tsx";
+export { CountUp } from "./motion/count-up.tsx";
+export { PulseDot } from "./motion/pulse-dot.tsx";
+export { RowEnter } from "./motion/row-enter.tsx";
+export { TickerDigits } from "./motion/ticker-digits.tsx";

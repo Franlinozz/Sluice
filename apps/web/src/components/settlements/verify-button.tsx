@@ -8,6 +8,7 @@ import { verifyReceiptAction } from "@/lib/actions";
 
 export function VerifyButton({ receiptId }: { receiptId: string }) {
   const [pending, start] = React.useTransition();
+  const [verified, setVerified] = React.useState(false);
   return (
     <Button
       variant="outline"
@@ -22,6 +23,7 @@ export function VerifyButton({ receiptId }: { receiptId: string }) {
           }
           const d = res.data!;
           if (d.verified) {
+            setVerified(true);
             toast.success("Verified on-chain", {
               description: d.blockNumber ? `Block ${d.blockNumber}` : undefined,
             });
@@ -33,8 +35,15 @@ export function VerifyButton({ receiptId }: { receiptId: string }) {
         })
       }
     >
-      <ShieldCheck className="size-3.5" />
-      {pending ? "Verifying…" : "Verify"}
+      {verified ? (
+        <ShieldCheck
+          className="size-3.5 motion-safe:animate-[sluice-pop_0.35s_ease-out_both]"
+          style={{ color: "var(--settled)" }}
+        />
+      ) : (
+        <ShieldCheck className="size-3.5" />
+      )}
+      {verified ? <span style={{ color: "var(--settled)" }}>Verified</span> : pending ? "Verifying…" : "Verify"}
     </Button>
   );
 }

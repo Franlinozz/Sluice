@@ -32,7 +32,11 @@ export function AgentTrace({ steps, className }: { steps: TraceStep[]; className
         const { Icon, ring, tint } = KIND_META[step.kind];
         const isLast = i === steps.length - 1;
         return (
-          <li key={i} className="relative flex gap-3 pb-5 last:pb-0">
+          <li
+            key={i}
+            className="relative flex gap-3 pb-5 last:pb-0 motion-safe:animate-[sluice-row-enter_0.4s_ease-out_both]"
+            style={{ animationDelay: `${Math.min(i, 14) * 60}ms` }}
+          >
             {!isLast && (
               <span
                 aria-hidden

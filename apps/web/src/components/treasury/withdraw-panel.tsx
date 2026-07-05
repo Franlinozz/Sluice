@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowUpRight, Loader2, ExternalLink, Banknote } from "lucide-react";
-import { Button, Card, Input, Label } from "@sluice/ui";
+import { Button, Card, Input, Label, PulseDot } from "@sluice/ui";
 import type { WithdrawChainDTO } from "@/lib/api";
 
 interface Result {
@@ -123,6 +123,15 @@ export function WithdrawPanel({
         />
       </div>
 
+      {pending && (
+        <div className="flex items-center gap-2 rounded-[10px] border border-hairline bg-surface-1 p-3 text-xs text-mid">
+          <PulseDot active />
+          {/* honest states only: the burn intent is signed+submitted, then Circle attests and the
+              mint tx lands — we show exactly what we know, when we know it. */}
+          <span>Burn intent submitted — awaiting the destination mint…</span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs text-low">
           {selected.sameChain
@@ -137,7 +146,7 @@ export function WithdrawPanel({
 
       {result && (
         <div className="flex items-center justify-between gap-3 rounded-[10px] border border-settled/30 bg-surface-1 p-3 text-xs">
-          <span className="text-mid">
+          <span className="text-mid motion-safe:animate-[sluice-pop_0.35s_ease-out_both]">
             Minted <span className="font-mono text-hi">${result.formattedAmount}</span> on {result.destinationChain}
           </span>
           <a

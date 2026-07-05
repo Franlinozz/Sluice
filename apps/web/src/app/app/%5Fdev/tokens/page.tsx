@@ -43,6 +43,11 @@ import {
   TooltipContent,
   TooltipTrigger,
   cn,
+  Reveal,
+  CountUp,
+  PulseDot,
+  RowEnter,
+  TickerDigits,
 } from "@sluice/ui";
 import { formatUSD, parseUSDC } from "@sluice/money";
 
@@ -358,6 +363,43 @@ export default function TokensPage() {
 
       <Group title="Agent reasoning trace">
         <AgentTrace steps={TRACE} />
+      </Group>
+
+      <Group title="Motion (R2) — transform/opacity only, reduced-motion safe">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-wrap items-center gap-8">
+            <span className="inline-flex items-center gap-2 text-sm text-mid">
+              <PulseDot active /> PulseDot (flow)
+            </span>
+            <span className="text-sm text-mid">
+              CountUp: <CountUp value={706} className="text-hi" /> · <CountUp value={0.118356} prefix="$" decimals={6} className="text-hi" />
+            </span>
+            <span className="text-sm text-mid">
+              TickerDigits: <TickerDigits value="$0.001234" className="text-hi" />
+            </span>
+          </div>
+          <div className="flex flex-col gap-1">
+            {["settled · $0.001", "settled · $0.000002", "batching · $0.06"].map((t, i) => (
+              <RowEnter key={t} index={i}>
+                <div className="rounded-md border border-hairline bg-surface-1 px-3 py-2 text-xs text-mid">{t}</div>
+              </RowEnter>
+            ))}
+          </div>
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-8 w-40" />
+            <Skeleton className="h-8 w-24" />
+            <span className="text-xs text-low">Skeleton shimmer</span>
+          </div>
+          <Reveal>
+            <div className="rounded-card border border-hairline bg-surface-1 p-4 text-xs text-mid">
+              Reveal: this block fades+rises when scrolled into view (static under reduced motion).
+            </div>
+          </Reveal>
+          <p className="text-xs text-low">
+            Also live: page-enter route transitions (template.tsx), pressable buttons (active scale
+            0.98), card hover lift + flow glow, budget-bar/reserve-bar width transitions.
+          </p>
+        </div>
       </Group>
 
       <Group title="Brand & motif">

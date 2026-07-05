@@ -173,3 +173,18 @@ rate-limited; spendLimit defined near top (TDZ-safe). FundingPool in deployed.js
   → https://sluiceflow.vercel.app (og:image canonical; re-verify visually when WAF cools).
 
 ## NEXT: R2 (motion system) — user has pasted the spec. Then R3+ when provided.
+
+- **Phase R2** (motion system): packages/ui/src/motion/ — Reveal (IO fade+rise, stagger), CountUp
+  (rAF eased, real values only; RSC-safe prefix/decimals props — function props can't cross the RSC
+  boundary), PulseDot (flow ping), RowEnter (top-of-feed slide-fade cascade), TickerDigits (per-digit
+  rolling odometer, transform-only; pause freezes exactly). Skeleton shimmer (translate sweep).
+  Pressable = Button base (active:scale-.98). PageTransition = app/template.tsx (.page-enter).
+  Keyframes in tokens.css (sluice-ping/row-enter/page-enter/shimmer/pop); html smooth-scroll under
+  no-preference. CSS/rAF ONLY (no framer-motion dep — lighter option per session rules). Applied:
+  Overview KpiTiles CountUp + RowEnter feed; Settlements row cascade (cards + <tr>) + Verify
+  confirm state (green pop "Verified"); AgentTrace cascade; spend budget bar 500ms ease; LiveMeter
+  TickerDigits odometer (flow accent while flowing) + PulseDot proof-of-flow; Treasury CountUp +
+  honest 2-state withdraw progress (burn-intent submitted → minted, real states only) + minted pop;
+  landing Reveal staggers (unit tiles, steps, economy viz, verify card); /app/_dev/tokens Motion
+  group. PERF GATE: CLS 0.0000-0.0005 on / /app /app/meter /app/settlements; long tasks = hydration
+  only; all animations transform/opacity. Audit ZERO defects. Reduced-motion: every primitive static.

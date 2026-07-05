@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { ArrowUpRight, BookOpen, Coins, ReceiptText } from "lucide-react";
-import { AmountMono, Button, Card, StatusPill, Stepper } from "@sluice/ui";
+import { AmountMono, Button, Card, RowEnter, StatusPill, Stepper } from "@sluice/ui";
 import { sluiceApi } from "@/lib/api";
 import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { NetworkHealth } from "@/components/overview/network-health";
+import { KpiTiles } from "@/components/overview/kpi-tiles";
 
 export const dynamic = "force-dynamic";
 
@@ -18,12 +19,6 @@ const FLOW = [
 export default async function OverviewPage() {
   const [kpis, receipts] = await Promise.all([sluiceApi.kpis(), sluiceApi.resources().then(() => sluiceApi.receipts())]);
 
-  const tiles = [
-    { label: "Total settled", value: kpis?.formattedTotalSettled ?? "$0.00", sub: "settled on Arc" },
-    { label: "Units metered", value: kpis ? String(kpis.unitsMetered) : "0", sub: "across all resources" },
-    { label: "Resources", value: kpis ? String(kpis.resources) : "0", sub: "registered & priced" },
-    { label: "Settlements", value: kpis ? String(kpis.settlements) : "0", sub: "settled batches" },
-  ];
   const recent = (receipts ?? []).slice(0, 6);
 
   return (
@@ -35,15 +30,7 @@ export default async function OverviewPage() {
         description="Every figure here traces to a real on-chain event or DB record — nothing is mocked. Numbers update live as agents pay creators."
       />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {tiles.map((t) => (
-          <Card key={t.label} className="p-5">
-            <div className="eyebrow">{t.label}</div>
-            <div className="mt-2 font-mono text-2xl tracking-tight tnum text-hi">{t.value}</div>
-            <div className="mt-1 text-xs text-low">{t.sub}</div>
-          </Card>
-        ))}
-      </div>
+      <KpiTiles kpis={kpis} />
 
       {kpis && Number(kpis.batchingAmount) > 0 && (
         <div className="flex items-center gap-2 rounded-card border border-hairline bg-surface-1 px-4 py-3 text-sm">
@@ -65,16 +52,18 @@ export default async function OverviewPage() {
             />
           ) : (
             <Card className="divide-y divide-hairline p-0">
-              {recent.map((r) => (
-                <div key={r.id} className="flex items-center justify-between gap-4 px-5 py-3">
-                  <div className="flex items-center gap-3">
-                    <StatusPill status={r.status} />
-                    <span className="text-sm text-mid">
-                      {r.units} {r.unitType.replace("per_", "")} · {r.backend}
-                    </span>
+              {recent.map((r, i) => (
+                <RowEnter key={r.id} index={i}>
+                  <div className="flex items-center justify-between gap-4 px-5 py-3">
+                    <div className="flex items-center gap-3">
+                      <StatusPill status={r.status} />
+                      <span className="text-sm text-mid">
+                        {r.units} {r.unitType.replace("per_", "")} · {r.backend}
+                      </span>
+                    </div>
+                    <AmountMono value={r.formattedAmount} size="sm" dimDecimals />
                   </div>
-                  <AmountMono value={r.formattedAmount} size="sm" dimDecimals />
-                </div>
+                </RowEnter>
               ))}
               <div className="px-5 py-3">
                 <Link

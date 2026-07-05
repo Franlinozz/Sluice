@@ -89,7 +89,7 @@ function AgentCard({ agent }: { agent: AgentDTO }) {
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-3">
           <div
-            className={cn("h-full rounded-full transition-[width]", pct >= 100 ? "bg-pending" : "bg-steel")}
+            className={cn("h-full rounded-full transition-[width] duration-500 ease-out", pct >= 100 ? "bg-pending" : "bg-steel")}
             style={{ width: `${pct}%` }}
           />
         </div>

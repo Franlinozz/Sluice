@@ -1,5 +1,5 @@
 import { AlertTriangle, Landmark } from "lucide-react";
-import { AddressChip, AmountMono, Card, DataRow, StatusPill } from "@sluice/ui";
+import { AddressChip, AmountMono, Card, CountUp, DataRow, StatusPill } from "@sluice/ui";
 import { explorerAddressUrl } from "@sluice/chain";
 import { sluiceApi } from "@/lib/api";
 import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
@@ -31,7 +31,9 @@ export default async function TreasuryPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <Card className="p-6 lg:col-span-1">
             <div className="eyebrow mb-2">Gateway available</div>
-            <AmountMono value={`$${bal.gateway.formattedAvailable}`} size="2xl" dimDecimals />
+            <div className="font-mono text-3xl tracking-tight tnum text-hi">
+              <CountUp value={Number(bal.gateway.available) / 1e6} prefix="$" decimals={6} />
+            </div>
             <div className="mt-4 flex items-center gap-2">
               <StatusPill status="settled" withDot />
               <span className="text-xs text-low">earnings ready to withdraw</span>
