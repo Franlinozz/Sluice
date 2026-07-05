@@ -271,6 +271,52 @@ async function linkAudit(page: Page, route: string, vp: string, checked: Set<str
   }
 }
 
+/** Approximate innerText from server HTML: drop scripts/styles/comments, strip tags. */
+function visibleText(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+/**
+ * LIVE deployments sit behind Vercel's Bot Filter, which (correctly) challenges headless browsers
+ * regardless of bypass headers. Plain HTTP isn't challenged — so when the browser crawl is blocked,
+ * we still verify the deployed CONTENT: route statuses + every text-level defect class (double-$,
+ * raw HTML as text, raw IP, joined words). Interactive/console/click coverage runs on the local
+ * prod build (the primary gate).
+ */
+async function httpParity(routes: string[]): Promise<void> {
+  console.log("→ HTTP parity mode (browser crawl WAF-challenged; content-level checks via plain HTTP)");
+  const RAW_IP = [62, 171, 182, 75].join(".");
+  for (const route of routes) {
+    try {
+      const res = await fetch(`${BASE}${route}`, { headers: { accept: "text/html" }, redirect: "follow" });
+      if (res.status >= 400) {
+        report({ route, viewport: "http", defect: `route returned HTTP ${res.status}`, severity: "high" });
+        continue;
+      }
+      if (route.startsWith("/badge/")) continue;
+      const text = visibleText(await res.text());
+      if (/\$\$[\d.,]/.test(text))
+        report({ route, viewport: "http", defect: `double-dollar rendered: "${text.match(/\$\$[\d.,]+/)?.[0]}"`, severity: "high" });
+      if (/<\s*(p|a\s+href|div|span|br)\b/i.test(text))
+        report({ route, viewport: "http", defect: "raw HTML rendered as literal text", severity: "high" });
+      if (text.includes(RAW_IP))
+        report({ route, viewport: "http", defect: "raw VPS IP visible in page text", severity: "high" });
+      if (/\bdepositinto\b/.test(text))
+        report({ route, viewport: "http", defect: "joined-word typo: depositinto", severity: "medium" });
+    } catch (err) {
+      report({ route, viewport: "http", defect: `fetch failed: ${String(err).slice(0, 120)}`, severity: "high" });
+    }
+    await sleep(GENTLE ? 400 : 50);
+  }
+}
+
 async function main() {
   console.log(`site-audit → ${BASE} (clicks: ${DO_CLICKS ? "on" : "off"})`);
   const routes = [...STATIC_ROUTES];
@@ -283,7 +329,26 @@ async function main() {
     /* badge route skipped if API unreachable */
   }
 
+  // Pre-flight: can a headless browser crawl this base at all, or does the WAF challenge it?
   const browser: Browser = await chromium.launch();
+  {
+    const probeCtx = await browser.newContext({
+      extraHTTPHeaders: process.env.VERCEL_BYPASS_SECRET
+        ? { "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_SECRET, "x-vercel-set-bypass-cookie": "true" }
+        : undefined,
+    });
+    const probe = await probeCtx.newPage();
+    const res = await probe.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => null);
+    const challenged = !res || res.status() === 403 || res.status() === 708;
+    await probeCtx.close();
+    if (challenged && !BASE.includes("localhost")) {
+      console.log("⚠ Vercel Bot Filter challenges headless browsers on this deployment (platform security, not an app defect).");
+      await browser.close();
+      await httpParity(routes);
+      finish(routes.length, "http parity (WAF-challenged browser crawl; interactive gate = local prod)");
+      return;
+    }
+  }
   const checkedLinks = new Set<string>();
 
   for (const vp of VIEWPORTS) {
@@ -339,14 +404,17 @@ async function main() {
     await ctx.close();
   }
   await browser.close();
+  finish(routes.length, `desktop 1440x900 + mobile 390x844 · click-audit: ${DO_CLICKS ? "on (safe mode — POSTs intercepted)" : "off"}`);
+}
 
+function finish(routeCount: number, modeNote: string): void {
   // ── write DEFECTS.md ─────────────────────────────────────────
   const real = defects.filter((d) => d.severity !== "info");
   const info = defects.filter((d) => d.severity === "info");
   const lines = [
     `# DEFECTS — site-audit ${new Date().toISOString()}`,
     ``,
-    `Base: ${BASE} · routes: ${routes.length} · viewports: desktop 1440x900 + mobile 390x844 · click-audit: ${DO_CLICKS ? "on (safe mode — POSTs intercepted)" : "off"}`,
+    `Base: ${BASE} · routes: ${routeCount} · mode: ${modeNote}`,
     ``,
     real.length === 0 ? `**✅ ZERO defects.**` : `**${real.length} defect(s) open:**`,
     ``,

@@ -142,3 +142,16 @@
 
 ## STATUS: Phases 0-11 COMPLETE + live on Arc. Tags v1.0.0 (core), v1.1.0 (stretch). Spend routes
 rate-limited; spendLimit defined near top (TDZ-safe). FundingPool in deployed.json.
+
+- **Phase R0** (overhaul: audit + purge): scripts/site-audit.ts (Playwright; desktop+mobile, console/
+  network/screenshots, safe-mode click audit, link check, text scans, overflow detection; AUDIT_GENTLE
+  + Vercel bypass header + HTTP-parity fallback because Vercel Bot Filter 403/708-challenges headless
+  browsers — platform security, documented, not an app defect). RESULT: ZERO defects local (full gate)
+  + live (content parity). Fixed: $$ double-dollar (VerifyReceipt; formatUSD single-$ unit test), raw
+  feed HTML (lib/sanitize.ts — handles feeds truncated MID-TAG + orphan href attrs + URLs→hostname),
+  "depositinto" joined word, IP purge (next.config /gw/:path* rewrite; all docs/SDK/MCP/API links via
+  domain; grep-clean), archived flag (migration 0007) + scripts/curate-resources.ts (17 archived, 2
+  renamed → 13 curated; receipts immutable, serializeReceipt.resourceName), settlements mobile card
+  layout, grid-cols-1 minmax(0,1fr) fix (line-clamp min-content 669px overflow), navbar links truly
+  centered, sidebar sticky h-dvh (footer always visible). DOMAIN RENAMED: sluiceflow.vercel.app
+  (sluice-six 307s; same Vercel project). VERCEL_BYPASS_SECRET in secrets env.
