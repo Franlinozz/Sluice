@@ -5,6 +5,7 @@ import { sluiceApi, type ResourceDTO } from "@/lib/api";
 import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { RegisterForm } from "@/components/earn/register-form";
+import { EditorialMedia } from "@/components/media/editorial-media";
 import { RssForm } from "@/components/earn/rss-form";
 import { sanitizeLabel } from "@/lib/sanitize";
 
@@ -86,8 +87,49 @@ export default async function EarnPage() {
         description="Put a price on your work — an article, a feed, a stream — and get paid every time it's used. AI agents pay you per citation, settled on Arc."
       />
 
+      <Card className="grid grid-cols-1 overflow-hidden p-0 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <EditorialMedia
+          src="/media/editorial/app/earn/creator-studio-workspace.webp"
+          alt="A creator's desk — microphone, camera, manuscript and notebook"
+          variant="split"
+          gradient="to-l"
+          darkOpacity={0.7}
+          lightOpacity={0.9}
+          sizes="(max-width: 768px) 100vw, 40vw"
+          className="min-h-44"
+        />
+        <div className="flex flex-col justify-center gap-2 p-6">
+          <div className="font-display text-base font-medium text-hi">Real work becomes a priced resource.</div>
+          <p className="text-sm leading-relaxed text-mid">
+            An essay, a feed, a recording, an endpoint — ingest or register it below, set a unit and a
+            price, and every future use settles to your wallet. You get a toll endpoint, an RSL file,
+            and a live earned badge.
+          </p>
+        </div>
+      </Card>
+
       <RssForm />
       <RegisterForm />
+
+      <Card className="grid grid-cols-1 overflow-hidden p-0 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)]">
+        <EditorialMedia
+          src="/media/editorial/app/earn/royalty-split-routing.webp"
+          alt="One master cable splitting into six labeled collaborator connectors — songwriter, producer, vocalist, guitarist, mix engineer, publisher"
+          variant="split"
+          darkOpacity={0.88}
+          lightOpacity={1}
+          sizes="(max-width: 768px) 100vw, 260px"
+          className="min-h-40"
+        />
+        <div className="flex flex-col justify-center gap-2 p-6">
+          <div className="font-display text-base font-medium text-hi">Collaborators? One payment, split on-chain.</div>
+          <p className="text-sm leading-relaxed text-mid">
+            A resource with multiple authors gets its own RoyaltySplitter contract on Arc: each
+            citation payment fans out by share, exactly, in one transaction — look for the{" "}
+            <span className="font-mono text-xs">split</span> badge on resources below.
+          </p>
+        </div>
+      </Card>
 
       <Section title="Citable sources" hint={`${citable.length}`}>
         {resources === null ? (

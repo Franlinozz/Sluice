@@ -165,7 +165,7 @@ wallet-native self-service deposits/withdrawals, and creator payout dashboards.
 
 ## Team
 
-Built solo by **[Franlinozz](https://github.com/Franlinozz)** for the Lepton Agents Hackathon
+Built solo by **[Franlinozz](https://github.com/Franlinozz)** ([@sluiceflow](https://x.com/sluiceflow) on X) for the Lepton Agents Hackathon
 (Canteen × Circle × Arc), on Circle's [`arc-nanopayments`](https://github.com/circlefin/arc-nanopayments)
 reference plumbing.
 

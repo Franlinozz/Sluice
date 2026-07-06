@@ -84,7 +84,10 @@ const VIEWPORTS = [
 ] as const;
 
 /** Third-party hosts whose console/network noise is recorded as info, not a defect. */
-const THIRD_PARTY = /walletconnect|web3modal|reown|pulse\.|relay\.|coinbase|vercel-insights|vitals|Analytics SDK/i;
+// "Error checking Cross-Origin-Opener-Policy" is Chrome's own message when the COOP-check fetch
+// for an EXTERNAL origin (opened during the click audit, e.g. Arcscan) fails transiently from this
+// box — browser/environment noise, not app code. Verified non-reproducible on manual loads.
+const THIRD_PARTY = /walletconnect|web3modal|reown|pulse\.|relay\.|coinbase|vercel-insights|vitals|Analytics SDK|Error checking Cross-Origin-Opener-Policy/i;
 
 type Severity = "high" | "medium" | "low" | "info";
 interface Defect {

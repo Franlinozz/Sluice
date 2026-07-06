@@ -136,3 +136,11 @@ a.text-steel:hover,
 a .text-steel:hover {
   color: var(--flow);
 }
+
+/* EditorialMedia: per-theme image opacity — the image fades, never the card. */
+.editorial-img {
+  opacity: var(--edm-light, 1);
+}
+[data-theme="dark"] .editorial-img {
+  opacity: var(--edm-dark, 1);
+}

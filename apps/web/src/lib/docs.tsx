@@ -2,6 +2,7 @@ import * as React from "react";
 import { Lead, H2, P, UL, LI, Callout, A, InlineCode } from "@/components/docs/prose";
 import { CodeBlock } from "@/components/docs/code-block";
 import { PartnerForm } from "@/components/docs/partner-form";
+import { EditorialMedia } from "@/components/media/editorial-media";
 
 export interface DocHeading {
   id: string;
@@ -38,6 +39,18 @@ export const docPages: DocPage[] = [
           call — metered and settled on <A href="https://arc.network">Arc</A> in USDC via Circle
           Gateway. Humans and agents pay per use; creators get paid per use.
         </Lead>
+        <EditorialMedia
+          src="/media/editorial/docs/developer-precision-workspace.webp"
+          alt="A developer's bench — printed code sheet under calipers, machined parts and field notes"
+          variant="figure"
+          aspect={21 / 9}
+          gradient="to-t"
+          darkOpacity={0.68}
+          lightOpacity={0.9}
+          objectPosition="center 42%"
+          sizes="(max-width: 768px) 100vw, 720px"
+          className="my-6 hidden sm:block"
+        />
         <H2 id="what">What Sluice is</H2>
         <P>
           A settlement layer for the agent-paid web. It wraps any resource behind an{" "}

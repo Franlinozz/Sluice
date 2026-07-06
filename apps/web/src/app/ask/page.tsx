@@ -6,6 +6,7 @@ import { sanitizeExcerpt } from "@/lib/sanitize";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { AskBox } from "@/components/ask/ask-box";
 import { AutoRefresh } from "@/components/auto-refresh";
+import { EditorialMedia } from "@/components/media/editorial-media";
 
 export const metadata = {
   title: "Ask the research agent",
@@ -28,18 +29,33 @@ export default async function AskPage() {
       <SiteHeader />
       <AutoRefresh intervalMs={25000} />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:px-6">
-        <p className="eyebrow">The citation toll · live</p>
-        <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-hi sm:text-4xl">
-          Ask the research agent.
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-mid sm:text-base">
-          It answers from sources whose authors put a price on them — and pays each one it cites,
-          for real. Don&apos;t trust it; check every payment on{" "}
-          <Link href="/app/settlements" className="text-steel hover:underline">
-            Settlements
-          </Link>{" "}
-          or Arcscan.
-        </p>
+        <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-[1.15fr_0.85fr]">
+          <div>
+            <p className="eyebrow">The citation toll · live</p>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-hi sm:text-4xl">
+              Ask the research agent.
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-mid sm:text-base">
+              It answers from sources whose authors put a price on them — and pays each one it cites,
+              for real. Don&apos;t trust it; check every payment on{" "}
+              <Link href="/app/settlements" className="text-steel hover:underline">
+                Settlements
+              </Link>{" "}
+              or Arcscan.
+            </p>
+          </div>
+          <EditorialMedia
+            src="/media/editorial/ask/paid-citations-research-desk.webp"
+            alt="A research desk at night — stacked, annotated source papers under a reading lamp"
+            variant="figure"
+            aspect={16 / 10}
+            gradient="to-t"
+            darkOpacity={0.6}
+            lightOpacity={0.85}
+            sizes="(max-width: 640px) 100vw, 300px"
+            className="order-last sm:order-none"
+          />
+        </div>
 
         <div className="mt-8">
           <AskBox />
@@ -57,6 +73,27 @@ export default async function AskPage() {
             </div>
           ))}
         </div>
+
+        {/* the toll, as an object — every citation is a compensable event */}
+        <Card className="mt-6 grid grid-cols-1 overflow-hidden p-0 sm:grid-cols-[240px_1fr]">
+          <EditorialMedia
+            src="/media/editorial/ask/citation-toll-access-pass.webp"
+            alt="A vintage citation-toll pass with a brass verified seal, resting on classic texts"
+            variant="split"
+            darkOpacity={0.82}
+            lightOpacity={0.95}
+            objectPosition="center 45%"
+            sizes="(max-width: 640px) 100vw, 240px"
+            className="min-h-36"
+          />
+          <div className="flex flex-col justify-center gap-1.5 p-5">
+            <div className="text-sm font-medium text-hi">Each citation creates a compensable event.</div>
+            <p className="text-xs leading-relaxed text-mid">
+              When the agent grounds an answer on a source, the retrieval itself is the payment —
+              attribution and compensation in one auditable step: claim, source, payment, author.
+            </p>
+          </div>
+        </Card>
 
         {/* recent answers — real questions, real paid citations */}
         <div className="mt-12">

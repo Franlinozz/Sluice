@@ -1,9 +1,11 @@
 import { AlertTriangle, Bot } from "lucide-react";
+import { Card } from "@sluice/ui";
 import { sluiceApi, type AgentDTO } from "@/lib/api";
 import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { CreateAgentForm } from "@/components/spend/create-agent-form";
 import { SessionCard } from "@/components/spend/session-card";
+import { EditorialMedia } from "@/components/media/editorial-media";
 import { Term } from "@/components/glossary";
 
 export const metadata = { title: "Spend · Agent Console" };
@@ -32,6 +34,28 @@ export default async function SpendPage() {
       />
 
       <CreateAgentForm />
+
+      <Card className="grid grid-cols-1 overflow-hidden p-0 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <div className="flex flex-col justify-center gap-2 p-6">
+          <div className="font-display text-base font-medium text-hi">Budget in, judgment shown.</div>
+          <p className="text-sm leading-relaxed text-mid">
+            Set a budget and a plain-English policy. The agent evaluates what&apos;s on offer, pays for
+            what&apos;s useful, skips the rest — and every decision below shows its reasoning. The model
+            recommends; deterministic code enforces the money rules.
+          </p>
+        </div>
+        <EditorialMedia
+          src="/media/editorial/app/spend/agent-budget-operations.webp"
+          alt="Printed resource cards stamped approved, skipped and selected, beside handwritten budget notes"
+          variant="split"
+          gradient="to-r"
+          darkOpacity={0.62}
+          lightOpacity={0.85}
+          objectPosition="center 30%"
+          sizes="(max-width: 768px) 100vw, 40vw"
+          className="min-h-44"
+        />
+      </Card>
 
       <Section title="Your agents" hint={agents ? `${agents.length}` : undefined}>
         {agents === null ? (

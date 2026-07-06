@@ -19,6 +19,7 @@ import { LiveStats } from "@/components/marketing/live-stats";
 import { EconomyViz } from "@/components/marketing/economy-viz";
 import { VerifyReceipt, type VerifyReceiptData, type VerifyAnchor } from "@/components/marketing/verify-receipt";
 import { AskBox } from "@/components/ask/ask-box";
+import { EditorialMedia } from "@/components/media/editorial-media";
 
 export const dynamic = "force-dynamic";
 
@@ -141,19 +142,34 @@ export default async function LandingPage() {
 
         {/* ── One meter, every unit ────────────────────────────── */}
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <p className="eyebrow">One meter, every unit</p>
-          <h2 className="mt-3 max-w-2xl font-display text-2xl font-semibold tracking-tight text-hi sm:text-3xl">
-            If it can be counted, it can be paid for — per use.
-          </h2>
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {UNITS.map((u, i) => (
-              <Reveal key={u.label} delay={i * 60}>
-                <div className="unit-tile flex flex-col items-center gap-3 rounded-card border border-hairline bg-surface-1/40 px-4 py-6 text-center">
-                  <u.icon className="unit-icon size-6 text-steel" strokeWidth={1.25} />
-                  <span className="font-mono text-xs text-mid">{u.label}</span>
-                </div>
-              </Reveal>
-            ))}
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.05fr_1fr]">
+            <div>
+              <p className="eyebrow">One meter, every unit</p>
+              <h2 className="mt-3 max-w-2xl font-display text-2xl font-semibold tracking-tight text-hi sm:text-3xl">
+                If it can be counted, it can be paid for — per use.
+              </h2>
+              <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {UNITS.map((u, i) => (
+                  <Reveal key={u.label} delay={i * 60}>
+                    <div className="unit-tile flex flex-col items-center gap-3 rounded-card border border-hairline bg-surface-1/40 px-4 py-6 text-center">
+                      <u.icon className="unit-icon size-6 text-steel" strokeWidth={1.25} />
+                      <span className="font-mono text-xs text-mid">{u.label}</span>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+            <Reveal delay={120}>
+              <EditorialMedia
+                src="/media/editorial/landing/metered-units-index.webp"
+                alt="A desk of measurable things — a seconds ruler, a highlighted transcript, a call log, a waveform and a mechanical counter"
+                variant="figure"
+                aspect={4 / 3}
+                darkOpacity={0.72}
+                lightOpacity={0.9}
+                sizes="(max-width: 1024px) 100vw, 45vw"
+              />
+            </Reveal>
           </div>
         </section>
 
@@ -190,8 +206,18 @@ export default async function LandingPage() {
             </span>
           </div>
           <Reveal className="mt-8">
-          <Card className="overflow-hidden p-0">
-            <EconomyViz receipts={receipts ?? []} resources={resList} className="h-[320px] w-full sm:h-[380px]" />
+          <Card className="relative overflow-hidden p-0">
+            <EditorialMedia
+              src="/media/editorial/landing/creator-payout-routing.webp"
+              alt=""
+              variant="background"
+              gradient="to-r"
+              darkOpacity={0.22}
+              lightOpacity={0.14}
+              objectPosition="center 60%"
+              className="hidden sm:block"
+            />
+            <EconomyViz receipts={receipts ?? []} resources={resList} className="relative h-[320px] w-full sm:h-[380px]" />
           </Card>
           </Reveal>
           <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-low">
@@ -226,10 +252,23 @@ export default async function LandingPage() {
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
               <Reveal key={s.n} delay={i * 90}>
-                <Card className="h-full p-6">
-                  <div className="font-mono text-sm text-steel">{s.n}</div>
-                  <h3 className="mt-3 font-display text-lg font-medium text-hi">{s.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-mid">{s.body}</p>
+                <Card className="relative h-full overflow-hidden p-6">
+                  {s.n === "03" && (
+                    <EditorialMedia
+                      src="/media/editorial/shared/physical-payment-rails.webp"
+                      alt=""
+                      variant="background"
+                      gradient="to-t"
+                      darkOpacity={0.3}
+                      lightOpacity={0.18}
+                      objectPosition="center 40%"
+                    />
+                  )}
+                  <div className="relative">
+                    <div className="font-mono text-sm text-steel">{s.n}</div>
+                    <h3 className="mt-3 font-display text-lg font-medium text-hi">{s.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-mid">{s.body}</p>
+                  </div>
                 </Card>
               </Reveal>
             ))}
@@ -301,7 +340,12 @@ export default async function LandingPage() {
         <div className="border-t border-hairline">
           <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-2 px-4 py-5 text-xs text-low sm:flex-row sm:items-center sm:px-6">
             <span>Settled on Arc in USDC · Circle Gateway nanopayments · x402</span>
-            <span>© {new Date().getFullYear()} Sluice</span>
+            <span className="flex items-center gap-3">
+              <a href="https://x.com/sluiceflow" target="_blank" rel="noreferrer" className="text-mid hover:text-hi">
+                @sluiceflow
+              </a>
+              <span>© {new Date().getFullYear()} Sluice</span>
+            </span>
           </div>
         </div>
       </footer>

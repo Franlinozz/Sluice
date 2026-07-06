@@ -6,6 +6,7 @@ import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
 import { Term } from "@/components/glossary";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { WithdrawPanel } from "@/components/treasury/withdraw-panel";
+import { EditorialMedia } from "@/components/media/editorial-media";
 
 export const metadata = { title: "Treasury" };
 export const dynamic = "force-dynamic";
@@ -72,6 +73,26 @@ export default async function TreasuryPage() {
 
       {bal && (
         <Section title="Withdraw" hint="Gateway Minter · instant Arc / cross-chain">
+          <Card className="mb-4 grid grid-cols-1 overflow-hidden p-0 md:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
+            <EditorialMedia
+              src="/media/editorial/app/treasury/treasury-withdrawal-wallet.webp"
+              alt="A lockbox, a release slip and a leather wallet — funds leaving custody"
+              variant="split"
+              darkOpacity={0.72}
+              lightOpacity={0.92}
+              objectPosition="center 55%"
+              sizes="(max-width: 768px) 100vw, 300px"
+              className="min-h-36"
+            />
+            <div className="flex flex-col justify-center gap-1.5 p-5">
+              <div className="font-display text-sm font-medium text-hi">Your earnings, out of the box.</div>
+              <p className="text-xs leading-relaxed text-mid">
+                Withdrawing materializes your Gateway balance on-chain via the Gateway Minter — an
+                instant mint on Arc, or cross-chain to another testnet. The balance figures on this
+                page are always read live from Gateway, never from an image.
+              </p>
+            </div>
+          </Card>
           <WithdrawPanel available={bal.gateway.formattedAvailable} chains={chains ?? []} />
         </Section>
       )}
