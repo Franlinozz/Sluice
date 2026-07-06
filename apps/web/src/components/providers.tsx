@@ -4,8 +4,6 @@ import * as React from "react";
 import { WagmiProvider, type State } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppKit } from "@reown/appkit/react";
-import { Toaster } from "sonner";
-import { TooltipProvider } from "@sluice/ui";
 import {
   appKitNetworks,
   appMetadata,
@@ -57,22 +55,7 @@ export function Providers({
 }) {
   return (
     <WagmiProvider config={wagmiConfig} initialState={initialState}>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider delayDuration={200} skipDelayDuration={300}>
-          {children}
-        </TooltipProvider>
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: "var(--surface-2)",
-              color: "var(--text-hi)",
-              border: "1px solid var(--border-emphasis)",
-              borderRadius: "10px",
-            },
-          }}
-        />
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiProvider>
   );
 }

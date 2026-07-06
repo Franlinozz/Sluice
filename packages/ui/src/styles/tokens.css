@@ -141,7 +141,7 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: url("/brand/texture-dots.webp");
+  /* background-image is applied on idle by TextureLayer (kept off the LCP critical path) */
   background-repeat: repeat;
   background-size: 1100px auto;
   transform: translateZ(0);
@@ -193,4 +193,24 @@
 /* smooth in-page anchors (docs TOC) — off under reduced motion */
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
+}
+
+
+/* ── Unit-tile line-art hover (R3): the icon strokes redraw themselves ── */
+@keyframes sluice-draw {
+  from { stroke-dasharray: 64; stroke-dashoffset: 64; }
+  to { stroke-dasharray: 64; stroke-dashoffset: 0; }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .unit-tile:hover .unit-icon path,
+  .unit-tile:hover .unit-icon circle,
+  .unit-tile:hover .unit-icon line,
+  .unit-tile:hover .unit-icon polyline,
+  .unit-tile:hover .unit-icon rect {
+    animation: sluice-draw 0.7s ease-out both;
+  }
+}
+.unit-tile { transition: transform 0.18s ease; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .unit-tile:hover { transform: translateY(-2px); }
 }

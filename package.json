@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@types/pdfkit": "^0.17.6",
+    "lighthouse": "^13.4.0",
     "opentype.js": "^2.0.0",
     "pdfkit": "^0.19.1",
     "playwright": "^1.61.1",

@@ -1,5 +1,6 @@
 import { ArrowUpRight, ShieldCheck } from "lucide-react";
-import { Card, Pill } from "@sluice/ui";
+import { Card, Pill, PulseDot } from "@sluice/ui";
+import { CopyRef } from "./copy-ref";
 
 export interface VerifyAnchor {
   label: string;
@@ -26,8 +27,9 @@ export function VerifyReceipt({ data, anchors }: { data: VerifyReceiptData | nul
     <Card className="flex flex-col gap-5 p-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="size-4 text-settled" />
+          <PulseDot active />
           <span className="text-sm font-medium text-hi">Latest settlement</span>
+          <ShieldCheck className="size-4 text-settled" />
         </div>
         <Pill tone="settled" dot>
           settled
@@ -55,7 +57,9 @@ export function VerifyReceipt({ data, anchors }: { data: VerifyReceiptData | nul
           {data.settlementRef[0] && (
             <div className="rounded-[10px] border border-hairline bg-surface-1 p-3">
               <div className="text-xs text-low">Circle Gateway transfer ID — re-checkable via the Gateway API</div>
-              <div className="mt-1 break-all font-mono text-xs text-mid">{data.settlementRef[0]}</div>
+              <div className="mt-1.5">
+                <CopyRef value={data.settlementRef[0]} />
+              </div>
             </div>
           )}
         </>

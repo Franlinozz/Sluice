@@ -1,10 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
-import { cookieToInitialState } from "wagmi";
-import { wagmiConfig } from "@/lib/wagmi";
 import { fontVariables } from "@/lib/fonts";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Providers } from "@/components/providers";
+import { UiProviders } from "@/components/ui-providers";
+import { TextureLayer } from "@/components/texture-layer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -46,17 +44,13 @@ export const viewport: Viewport = {
   colorScheme: "dark light",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // SSR-safe wagmi hydration from cookies (CLAUDE.md anticipated bugs · Wallet/SSR).
-  const cookie = (await headers()).get("cookie");
-  const initialState = cookieToInitialState(wagmiConfig, cookie);
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
       <body className="min-h-dvh bg-canvas font-sans text-hi antialiased">
-        <div aria-hidden className="texture-layer" />
+        <TextureLayer />
         <ThemeProvider>
-          <Providers initialState={initialState}>{children}</Providers>
+          <UiProviders>{children}</UiProviders>
         </ThemeProvider>
       </body>
     </html>

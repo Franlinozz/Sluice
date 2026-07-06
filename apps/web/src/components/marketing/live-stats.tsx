@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Activity } from "lucide-react";
+import { PulseDot } from "@sluice/ui";
 import type { Kpis } from "@/lib/api";
 
 interface Stat {
@@ -90,10 +91,7 @@ export function LiveStats({ initial }: { initial: Kpis | null }) {
   return (
     <div className="rounded-card border border-hairline bg-surface-1/40">
       <div className="flex items-center gap-2 border-b border-hairline px-5 py-2.5">
-        <span className="relative flex size-2">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-settled opacity-60" />
-          <span className="relative inline-flex size-2 rounded-full bg-settled" />
-        </span>
+        <PulseDot active />
         <span className="text-xs text-mid">Live from Sluice — refreshed every minute</span>
         <Activity className="ml-auto size-3.5 text-low" />
       </div>

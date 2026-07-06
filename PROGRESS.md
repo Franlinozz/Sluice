@@ -188,3 +188,24 @@ rate-limited; spendLimit defined near top (TDZ-safe). FundingPool in deployed.js
   landing Reveal staggers (unit tiles, steps, economy viz, verify card); /app/_dev/tokens Motion
   group. PERF GATE: CLS 0.0000-0.0005 on / /app /app/meter /app/settlements; long tasks = hydration
   only; all animations transform/opacity. Audit ZERO defects. Reduced-motion: every primitive static.
+
+- **Phase R3** (landing rebuild — the living-logo hero): components/marketing/hero-flow.tsx —
+  canvas 2D rAF (NO three.js): full-width luminous pipe, 160-340 particles riding 12 converging
+  trace-lanes (the banner motif animated), the REAL potrace glyph as the gate (Path2D from
+  logo-paths; potrace space = translate(0,1254) scale(0.1,-0.1)), meter pulse every ~22 particles →
+  glyph flow-flash + discrete settled drops exiting right with fading receipt ticks; floaters show
+  REAL recent receipt amounts; sprite glows (no shadowBlur), DPR≤2, pause on hidden/off-screen,
+  theme observer, scroll parallax (compositor transform). Reduced-motion/pre-hydration = designed
+  static SVG schematic w/ latest real settlement printed (HeroSchematic). Hero layout: centered
+  thesis "Make the smallest unit sellable." + full-bleed canvas band. Ask module: staggered citation
+  entrances + per-citation RECEIPT strip (paid $x → author, on-chain tx or Gateway-attested link) +
+  CountUp total. EconomyViz v2: 7-day window w/ honest all-time fallback (never empty), 12s poll
+  diffs NEW settled receipt ids → REAL bright pulses + "live — just settled" status; ambient history
+  replay when quiet ("quiet right now"); labeled columns; measured label truncation. VerifyReceipt:
+  PulseDot + copy-able Circle ref (CopyRef). Unit tiles: line-art draw-in hover (sluice-draw).
+  PERF: wallet stack (wagmi+AppKit) SPLIT OUT of marketing — Providers now mounts under /app only
+  (root layout = UiProviders: toasts+tooltips; console layout does cookie hydration); marketing
+  header drops the Connect button; texture bg applied on idle (TextureLayer) off the LCP path.
+  LIGHTHOUSE: desktop 99 (TBT 0ms, LCP 0.8s, CLS 0) ✓ DoD; mobile-emulated 70 on this shared VPS
+  (was 47) — remaining gap is the 4x-throttled starved vCPU, not app weight (32KB chunk "6.2s").
+  Both themes screenshot-verified; audit ZERO defects. Old HeroMeter deleted.

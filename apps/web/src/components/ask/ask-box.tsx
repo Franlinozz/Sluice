@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { ArrowUpRight, Search, Sparkles } from "lucide-react";
-import { AddressChip, AmountMono, Badge, Button, Card, cn } from "@sluice/ui";
+import { ArrowUpRight, ReceiptText, Search, Sparkles } from "lucide-react";
+import { AddressChip, AmountMono, Badge, Button, Card, cn, CountUp, PulseDot, Skeleton } from "@sluice/ui";
 import { runResearchAction } from "@/lib/actions";
 import type { ResearchResultDTO } from "@/lib/api";
 
@@ -73,10 +73,15 @@ export function AskBox() {
 
       {pending && (
         <Card className="p-5">
-          <p className="text-sm text-mid">
-            The agent is reasoning over registered sources and paying the per-citation toll to each
-            one it grounds in… (real USDC settlement on Arc)
+          <p className="flex items-center gap-2 text-sm text-mid">
+            <PulseDot active />
+            Reasoning over registered sources — paying the per-citation toll to each one it grounds
+            in (real USDC on Arc)…
           </p>
+          <div className="mt-4 flex flex-col gap-2">
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-4/5" />
+          </div>
         </Card>
       )}
 
@@ -90,7 +95,13 @@ export function AskBox() {
               Citations · each is a real settlement ({result.mode})
             </div>
             <span className="text-xs text-low">
-              total paid <AmountMono value={result.formattedTotalPaid} size="xs" />
+              total paid{" "}
+              <CountUp
+                value={Number(result.totalPaid) / 1e6}
+                prefix="$"
+                decimals={6}
+                className="text-hi"
+              />
             </span>
           </div>
 
@@ -100,10 +111,11 @@ export function AskBox() {
             </p>
           ) : (
             <ol className="mt-3 flex flex-col gap-3">
-              {result.citations.map((c) => (
+              {result.citations.map((c, ci) => (
                 <li
                   key={c.marker}
-                  className="rounded-[10px] border border-hairline bg-surface-1 p-4"
+                  className="rounded-[10px] border border-hairline bg-surface-1 p-4 motion-safe:animate-[sluice-row-enter_0.4s_ease-out_both]"
+                  style={{ animationDelay: `${ci * 160}ms` }}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
@@ -157,6 +169,27 @@ export function AskBox() {
                       ))}
                     </div>
                   )}
+                  {/* the receipt: this citation IS a settlement — show its proof inline */}
+                  <div
+                    className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-hairline pt-2.5 text-xs motion-safe:animate-[sluice-pop_0.4s_ease-out_both]"
+                    style={{ animationDelay: `${450 + ci * 180}ms` }}
+                  >
+                    <span className="inline-flex items-center gap-1.5 font-medium" style={{ color: "var(--settled)" }}>
+                      <ReceiptText className="size-3.5" /> receipt
+                    </span>
+                    <span className="font-mono text-mid">
+                      paid {c.formattedAmount} → {c.author ?? c.resourceName}
+                    </span>
+                    {c.explorerUrl ? (
+                      <a href={c.explorerUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 text-steel hover:underline">
+                        on-chain tx <ArrowUpRight className="size-3" />
+                      </a>
+                    ) : (
+                      <a href="/app/settlements" className="inline-flex items-center gap-0.5 text-steel hover:underline">
+                        Gateway-attested · view in Settlements <ArrowUpRight className="size-3" />
+                      </a>
+                    )}
+                  </div>
                 </li>
               ))}
             </ol>

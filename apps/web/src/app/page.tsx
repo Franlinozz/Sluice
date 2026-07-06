@@ -14,7 +14,7 @@ import { Button, Card, Horizon, Logo, LiveDot, Reveal } from "@sluice/ui";
 import { arcConfig, explorerAddressUrl } from "@sluice/chain";
 import { sluiceApi } from "@/lib/api";
 import { SiteHeader } from "@/components/marketing/site-header";
-import { HeroMeter } from "@/components/marketing/hero-meter";
+import { HeroFlow } from "@/components/marketing/hero-flow";
 import { LiveStats } from "@/components/marketing/live-stats";
 import { EconomyViz } from "@/components/marketing/economy-viz";
 import { VerifyReceipt, type VerifyReceiptData, type VerifyAnchor } from "@/components/marketing/verify-receipt";
@@ -86,18 +86,18 @@ export default async function LandingPage() {
       <SiteHeader />
 
       <main className="flex-1">
-        {/* ── Hero ─────────────────────────────────────────────── */}
-        <section className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
-          <div>
+        {/* ── Hero: the logo itself, alive ─────────────────────── */}
+        <section className="relative overflow-hidden">
+          <div className="mx-auto max-w-4xl px-4 pt-16 text-center sm:px-6 sm:pt-24">
             <p className="eyebrow">Arc · Circle · x402 · Gateway nanopayments</p>
-            <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.04] tracking-tight text-hi sm:text-5xl lg:text-[3.4rem]">
-              Make the smallest unit sellable — for humans and machines, settled on Arc.
+            <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.03] tracking-tight text-hi sm:text-6xl">
+              Make the smallest unit sellable.
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-mid sm:text-lg">
-              A read, a second, a citation, a listen, a call — metered and settled on Arc in USDC.
-              Creators get paid per use. Agents pay per use, and decide for themselves.
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-mid sm:text-lg">
+              A read, a second, a citation — metered and settled on Arc in USDC, for humans and
+              machines alike.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg">
                 <Link href="/app/earn">
                   Start earning <ArrowRight className="size-4" />
@@ -107,7 +107,7 @@ export default async function LandingPage() {
                 <Link href="/app/spend">Run a paying agent</Link>
               </Button>
             </div>
-            <p className="mt-6 flex flex-wrap items-center gap-1.5 text-xs text-low">
+            <p className="mt-6 flex flex-wrap items-center justify-center gap-1.5 text-xs text-low">
               <ShieldCheck className="size-3.5 text-settled" />
               Live on Arc testnet · {kpis ? `$${(Number(kpis.totalSettled) / 1e6).toFixed(6)}` : "$0.00"} settled so
               far —{" "}
@@ -122,17 +122,14 @@ export default async function LandingPage() {
             </p>
           </div>
 
-          <div className="relative">
-            <Card className="relative overflow-hidden">
-              <div className="absolute left-5 top-5 z-10">
-                <p className="eyebrow">the sluice</p>
-              </div>
-              <HeroMeter className="h-[340px] w-full sm:h-[400px]" />
-              <div className="pointer-events-none absolute bottom-5 right-5 z-10 text-right">
-                <p className="font-mono text-xs text-low">metered → gated → settled</p>
-              </div>
-            </Card>
-          </div>
+          {/* the living schematic — value flows in, the gate meters it, receipts settle out */}
+          <HeroFlow
+            receipts={(receipts ?? [])
+              .filter((r) => r.status === "settled")
+              .slice(0, 8)
+              .map((r) => ({ formattedAmount: r.formattedAmount, unitType: r.unitType }))}
+            className="mt-2 h-[300px] w-full sm:h-[380px]"
+          />
         </section>
 
         {/* ── Live REAL stats ──────────────────────────────────── */}
@@ -151,8 +148,8 @@ export default async function LandingPage() {
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {UNITS.map((u, i) => (
               <Reveal key={u.label} delay={i * 60}>
-                <div className="flex flex-col items-center gap-3 rounded-card border border-hairline bg-surface-1/40 px-4 py-6 text-center">
-                  <u.icon className="size-6 text-steel" strokeWidth={1.25} />
+                <div className="unit-tile flex flex-col items-center gap-3 rounded-card border border-hairline bg-surface-1/40 px-4 py-6 text-center">
+                  <u.icon className="unit-icon size-6 text-steel" strokeWidth={1.25} />
                   <span className="font-mono text-xs text-mid">{u.label}</span>
                 </div>
               </Reveal>

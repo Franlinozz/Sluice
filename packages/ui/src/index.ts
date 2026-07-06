@@ -30,6 +30,7 @@ export {
 } from "./primitives/network-badge.tsx";
 export { AddressChip, type AddressChipProps } from "./primitives/address-chip.tsx";
 export { Logo, LogoMark } from "./primitives/logo.tsx";
+export { GLYPH_VIEWBOX, GLYPH_G } from "./primitives/logo-paths.ts";
 export { Input, Label } from "./primitives/input.tsx";
 export { Switch } from "./primitives/switch.tsx";
 
