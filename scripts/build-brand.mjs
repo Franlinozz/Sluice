@@ -244,8 +244,16 @@ export const WORDMARK_CAP = ${word.capHeight.toFixed(2)};
   // ── favicons ────────────────────────────────────────────────────────────────
   const tile = async (size, radius) => {
     const glyphBuf = await (await glyphPng(mask, PAPER, 0.02)).toBuffer();
-    const inner = Math.round(size * 0.62);
-    const resized = await sharp(glyphBuf).resize({ width: inner, height: inner, fit: "inside" }).toBuffer();
+    // The full mark is very wide (gate + rail arms), which left the gate tiny at favicon
+    // sizes. Crop to the central gate (its width ≈ 1.15× its height, centered) so the
+    // recognizable shape fills the tile.
+    const gm = await sharp(glyphBuf).metadata();
+    const cropW = Math.min(gm.width, Math.round(gm.height * 1.15));
+    const cropped = await sharp(glyphBuf)
+      .extract({ left: Math.round((gm.width - cropW) / 2), top: 0, width: cropW, height: gm.height })
+      .toBuffer();
+    const inner = Math.round(size * 0.72);
+    const resized = await sharp(cropped).resize({ width: inner, height: inner, fit: "inside" }).toBuffer();
     const rm = await sharp(resized).metadata();
     const rrect = Buffer.from(
       `<svg width="${size}" height="${size}"><rect width="${size}" height="${size}" rx="${radius}" fill="#0b0c0e"/></svg>`,
