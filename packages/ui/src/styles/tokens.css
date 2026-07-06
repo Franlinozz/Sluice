@@ -10,16 +10,16 @@
 
 :root,
 [data-theme="dark"] {
-  /* surfaces */
-  --canvas: #0a0a0b;
-  --surface-1: #111113;
-  --surface-2: #17181b;
-  --surface-3: #1f2024;
-  --terminal: #070708;
+  /* surfaces — ash graphite: lifted off pure-black so the theme reads grey, not void */
+  --canvas: #15161a;
+  --surface-1: #1c1d22;
+  --surface-2: #22242a;
+  --surface-3: #2a2c33;
+  --terminal: #101114;
 
   /* borders */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-emphasis: #2a2c31;
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-emphasis: #363941;
 
   /* text */
   --text-hi: #f4f5f6;
@@ -28,7 +28,7 @@
 
   /* accents (used sparingly) */
   --signal: #e8eaed; /* CTA / active — cold near-platinum */
-  --signal-contrast: #0a0a0b; /* text/icon ON the signal accent */
+  --signal-contrast: #101114; /* text/icon ON the signal accent */
   --steel: #9da7b3; /* links / active-nav */
   /* Glacial "flow" accent (design v2) — ONLY for: live dots, flowing particles, meter ticks,
      link hover, primary-CTA hover glow, settled pulse. Everything else stays greyscale. */
@@ -148,13 +148,12 @@
   /* vignette: keep the content zone clean, let depth breathe at the edges */
   mask-image: radial-gradient(ellipse 80% 70% at 50% 42%, transparent 28%, black 80%);
   -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 42%, transparent 28%, black 80%);
-  /* dark (default): inverted dots at whisper opacity. NO mix-blend-mode — blend modes force a
-     full-viewport recomposite every animation frame (kills software rasterizers); at these
-     opacities plain alpha is visually identical. */
-  filter: invert(1);
-  opacity: 0.05;
+  /* dark (default): NO texture at all — the ash surfaces carry the depth themselves; the
+     halftone read as noise against the lifted greys. Light (Marble) keeps it. */
+  display: none;
 }
 [data-theme="light"] .texture-layer {
+  display: block;
   filter: none;
   opacity: 0.5;
 }
