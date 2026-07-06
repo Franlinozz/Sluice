@@ -4,10 +4,11 @@ import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAccount } from "wagmi";
-import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { Button, Card, PulseDot, cn } from "@sluice/ui";
 import { WalletButton } from "@/components/wallet/wallet-button";
 import { useProfile } from "@/components/people/use-profile";
+import { FaucetClaim } from "@/components/people/faucet-claim";
 
 /**
  * /join (R5): zero → first real receipt in ~3 minutes. Steps auto-check from real state (wallet,
@@ -65,14 +66,8 @@ function JoinInner() {
     {
       title: "Get testnet USDC",
       done: (balances?.wallet ?? 0) > 0,
-      body: "Circle's faucet, free — pick “Arc Testnet”, paste your address.",
-      action: (
-        <Button asChild size="sm" variant="secondary">
-          <a href="https://faucet.circle.com" target="_blank" rel="noreferrer">
-            Open faucet <ArrowUpRight className="size-3.5" />
-          </a>
-        </Button>
-      ),
+      body: "One click — a real on-chain transfer, one claim per person.",
+      action: <FaucetClaim />,
     },
     {
       title: "Deposit into your spending balance",

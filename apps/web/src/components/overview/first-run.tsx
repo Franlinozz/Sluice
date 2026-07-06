@@ -74,9 +74,8 @@ export function FirstRunChecklist() {
     {
       done: (balances?.wallet ?? 0) > 0,
       label: "Get testnet USDC",
-      href: "https://faucet.circle.com",
-      external: true,
-      hint: "Circle's faucet — pick “Arc Testnet”, paste your address.",
+      href: "/join",
+      hint: "Claim $0.25 from the built-in faucet on the join page — one click, real on-chain transfer.",
     },
     {
       done: (balances?.gateway ?? 0) > 0,

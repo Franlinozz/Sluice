@@ -64,6 +64,13 @@
       "when": 1783326774639,
       "tag": "0008_windy_firedrake",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1783356314461,
+      "tag": "0009_brave_magneto",
+      "breakpoints": true
     }
   ]
 }

@@ -267,8 +267,33 @@ export const profileWallets = sqliteTable(
   (t) => [index("profile_wallets_profile").on(t.profileId)],
 );
 
+/**
+ * Faucet (rule 16 aware): ONE claim per HUMAN (profile). Linked wallets share the claim — the
+ * uniqueness checks run against both the profile and the wallet. Every claim is a real on-chain
+ * transfer from the operator wallet; txHash links to Arcscan.
+ */
+export const faucetClaims = sqliteTable(
+  "faucet_claims",
+  {
+    id: text("id").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id),
+    /** lowercase 0x recipient */
+    wallet: text("wallet").notNull(),
+    /** 6dp USDC base units, as string. */
+    amount: text("amount").notNull(),
+    txHash: text("tx_hash").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+  },
+  (t) => [index("faucet_claims_profile").on(t.profileId), index("faucet_claims_wallet").on(t.wallet)],
+);
+
 export type Profile = typeof profiles.$inferSelect;
 export type ProfileWallet = typeof profileWallets.$inferSelect;
+export type FaucetClaim = typeof faucetClaims.$inferSelect;
 
 export type Feed = typeof feeds.$inferSelect;
 export type Research = typeof research.$inferSelect;

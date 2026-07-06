@@ -67,6 +67,7 @@ import {
   walletsOf,
 } from "./people/profiles.ts";
 import { computeStats } from "./people/stats.ts";
+import { claimFaucet, faucetStatus } from "./people/faucet.ts";
 import { listPartners, registerPartnerEndpoint } from "./partners/partners.ts";
 import type { Agent, Decision, Receipt, Resource, Run } from "./db/schema.ts";
 
@@ -834,6 +835,26 @@ app.post("/profiles/:id/wallets", async (req, reply) => {
   const res = linkWallet(id, b.wallet);
   if (!res.ok) return reply.code(400).send({ error: res.error });
   return serializeProfile(profileById(id)!);
+});
+
+app.get("/faucet/status", async (req, reply) => {
+  const q = req.query as { profileId?: string; wallet?: string };
+  if (!q.profileId || !q.wallet || !ADDR_RE.test(q.wallet)) {
+    return reply.code(400).send({ error: "profileId and a valid wallet are required" });
+  }
+  return faucetStatus(q.profileId, q.wallet);
+});
+
+app.post("/faucet/claim", spendLimit, async (req, reply) => {
+  const b = (req.body ?? {}) as { profileId?: string; wallet?: string };
+  if (!b.profileId || !b.wallet || !ADDR_RE.test(b.wallet)) {
+    return reply.code(400).send({ error: "profileId and a valid wallet are required" });
+  }
+  try {
+    return await claimFaucet(b.profileId, b.wallet);
+  } catch (err) {
+    return reply.code(500).send({ error: err instanceof Error ? err.message : String(err) });
+  }
 });
 
 app.get("/community", async () => communityProfiles());
