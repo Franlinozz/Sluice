@@ -3,6 +3,7 @@ import { AddressChip, AmountMono, Card, CountUp, DataRow, StatusPill } from "@sl
 import { explorerAddressUrl } from "@sluice/chain";
 import { sluiceApi } from "@/lib/api";
 import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
+import { Term } from "@/components/glossary";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { WithdrawPanel } from "@/components/treasury/withdraw-panel";
 
@@ -18,7 +19,12 @@ export default async function TreasuryPage() {
       <PageHeader
         eyebrow="Treasury"
         title="Treasury"
-        description="Your unified USDC balance in the Gateway with honest states — total, available, withdrawing, withdrawable. Withdrawals mint USDC on-chain (Arcscan-linkable)."
+        description={
+          <>
+            Your balance, and real withdrawals to your own wallet — instantly on Arc, or out to
+            other chains. Tiny payments arrive here via <Term k="batch-settlement">batch settlement</Term>.
+          </>
+        }
       />
 
       {bal === null ? (

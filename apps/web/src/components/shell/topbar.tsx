@@ -16,6 +16,7 @@ import { useArcStatus } from "@/components/wallet/use-arc-status";
 import { WalletButton } from "@/components/wallet/wallet-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CommandMenu } from "./command-menu";
+import { TourButton } from "@/components/tour/tour";
 import { NavLink } from "./sidebar";
 
 export function Topbar() {
@@ -31,6 +32,7 @@ export function Topbar() {
 
       <div className="ml-auto flex items-center gap-2">
         <CommandMenu />
+        <TourButton />
         <NetworkBadge name="Arc Testnet" status={status} className="hidden sm:inline-flex" />
         <ThemeToggle />
         <WalletButton />

@@ -83,7 +83,7 @@ export default async function EarnPage() {
       <PageHeader
         eyebrow="Earn · Creator Studio"
         title="Creator Studio"
-        description="Register content as a priced, citable resource. AI agents pay you per citation, settled on Arc. Generate an RSL/llms.txt policy and an embeddable pay-per-cite badge."
+        description="Put a price on your work — an article, a feed, a stream — and get paid every time it's used. AI agents pay you per citation, settled on Arc."
       />
 
       <RssForm />

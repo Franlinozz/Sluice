@@ -22,7 +22,7 @@ export function RegisterForm() {
   const formRef = React.useRef<HTMLFormElement>(null);
 
   return (
-    <Card className="p-6">
+    <Card className="p-6" data-tour="earn">
       <div className="eyebrow mb-4">Register a resource</div>
       <form
         ref={formRef}

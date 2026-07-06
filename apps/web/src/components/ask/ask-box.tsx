@@ -26,12 +26,15 @@ export function AskBox() {
         return;
       }
       setResult(res.data!);
+      try {
+        localStorage.setItem("sluice-asked", "1"); // first-run checklist: real action, honestly tracked per browser
+      } catch {}
     });
   };
 
   return (
     <div className="flex flex-col gap-5">
-      <Card className="p-5">
+      <Card className="p-5" data-tour="ask">
         <form
           onSubmit={(e) => {
             e.preventDefault();

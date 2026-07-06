@@ -73,7 +73,7 @@ const VIEWPORTS = [
 ] as const;
 
 /** Third-party hosts whose console/network noise is recorded as info, not a defect. */
-const THIRD_PARTY = /walletconnect|web3modal|reown|pulse\.|relay\.|coinbase|vercel-insights|vitals/i;
+const THIRD_PARTY = /walletconnect|web3modal|reown|pulse\.|relay\.|coinbase|vercel-insights|vitals|Analytics SDK/i;
 
 type Severity = "high" | "medium" | "low" | "info";
 interface Defect {
@@ -378,6 +378,8 @@ async function main() {
           ? "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
           : undefined,
     });
+    // pre-seed: the audit exercises the base UI; the tour has its own keyboard/a11y path via "?"
+    await ctx.addInitScript(() => localStorage.setItem("sluice-tour-done", "1"));
     for (const route of routes) {
       const page = await preparePage(ctx, route, vp.name);
       try {

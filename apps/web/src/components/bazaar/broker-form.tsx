@@ -110,7 +110,7 @@ export function BrokerForm({ resources }: { resources: BrokerResourceOption[] })
         <p className="text-xs text-low">Posts a real bond on Arc — gas + capital move on-chain.</p>
         <Button size="sm" onClick={submit} disabled={pending}>
           {pending ? <Loader2 className="size-4 animate-spin" /> : <Handshake className="size-4" />}
-          {pending ? "Posting bond…" : "Post bond & hire"}
+          {pending ? "Staking…" : `Stake $${bond || "0.02"} behind this job`}
         </Button>
       </div>
     </Card>

@@ -7,6 +7,7 @@ import { PageHeader, EmptyState } from "@/components/shell/page-parts";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { SettleButton } from "@/components/settlements/settle-button";
 import { VerifyButton } from "@/components/settlements/verify-button";
+import { MarkReceiptsVisited } from "@/components/settlements/mark-visited";
 
 export const metadata = { title: "Settlements · Explorer" };
 export const dynamic = "force-dynamic";
@@ -39,10 +40,11 @@ export default async function SettlementsPage() {
   return (
     <div className="flex flex-col gap-8">
       <AutoRefresh />
+      <MarkReceiptsVisited />
       <PageHeader
         eyebrow="Settlements · Explorer"
         title="Settlement Explorer"
-        description="Every batch, every receipt — resource, units, rate, amount — with honest authorized → batching → settled states. Don't trust the numbers; verify them."
+        description="Every payment ever made here, with its receipt. Don't take our word for any of them — verify each one yourself."
         actions={receipts && receipts.length > 0 ? <SettleButton /> : undefined}
       />
 
@@ -91,7 +93,7 @@ export default async function SettlementsPage() {
           </div>
 
           {/* Desktop: full table */}
-          <Card className="hidden overflow-hidden p-0 md:block">
+          <Card className="hidden overflow-hidden p-0 md:block" data-tour="verify">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>

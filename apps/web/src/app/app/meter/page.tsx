@@ -3,6 +3,7 @@ import { AlertTriangle, Radio } from "lucide-react";
 import { Card } from "@sluice/ui";
 import { sluiceApi } from "@/lib/api";
 import { PageHeader, EmptyState } from "@/components/shell/page-parts";
+import { Term } from "@/components/glossary";
 import { StartStream } from "@/components/meter/start-stream";
 import { sanitizeLabel } from "@/lib/sanitize";
 
@@ -18,7 +19,13 @@ export default async function MeterIndexPage() {
       <PageHeader
         eyebrow="Streams · Live Meter"
         title="Streaming meter"
-        description="Continuous per-second payments with proof-of-flow. Start a session, watch value accrue live, pause/resume, and settle on stop — no charge for dead air."
+        description={
+          <>
+            Pay for streams by the second — and only while they&apos;re actually flowing (
+            <Term k="proof-of-flow">proof of flow</Term>). Stop any time; you&apos;re never charged
+            for dead air.
+          </>
+        }
       />
 
       {resources === null ? (

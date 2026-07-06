@@ -21,7 +21,7 @@ export default async function DiscoverPage() {
       <PageHeader
         eyebrow="Discover · Bazaar"
         title="Bazaar"
-        description="The open marketplace for the agent-paid web. Browse priced resources, hire providers who put real capital behind delivery, and read reputation as money — not a self-reported score."
+        description="Everything with a price on it, in one place. Hire providers who stake real money on delivering — reputation you can read as money, not stars."
       />
 
       {/* Verified contracts on Arcscan */}

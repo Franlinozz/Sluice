@@ -21,7 +21,7 @@ export default async function FundingPage() {
       <PageHeader
         eyebrow="Funding · Quadratic matching"
         title="Retroactive funding pool"
-        description="The pool matches the breadth of support, not its size — many small tips beat one big one. Sub-cent matches sweep to a long tail of creators in a single on-chain transaction."
+        description="A matching pool that rewards creators many people tip — lots of small supporters beat one big wallet. Matches pay out in a single on-chain sweep."
         actions={ready && f?.status === "open" ? <SettleButton disabled={!hasMatches} /> : undefined}
       />
 

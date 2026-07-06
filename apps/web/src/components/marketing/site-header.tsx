@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button, Logo } from "@sluice/ui";
 import { arcConfig } from "@sluice/chain";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TourButton } from "@/components/tour/tour";
 
 export function SiteHeader() {
   return (
@@ -31,6 +32,7 @@ export function SiteHeader() {
           </a>
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <TourButton className="hidden sm:grid" />
           <ThemeToggle />
           <Button asChild size="sm" variant="secondary">
             <Link href="/app">Open app</Link>

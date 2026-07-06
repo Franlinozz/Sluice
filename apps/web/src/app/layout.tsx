@@ -3,6 +3,7 @@ import { fontVariables } from "@/lib/fonts";
 import { ThemeProvider } from "@/components/theme-provider";
 import { UiProviders } from "@/components/ui-providers";
 import { TextureLayer } from "@/components/texture-layer";
+import { Tour } from "@/components/tour/tour";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -50,7 +51,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-dvh bg-canvas font-sans text-hi antialiased">
         <TextureLayer />
         <ThemeProvider>
-          <UiProviders>{children}</UiProviders>
+          <UiProviders>
+            {children}
+            <Tour />
+          </UiProviders>
         </ThemeProvider>
       </body>
     </html>

@@ -3,6 +3,7 @@ import { AlertTriangle, Cpu, ShieldCheck, ShieldX, ShieldAlert, Star, ExternalLi
 import { AddressChip, Card, DataRow, Pill } from "@sluice/ui";
 import { sluiceApi, type MatchDTO } from "@/lib/api";
 import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
+import { Term } from "@/components/glossary";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { ResolveButtons } from "@/components/bazaar/resolve-buttons";
 
@@ -28,7 +29,12 @@ export default async function AgentsPage() {
       <PageHeader
         eyebrow="Agents · Fleet & Reputation"
         title="Fleet & Reputation"
-        description="Reputation bonds — capital at risk, not a self-reported score. A broker posts a USDC bond behind each match; deliver and it's released, underdeliver and the arbiter slashes it to the buyer. Every move is on-chain."
+        description={
+          <>
+            Providers put real money behind their promises (a <Term k="bond">bond</Term>). Deliver
+            and it comes back; fall short and the buyer is compensated — all of it on-chain.
+          </>
+        }
         actions={
           <Link
             href="/app/discover#broker"

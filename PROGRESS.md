@@ -220,3 +220,20 @@ rate-limited; spendLimit defined near top (TDZ-safe). FundingPool in deployed.js
   live re-verify blocked by Vercel WAF IP-scoring of this VPS (repeated probe bursts keep the
   challenge hot; probes now reset it — STOP poking the domain from this box; verify live from a
   normal browser/IP). Parity fetches now send browser-grade headers for future runs.
+
+- **Phase R4** (comprehension layer): TOUR (components/tour/tour.tsx, root-mounted): 5 steps over
+  REAL surfaces (/app workspace → /app/earn register → /app/spend trace → /ask → /app/settlements),
+  spotlight = box-shadow cutout + flow ring, keyboard ←/→/Enter/Esc, localStorage sluice-tour-done,
+  auto-first-run on /app, relaunch via "?" (Topbar + SiteHeader). data-tour anchors on real elements.
+  FIRST-RUN CHECKLIST (overview/first-run.tsx): 5 real auto-checks — wagmi isConnected, wallet USDC
+  + Gateway available (via /api/sluice/gateway/balance), sluice-asked + sluice-receipt-viewed
+  localStorage flags (set by AskBox success + settlements MarkReceiptsVisited); faucet.circle.com
+  link; dismissible; hides when complete. PLAIN LANGUAGE: every console page description rewritten
+  jargon-free first sentence; glossary Term tooltips (components/glossary.tsx — gateway/x402/
+  citation-toll/bond/eip-3009/batch-settlement/proof-of-flow), first-use sprinkles; broker button →
+  "Stake $X behind this job". ASK PAGE: /research API now embeds per-row citations; recent-answers
+  feed (real paid citations w/ receipt links), 3-step strip, inviting empty state. SPEND: SessionCard
+  (collapsed summary rows, first expanded; Paid/Skipped/Capped filter chips w/ counts; sticky session
+  header top-16). OVERVIEW: KPI tiles deep-link w/ hover arrow; "How settlement works" = 4 line-art
+  MiniDiagrams + plain copy. Harness: pre-seeds tour-done; "Analytics SDK" (Reown telemetry) → 3rd
+  party class. Audit ZERO defects.

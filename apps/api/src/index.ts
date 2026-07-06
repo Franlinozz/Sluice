@@ -489,7 +489,22 @@ app.post("/research", spendLimit, async (req, reply) => {
   }
 });
 
-app.get("/research", async () => recentResearch());
+app.get("/research", async () =>
+  recentResearch().map((r) => {
+    const detail = getResearch(r.id);
+    return {
+      ...r,
+      formattedTotalPaid: formatUSD(BigInt(r.totalPaid)),
+      citations: (detail?.citations ?? []).map((c) => ({
+        resourceName: c.resourceName,
+        author: c.author,
+        formattedAmount: formatUSD(BigInt(c.amount)),
+        settlementType: c.settlementType,
+        explorerUrl: c.txHash && /^0x[0-9a-fA-F]{64}$/.test(c.txHash) ? explorerTxUrl(c.txHash) : null,
+      })),
+    };
+  }),
+);
 
 app.get("/research/:id", async (req, reply) => {
   const { id } = req.params as { id: string };

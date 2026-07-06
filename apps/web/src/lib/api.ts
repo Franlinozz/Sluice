@@ -286,7 +286,26 @@ export const sluiceApi = {
   treasuryChains: () => getJSON<WithdrawChainDTO[]>("/treasury/chains"),
   treasuryBalance: () => getJSON<GatewayBalanceDTO>("/treasury/balance"),
   funding: () => getJSON<FundingDTO>("/funding"),
+  recentAnswers: () => getJSON<RecentAnswerDTO[]>("/research"),
 };
+
+export interface RecentAnswerDTO {
+  id: string;
+  question: string;
+  answer: string;
+  mode: "live" | "mock";
+  citationCount: number;
+  totalPaid: string;
+  formattedTotalPaid: string;
+  createdAt: string;
+  citations: {
+    resourceName: string;
+    author: string | null;
+    formattedAmount: string;
+    settlementType: "gateway" | "onchain";
+    explorerUrl: string | null;
+  }[];
+}
 
 export interface WithdrawChainDTO {
   name: string;
