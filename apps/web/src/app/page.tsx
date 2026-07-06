@@ -100,7 +100,7 @@ export default async function LandingPage() {
                 fill
                 sizes="100vw"
                 draggable={false}
-                className="object-cover object-[center_top]"
+                className="object-cover object-center"
               />
               <div className="hero-photo-scrim" />
             </div>
