@@ -1,4 +1,4 @@
-# DEFECTS — site-audit 2026-07-06T06:22:52.939Z
+# DEFECTS — site-audit 2026-07-06T07:16:29.229Z
 
 Base: http://localhost:3005 · routes: 27 · mode: desktop 1440x900 + mobile 390x844 · click-audit: on (safe mode — POSTs intercepted)
 

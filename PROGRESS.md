@@ -209,3 +209,10 @@ rate-limited; spendLimit defined near top (TDZ-safe). FundingPool in deployed.js
   LIGHTHOUSE: desktop 99 (TBT 0ms, LCP 0.8s, CLS 0) ✓ DoD; mobile-emulated 70 on this shared VPS
   (was 47) — remaining gap is the 4x-throttled starved vCPU, not app weight (32KB chunk "6.2s").
   Both themes screenshot-verified; audit ZERO defects. Old HeroMeter deleted.
+  R3 PERF ITERATION: hero split into LAYERED canvases — statics (lanes+pipe+ambient+base glyph)
+  painted ONCE to their own element; the rAF layer only clears+sprites (~2ms JS/frame). Particles
+  source-over (additive across full width kills software raster); texture layer's mix-blend-mode
+  REMOVED (blend modes force full-viewport recomposites every frame; plain alpha identical at 5%).
+  Measured on the GPU-less VPS (SwiftShader): mobile 60fps locked, desktop ~20fps raster-bound
+  (control: /docs 60fps, /?noanim 60fps → the gap is software compositing of a full-width animated
+  canvas, not app JS — real desktops composite on GPU). ?noanim debug switch kept.

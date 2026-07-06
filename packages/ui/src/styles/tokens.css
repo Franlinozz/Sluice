@@ -148,14 +148,14 @@
   /* vignette: keep the content zone clean, let depth breathe at the edges */
   mask-image: radial-gradient(ellipse 80% 70% at 50% 42%, transparent 28%, black 80%);
   -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 42%, transparent 28%, black 80%);
-  /* dark (default): inverted dots, screen-blended, whisper-level */
+  /* dark (default): inverted dots at whisper opacity. NO mix-blend-mode — blend modes force a
+     full-viewport recomposite every animation frame (kills software rasterizers); at these
+     opacities plain alpha is visually identical. */
   filter: invert(1);
-  mix-blend-mode: screen;
-  opacity: 0.055;
+  opacity: 0.05;
 }
 [data-theme="light"] .texture-layer {
   filter: none;
-  mix-blend-mode: multiply;
   opacity: 0.5;
 }
 

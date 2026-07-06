@@ -158,6 +158,7 @@ interface Floater {
 
 export function HeroFlow({ receipts, className }: { receipts: HeroReceipt[]; className?: string }) {
   const wrapRef = React.useRef<HTMLDivElement>(null);
+  const bgCanvasRef = React.useRef<HTMLCanvasElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [animated, setAnimated] = React.useState(false);
   const receiptsRef = React.useRef(receipts);
@@ -165,6 +166,7 @@ export function HeroFlow({ receipts, className }: { receipts: HeroReceipt[]; cla
 
   React.useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return; // static schematic stays
+    if (new URLSearchParams(window.location.search).has("noanim")) return; // perf bisect switch
     const canvas = canvasRef.current;
     const wrap = wrapRef.current;
     if (!canvas || !wrap) return;
@@ -176,12 +178,6 @@ export function HeroFlow({ receipts, className }: { receipts: HeroReceipt[]; cla
     let glowSoft = makeSprite(48, pal.dark ? pal.flowRgb : pal.steelRgb, 0.5);
     const glyphPath = new Path2D(GLYPH_D);
 
-    const themeObs = new MutationObserver(() => {
-      pal = readPalette();
-      glowFlow = makeSprite(64, pal.flowRgb, 0.85);
-      glowSoft = makeSprite(48, pal.dark ? pal.flowRgb : pal.steelRgb, 0.5);
-    });
-    themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
     let W = 0, H = 0, dpr = 1;
     const LANES = 12;
@@ -199,14 +195,89 @@ export function HeroFlow({ receipts, className }: { receipts: HeroReceipt[]; cla
         return Math.sign(t) * Math.pow(Math.abs(t), 1.25) * H * 0.26;
       });
     };
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(wrap);
 
     const cy = () => H * 0.5;
     const gateH = () => Math.min(H * 0.36, 132);
     const gateHalf = () => (gateH() / GVH) * GVW * 0.5;
     const convergeX = () => W / 2 - gateHalf() * 0.72;
+
+    // ── offscreen caches: rasterize the expensive statics ONCE per resize/theme ──
+    // (per-frame Path2D fills + polylines are what kill software-rendered canvases)
+    let bgCache: HTMLCanvasElement | null = null;
+    let glyphBase: HTMLCanvasElement | null = null;
+    let glyphFlash: HTMLCanvasElement | null = null;
+    const buildCaches = () => {
+      if (W < 4 || H < 4) return;
+      bgCache = document.createElement("canvas");
+      bgCache.width = Math.floor(W * dpr);
+      bgCache.height = Math.floor(H * dpr);
+      const bg = bgCache.getContext("2d")!;
+      bg.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const gateIn0 = W / 2 - gateHalf() * 0.7;
+      bg.lineWidth = 1;
+      bg.strokeStyle = `rgba(${pal.steelRgb},${pal.dark ? 0.09 : 0.13})`;
+      for (let l = 0; l < LANES; l++) {
+        bg.beginPath();
+        for (let x = 0; x <= gateIn0 + 4; x += 26) {
+          const y = laneY(l, x);
+          if (x === 0) bg.moveTo(x, y);
+          else bg.lineTo(x, y);
+        }
+        bg.stroke();
+      }
+      const grad = bg.createLinearGradient(0, 0, W, 0);
+      grad.addColorStop(0, `rgba(${pal.steelRgb},0.08)`);
+      grad.addColorStop(0.5, `rgba(${pal.steelRgb},${pal.dark ? 0.4 : 0.5})`);
+      grad.addColorStop(1, `rgba(${pal.steelRgb},0.08)`);
+      bg.strokeStyle = grad;
+      bg.beginPath();
+      bg.moveTo(0, cy());
+      bg.lineTo(W, cy());
+      bg.stroke();
+
+      const mkGlyph = (color: string) => {
+        const gh = gateH();
+        const gw = (gh / GVH) * GVW;
+        const c = document.createElement("canvas");
+        c.width = Math.ceil(gw * dpr) + 4;
+        c.height = Math.ceil(gh * dpr) + 4;
+        const g = c.getContext("2d")!;
+        g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        drawGlyph(g, glyphPath, gw / 2 + 2 / dpr, gh / 2 + 2 / dpr, gh, color, 1);
+        return c;
+      };
+      glyphBase = mkGlyph(pal.hi);
+      glyphFlash = mkGlyph(pal.flow);
+
+      // paint the static layer element once (bg canvas): lanes+pipe, ambient glow, base glyph
+      const bgEl = bgCanvasRef.current;
+      if (bgEl) {
+        bgEl.width = Math.floor(W * dpr);
+        bgEl.height = Math.floor(H * dpr);
+        const bctx = bgEl.getContext("2d")!;
+        bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        bctx.clearRect(0, 0, W, H);
+        bctx.drawImage(bgCache!, 0, 0, W, H);
+        if (pal.dark) {
+          bctx.globalAlpha = 0.10;
+          const amb = gateH() * 2.1;
+          bctx.drawImage(glowFlow, W / 2 - amb / 2, cy() - amb / 2, amb, amb);
+          bctx.globalAlpha = 1;
+        }
+        const gh = gateH();
+        const gw = (gh / GVH) * GVW;
+        bctx.globalAlpha = pal.dark ? 0.92 : 0.85;
+        bctx.drawImage(glyphBase, W / 2 - gw / 2 - 2 / dpr, cy() - gh / 2 - 2 / dpr, gw + 4 / dpr, gh + 4 / dpr);
+        bctx.globalAlpha = 1;
+      }
+    };
+    const blitGlyph = (img: HTMLCanvasElement, alpha: number) => {
+      const gh = gateH();
+      const gw = (gh / GVH) * GVW;
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(img, W / 2 - gw / 2 - 2 / dpr, cy() - gh / 2 - 2 / dpr, gw + 4 / dpr, gh + 4 / dpr);
+      ctx.globalAlpha = 1;
+    };
 
     const laneY = (lane: number, x: number) => {
       const cx0 = convergeX();
@@ -215,7 +286,23 @@ export function HeroFlow({ receipts, className }: { receipts: HeroReceipt[]; cla
       return cy() + laneOffsets[lane]! * ease;
     };
 
-    const COUNT = Math.max(160, Math.min(340, Math.floor(W / 4)));
+    resize();
+    buildCaches();
+    const ro = new ResizeObserver(() => {
+      resize();
+      buildCaches();
+    });
+    ro.observe(wrap);
+
+    const themeObs = new MutationObserver(() => {
+      pal = readPalette();
+      glowFlow = makeSprite(64, pal.flowRgb, 0.85);
+      glowSoft = makeSprite(48, pal.dark ? pal.flowRgb : pal.steelRgb, 0.5);
+      buildCaches();
+    });
+    themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+    const COUNT = Math.max(160, Math.min(280, Math.floor(W / 4.5)));
     const parts: Particle[] = Array.from({ length: COUNT }, () => spawn(true));
     function spawn(seed = false): Particle {
       const gateIn = W / 2 - gateHalf() * 0.7;
@@ -246,34 +333,9 @@ export function HeroFlow({ receipts, className }: { receipts: HeroReceipt[]; cla
       const gateIn = W / 2 - gateHalf() * 0.7;
       const gateOut = W / 2 + gateHalf() * 0.62;
 
-      ctx.clearRect(0, 0, W, H);
+      ctx.clearRect(0, 0, W, H); // statics live on the layered bg canvas — nothing re-blits here
 
-      // trace lanes (faint, converging — the banner motif)
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = `rgba(${pal.steelRgb},${pal.dark ? 0.09 : 0.13})`;
-      for (let l = 0; l < LANES; l++) {
-        ctx.beginPath();
-        for (let x = 0; x <= gateIn + 4; x += 26) {
-          const y = laneY(l, x);
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
-
-      // the pipe
-      const grad = ctx.createLinearGradient(0, 0, W, 0);
-      grad.addColorStop(0, `rgba(${pal.steelRgb},0.08)`);
-      grad.addColorStop(0.5, `rgba(${pal.steelRgb},${pal.dark ? 0.4 : 0.5})`);
-      grad.addColorStop(1, `rgba(${pal.steelRgb},0.08)`);
-      ctx.strokeStyle = grad;
-      ctx.beginPath();
-      ctx.moveTo(0, cy());
-      ctx.lineTo(W, cy());
-      ctx.stroke();
-
-      // inflow particles
-      if (pal.dark) ctx.globalCompositeOperation = "lighter";
+      // inflow particles (source-over: additive across the full canvas kills software raster)
       for (const p of parts) {
         p.x += p.v * dt;
         if (p.x >= gateIn) {
@@ -289,7 +351,6 @@ export function HeroFlow({ receipts, className }: { receipts: HeroReceipt[]; cla
         ctx.drawImage(glowSoft, p.x - s / 2, y - s / 2, s, s);
       }
       ctx.globalAlpha = 1;
-      ctx.globalCompositeOperation = "source-over";
 
       // meter pulse: every ~22 metered particles, the gate counts a batch
       if (metered >= 22) {
@@ -301,19 +362,10 @@ export function HeroFlow({ receipts, className }: { receipts: HeroReceipt[]; cla
 
       // the gate glyph (+ flash on pulse)
       const sincePulse = now - pulseT;
-      if (pal.dark) {
-        ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = 0.10;
-        const amb = gateH() * 2.1;
-        ctx.drawImage(glowFlow, W / 2 - amb / 2, cy() - amb / 2, amb, amb);
-        ctx.globalAlpha = 1;
-        ctx.globalCompositeOperation = "source-over";
-      }
-      drawGlyph(ctx, glyphPath, W / 2, cy(), gateH(), pal.hi, pal.dark ? 0.92 : 0.85);
       if (sincePulse < 0.55) {
         const k = 1 - sincePulse / 0.55;
         if (pal.dark) ctx.globalCompositeOperation = "lighter";
-        drawGlyph(ctx, glyphPath, W / 2, cy(), gateH(), pal.flow, 0.5 * k);
+        if (glyphFlash) blitGlyph(glyphFlash, 0.5 * k);
         const g = gateH() * (1.4 + (1 - k) * 0.9);
         ctx.globalAlpha = 0.5 * k;
         ctx.drawImage(glowFlow, W / 2 - g / 2, cy() - g / 2, g, g);
@@ -444,9 +496,10 @@ export function HeroFlow({ receipts, className }: { receipts: HeroReceipt[]; cla
         <HeroSchematic latest={receipts[0]} />
       </div>
       <canvas
-        ref={canvasRef}
+        ref={bgCanvasRef}
         className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${animated ? "opacity-100" : "opacity-0"}`}
       />
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
     </div>
   );
 }
