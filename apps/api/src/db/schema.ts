@@ -30,6 +30,8 @@ export type SettlementBackendName = (typeof SETTLEMENT_BACKENDS)[number];
 /** A priced, x402-protected resource. */
 export const resources = sqliteTable("resources", {
   id: text("id").primaryKey(),
+  /** Who registered it (R5 attribution, opt-in display). */
+  profileId: text("profile_id"),
   name: text("name").notNull(),
   description: text("description"),
   unitType: text("unit_type").$type<UnitType>().notNull(),
@@ -74,6 +76,8 @@ export const feeds = sqliteTable("feeds", {
 /** A research query answered by the agent (the citation-toll loop). */
 export const research = sqliteTable("research", {
   id: text("id").primaryKey(),
+  /** Who asked (R5 attribution, opt-in display). */
+  profileId: text("profile_id"),
   question: text("question").notNull(),
   answer: text("answer"),
   mode: text("mode").notNull().default("mock"),
@@ -227,6 +231,44 @@ export const fundingRounds = sqliteTable("funding_rounds", {
     .default(sql`(unixepoch() * 1000)`),
   settledAt: integer("settled_at", { mode: "timestamp_ms" }),
 });
+
+/**
+ * People (R5, rule 16): ONE PROFILE = ONE HUMAN. A profile may link several wallets — they count
+ * as a single user in every metric. Nothing here helps one person appear as many; distinct-user
+ * counts cluster by profile first, wallet second.
+ */
+export const profiles = sqliteTable("profiles", {
+  id: text("id").primaryKey(),
+  /** Optional public handle (unique, lowercase, a-z0-9-). */
+  handle: text("handle").unique(),
+  displayName: text("display_name").notNull(),
+  avatarUrl: text("avatar_url"),
+  /** Opt-in: only public profiles appear on /community and in attributions. */
+  isPublic: integer("is_public", { mode: "boolean" }).notNull().default(false),
+  /** Honest referral: the profile that invited this one (set once at creation). */
+  refBy: text("ref_by"),
+  joinedAt: integer("joined_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+});
+
+export const profileWallets = sqliteTable(
+  "profile_wallets",
+  {
+    /** lowercase 0x address */
+    wallet: text("wallet").primaryKey(),
+    profileId: text("profile_id")
+      .notNull()
+      .references(() => profiles.id),
+    linkedAt: integer("linked_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+  },
+  (t) => [index("profile_wallets_profile").on(t.profileId)],
+);
+
+export type Profile = typeof profiles.$inferSelect;
+export type ProfileWallet = typeof profileWallets.$inferSelect;
 
 export type Feed = typeof feeds.$inferSelect;
 export type Research = typeof research.$inferSelect;

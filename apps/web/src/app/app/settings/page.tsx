@@ -13,6 +13,7 @@ import {
 import { arcConfig, explorerAddressUrl } from "@sluice/chain";
 import { PageHeader } from "@/components/shell/page-parts";
 import { WalletButton } from "@/components/wallet/wallet-button";
+import { ProfileCard } from "@/components/people/profile-card";
 
 function SettingCard({
   title,
@@ -46,6 +47,8 @@ export default function SettingsPage() {
         title="Account"
         description="Wallet, appearance, and network. Working controls do something; anything not yet available is disabled with a stated reason — never a silent no-op."
       />
+
+      <ProfileCard />
 
       <div className="flex flex-col gap-4">
         <SettingCard

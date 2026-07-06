@@ -20,7 +20,7 @@ export function AskBox() {
   const ask = (question: string) => {
     if (!question.trim()) return;
     start(async () => {
-      const res = await runResearchAction(question.trim());
+      const res = await runResearchAction(question.trim(), localStorage.getItem("sluice-profile-id") ?? undefined);
       if (!res.ok) {
         toast.error("Research failed", { description: res.error });
         return;

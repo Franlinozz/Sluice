@@ -9,6 +9,8 @@ import { deploySplitter, type SplitShare } from "./contracts/splitter.ts";
 
 export interface RegisterResourceInput {
   name: string;
+  /** Who registered it (R5 attribution, opt-in display). */
+  profileId?: string;
   description?: string;
   unitType: UnitType;
   /** Human price per unit, e.g. "$0.001" or "0.000001". */
@@ -73,6 +75,7 @@ export async function registerResource(input: RegisterResourceInput): Promise<Re
   db.insert(resources)
     .values({
       id,
+      profileId: input.profileId ?? null,
       name: input.name,
       description: input.description ?? null,
       unitType: input.unitType,

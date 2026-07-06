@@ -237,3 +237,21 @@ rate-limited; spendLimit defined near top (TDZ-safe). FundingPool in deployed.js
   header top-16). OVERVIEW: KPI tiles deep-link w/ hover arrow; "How settlement works" = 4 line-art
   MiniDiagrams + plain copy. Harness: pre-seeds tour-done; "Analytics SDK" (Reown telemetry) → 3rd
   party class. Audit ZERO defects.
+
+- **Phase R5** (people & traction, rule 16 ABSOLUTE): migration 0008 — profiles (handle/displayName/
+  isPublic opt-in/refBy set ONCE at creation) + profile_wallets (wallet→profile clustering; linked
+  wallets count as ONE human everywhere) + research.profileId + resources.profileId attribution.
+  API: /profiles/ensure|/:id|PATCH|/wallets, /community (public opt-in only), /stats (conservative:
+  humans=profiles; paying wallets CLUSTERED; creators clustered; per-day settlements; latest receipts;
+  honesty notes), /partners GET/POST (x402 402-probe before listing — no dead entries). Web:
+  useProfile hook (ensure-on-connect, sluice-profile-id), ProfileCard in settings (edit + link
+  wallet), /app/activity (my receipts across linked wallets + my questions), public /community +
+  /traction (proof-linked figures, inline SVG daily chart, partners strip) + /api/stats passthrough
+  (matches UI — same source), /join (Providers-wrapped, ?ref=handle stored once, 5 real auto-checked
+  steps), attribution plumbed через AskBox + register form. CROSS-TEAM EXCHANGE: partner endpoints =
+  resources w/ metadata.externalUrl; runner pays THEIR URL (payExternal) and records the ACTUAL
+  amount their 402 charged; eligible-first resource selection (fresh partner listings not crowded out
+  of MAX_STEPS). PROVEN E2E: standalone second x402 server (scripts/partner-endpoint.ts, :3011, own
+  payTo, immediate settlement; pm2 sluice-partner-demo) → probe passed → listed → agent PAID it
+  ($0.002 their price) → decision recorded. Docs /docs/partners page + PartnerForm. Audit ZERO.
+  REMAINING (needs a human): timed /join run with a brand-new person (<3min).

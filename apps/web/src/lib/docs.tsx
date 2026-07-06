@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Lead, H2, P, UL, LI, Callout, A, InlineCode } from "@/components/docs/prose";
 import { CodeBlock } from "@/components/docs/code-block";
+import { PartnerForm } from "@/components/docs/partner-form";
 
 export interface DocHeading {
   id: string;
@@ -453,6 +454,50 @@ curl -X POST ${API}/connectors/owncast -d '{"instance":"https://live.example.com
 curl -X POST ${API}/connectors/navidrome \\
   -d '{"baseUrl":"https://music.example.com","user":"u","token":"<md5>","salt":"<salt>"}'`}
         />
+      </>
+    ),
+  },
+
+  {
+    slug: "partners",
+    title: "List your x402 endpoint",
+    group: "Build",
+    description: "Cross-team exchange: put your priced endpoint on the Sluice Bazaar — our agents pay it for real.",
+    headings: [
+      { id: "why", text: "Why list" },
+      { id: "form", text: "List your endpoint" },
+      { id: "api", text: "Or via the API" },
+    ],
+    Body: () => (
+      <>
+        <Lead>
+          Building on x402 too? List your priced endpoint on the Sluice Bazaar (with your consent —
+          you register it) and Sluice buyer agents can genuinely pay YOUR service on Arc.
+          Machine-to-machine traction across teams, all real.
+        </Lead>
+        <H2 id="why">Why list</H2>
+        <UL>
+          <LI>Your endpoint appears in the Bazaar and on the public /traction partners strip.</LI>
+          <LI>Our budgeted agents include it in real paid sessions — receipts on both sides.</LI>
+          <LI>We probe your URL for a real 402 with payment requirements before listing. No dead entries.</LI>
+        </UL>
+        <H2 id="form">List your endpoint</H2>
+        <PartnerForm />
+        <H2 id="api">Or via the API</H2>
+        <CodeBlock
+          lang="bash"
+          code={`curl -X POST ${API}/partners/endpoints -H 'content-type: application/json' -d '{
+  "name": "Weather oracle · per request",
+  "team": "yourteam",
+  "endpointUrl": "https://api.yourteam.dev/paid/weather",
+  "contact": "@you"
+}'`}
+        />
+        <P>
+          Requirements: the URL must answer <InlineCode>402</InlineCode> with x402 payment
+          requirements; the Gateway-batched scheme settles gas-free, plain exact-scheme endpoints
+          settle per payment. Listings appear at <InlineCode>GET {API}/partners</InlineCode>.
+        </P>
       </>
     ),
   },

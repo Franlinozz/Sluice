@@ -1,4 +1,5 @@
 import {
+  Activity,
   BookOpen,
   Bot,
   Coins,
@@ -30,6 +31,7 @@ export const primaryNav: NavItem[] = [
   { label: "Funding", href: "/app/funding", icon: HeartHandshake },
   { label: "Treasury", href: "/app/treasury", icon: Landmark },
   { label: "Settlements", href: "/app/settlements", icon: ReceiptText },
+  { label: "Activity", href: "/app/activity", icon: Activity },
 ];
 
 export const secondaryNav: NavItem[] = [

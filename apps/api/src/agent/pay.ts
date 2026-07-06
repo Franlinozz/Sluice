@@ -36,6 +36,18 @@ export interface PayOutcome {
   error?: string;
 }
 
+/** Pay an EXTERNAL x402 endpoint (a partner team's service) — real cross-team settlement. */
+export async function payExternal(url: string): Promise<PayOutcome> {
+  const c = buyerClient();
+  if (!c) return { ok: false, error: "no buyer wallet configured" };
+  try {
+    const res = await c.pay<{ status?: string }>(url);
+    return { ok: true, amount: res.formattedAmount };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 export async function payResource(path: string): Promise<PayOutcome> {
   const c = buyerClient();
   if (!c) return { ok: false, error: "no buyer wallet configured" };

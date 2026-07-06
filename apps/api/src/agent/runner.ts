@@ -4,6 +4,7 @@
  * never authorizes a payment). Pays via the Phase 1 core → payments appear in /app/settlements.
  */
 import { randomUUID } from "node:crypto";
+import { parseUSDC } from "@sluice/money";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client.ts";
 import { agents, decisions, runs, type Run } from "../db/schema.ts";
@@ -11,7 +12,7 @@ import { listResources } from "../registry.ts";
 import { agentRules, getAgent } from "./store.ts";
 import { reason } from "./reasoning.ts";
 import { hasOpenAI } from "./openai.ts";
-import { ensureDeposit, payResource } from "./pay.ts";
+import { ensureDeposit, payExternal, payResource } from "./pay.ts";
 
 const MAX_STEPS = Number(process.env.AGENT_MAX_STEPS ?? "12");
 
@@ -25,7 +26,17 @@ export async function runAgentSession(agentId: string): Promise<Run> {
   const mode = hasOpenAI() ? "live" : "mock";
   db.insert(runs).values({ id: runId, agentId, status: "running", mode }).run();
 
-  const resources = listResources().slice(0, MAX_STEPS);
+  // Consider policy-ELIGIBLE resources first (allowed unit types), newest first within each group —
+  // so a fresh partner listing isn't crowded out of the session by older ineligible rows.
+  const eligible = (u: string) => !rules.allowedUnitTypes || rules.allowedUnitTypes.includes(u as never);
+  const resources = listResources()
+    .sort((a, b) => {
+      const ea = eligible(a.unitType) ? 0 : 1;
+      const eb = eligible(b.unitType) ? 0 : 1;
+      if (ea !== eb) return ea - eb;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    })
+    .slice(0, MAX_STEPS);
   // Make sure we have a little Gateway balance to spend.
   await ensureDeposit(budget > 0n ? budget : 100_000n);
 
@@ -63,12 +74,29 @@ export async function runAgentSession(agentId: string): Promise<Run> {
         reasonText += ` — would exceed the budget; pausing for more allowance.`;
         paused = true;
       } else {
-        const pres = await payResource(r.path);
+        // partner endpoints (cross-team exchange): pay THEIR x402 URL directly
+        const ext = (() => {
+          try {
+            return r.metadata ? (JSON.parse(r.metadata) as { externalUrl?: string }).externalUrl : undefined;
+          } catch {
+            return undefined;
+          }
+        })();
+        const pres = ext ? await payExternal(ext) : await payResource(r.path);
         if (pres.ok) {
           paid = true;
-          spent += price;
+          // external endpoints set their OWN price in their 402 — record what was actually paid
+          let actual = price;
+          if (ext && pres.amount) {
+            try {
+              actual = parseUSDC(pres.amount);
+            } catch {
+              actual = price;
+            }
+          }
+          spent += actual;
           value += result.relevance;
-          amount = r.unitPrice;
+          amount = actual.toString();
           paymentRef = pres.amount ?? null;
         } else {
           decision = "skip";

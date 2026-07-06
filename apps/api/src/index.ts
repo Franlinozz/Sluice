@@ -58,6 +58,16 @@ import {
 import { escrowReady, deployed } from "./contracts/escrow.ts";
 import { withdrawTreasury, treasuryAddress, WITHDRAW_CHAINS } from "./treasury/withdraw.ts";
 import { poolReady, fundingState, addTipFromOperator, settleRound } from "./funding/pool.ts";
+import {
+  communityProfiles,
+  ensureProfile,
+  linkWallet,
+  profileById,
+  updateProfile,
+  walletsOf,
+} from "./people/profiles.ts";
+import { computeStats } from "./people/stats.ts";
+import { listPartners, registerPartnerEndpoint } from "./partners/partners.ts";
 import type { Agent, Decision, Receipt, Resource, Run } from "./db/schema.ts";
 
 // Boot guard: server secrets must never be exposed as NEXT_PUBLIC_* (CLAUDE.md #12).
@@ -473,14 +483,15 @@ function serializeCitation(c: {
 }
 
 app.post("/research", spendLimit, async (req, reply) => {
-  const body = (req.body ?? {}) as { question?: string };
+  const body = (req.body ?? {}) as { question?: string; profileId?: string };
   if (!body.question || !body.question.trim()) {
     return reply.code(400).send({ error: "question is required" });
   }
   try {
-    const r = await runResearch(body.question.trim());
+    const r = await runResearch(body.question.trim(), body.profileId);
     return {
       ...r,
+      profileId: body.profileId ?? null,
       formattedTotalPaid: formatUSD(BigInt(r.totalPaid)),
       citations: r.citations.map(serializeCitation),
     };
@@ -494,6 +505,7 @@ app.get("/research", async () =>
     const detail = getResearch(r.id);
     return {
       ...r,
+      profileId: r.profileId ?? null,
       formattedTotalPaid: formatUSD(BigInt(r.totalPaid)),
       citations: (detail?.citations ?? []).map((c) => ({
         resourceName: c.resourceName,
@@ -774,6 +786,81 @@ app.post("/funding/settle", spendLimit, async (req, reply) => {
   const b = (req.body ?? {}) as { round?: number };
   try {
     return await settleRound(b.round);
+  } catch (err) {
+    reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// ── R5: people, honest stats, cross-team partners ────────────────────────────
+const ADDR_RE = /^0x[0-9a-fA-F]{40}$/;
+
+function serializeProfile(p: NonNullable<ReturnType<typeof profileById>>) {
+  return {
+    id: p.id,
+    handle: p.handle,
+    displayName: p.displayName,
+    avatarUrl: p.avatarUrl,
+    isPublic: p.isPublic,
+    joinedAt: p.joinedAt,
+    wallets: walletsOf(p.id),
+  };
+}
+
+app.post("/profiles/ensure", async (req, reply) => {
+  const b = (req.body ?? {}) as { wallet?: string; refHandle?: string };
+  if (!b.wallet || !ADDR_RE.test(b.wallet)) return reply.code(400).send({ error: "valid wallet required" });
+  return serializeProfile(ensureProfile(b.wallet, b.refHandle));
+});
+
+app.get("/profiles/:id", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const p = profileById(id);
+  if (!p) return reply.code(404).send({ error: "profile not found" });
+  return serializeProfile(p);
+});
+
+app.patch("/profiles/:id", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const b = (req.body ?? {}) as { displayName?: string; handle?: string | null; isPublic?: boolean; avatarUrl?: string | null };
+  const res = updateProfile(id, b);
+  if (!res.ok) return reply.code(400).send({ error: res.error });
+  return serializeProfile(res.profile!);
+});
+
+app.post("/profiles/:id/wallets", async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const b = (req.body ?? {}) as { wallet?: string };
+  if (!b.wallet || !ADDR_RE.test(b.wallet)) return reply.code(400).send({ error: "valid wallet required" });
+  const res = linkWallet(id, b.wallet);
+  if (!res.ok) return reply.code(400).send({ error: res.error });
+  return serializeProfile(profileById(id)!);
+});
+
+app.get("/community", async () => communityProfiles());
+
+app.get("/stats", async () => computeStats());
+
+app.get("/partners", async () => listPartners());
+
+app.post("/partners/endpoints", spendLimit, async (req, reply) => {
+  const b = (req.body ?? {}) as { name?: string; endpointUrl?: string; team?: string; contact?: string; description?: string };
+  if (!b.name?.trim() || !b.endpointUrl?.trim() || !b.team?.trim()) {
+    return reply.code(400).send({ error: "name, endpointUrl and team are required" });
+  }
+  try {
+    new URL(b.endpointUrl);
+  } catch {
+    return reply.code(400).send({ error: "endpointUrl must be a valid URL" });
+  }
+  try {
+    const { resource, probe } = await registerPartnerEndpoint({
+      name: b.name,
+      endpointUrl: b.endpointUrl,
+      team: b.team,
+      contact: b.contact,
+      description: b.description,
+    });
+    reply.code(201).send({ registered: true, resourceId: resource.id, probe });
   } catch (err) {
     reply.code(400).send({ error: err instanceof Error ? err.message : String(err) });
   }

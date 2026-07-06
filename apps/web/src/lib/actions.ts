@@ -29,6 +29,7 @@ async function call<T>(
 }
 
 export interface RegisterResourceFields {
+  profileId?: string;
   name: string;
   description?: string;
   unitType: string;
@@ -104,10 +105,10 @@ export async function ingestRssAction(input: IngestRssFields) {
   return res;
 }
 
-export async function runResearchAction(question: string) {
+export async function runResearchAction(question: string, profileId?: string) {
   const res = await call<ResearchResultDTO>("/research", {
     method: "POST",
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, profileId }),
   });
   if (res.ok) {
     revalidatePath("/app/settlements");

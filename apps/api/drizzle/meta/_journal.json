@@ -57,6 +57,13 @@
       "when": 1783269888041,
       "tag": "0007_magical_preak",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1783326774639,
+      "tag": "0008_windy_firedrake",
+      "breakpoints": true
     }
   ]
 }

@@ -35,11 +35,16 @@ const STATIC_ROUTES = [
   "/docs/mcp",
   "/docs/api-reference",
   "/docs/connectors",
+  "/docs/partners",
   "/docs/rsl",
   "/docs/self-hosting",
   "/docs/changelog",
   "/docs/faq",
+  "/community",
+  "/traction",
+  "/join",
   "/app",
+  "/app/activity",
   "/app/earn",
   "/app/spend",
   "/app/meter",
@@ -54,7 +59,11 @@ const STATIC_ROUTES = [
 const CLICK_ROUTES = new Set([
   "/",
   "/ask",
+  "/community",
+  "/traction",
+  "/join",
   "/app",
+  "/app/activity",
   "/app/earn",
   "/app/spend",
   "/app/meter",
@@ -65,6 +74,8 @@ const CLICK_ROUTES = new Set([
   "/app/settlements",
   "/app/settings",
   "/docs/quickstart",
+  "/join",
+  "/traction",
 ]);
 
 const VIEWPORTS = [

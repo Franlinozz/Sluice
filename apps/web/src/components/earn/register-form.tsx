@@ -31,6 +31,7 @@ export function RegisterForm() {
             const res = await registerResourceAction({
               name: String(fd.get("name") ?? ""),
               description: String(fd.get("description") ?? ""),
+              profileId: localStorage.getItem("sluice-profile-id") ?? undefined,
               unitType: String(fd.get("unitType") ?? "per_request"),
               price: String(fd.get("price") ?? ""),
               path: String(fd.get("path") ?? ""),

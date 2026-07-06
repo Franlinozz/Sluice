@@ -91,7 +91,7 @@ export interface RunResearchResult {
   }[];
 }
 
-export async function runResearch(question: string): Promise<RunResearchResult> {
+export async function runResearch(question: string, profileId?: string): Promise<RunResearchResult> {
   const pool = listResources().filter(
     (r) => (r.unitType === "per_citation" || r.unitType === "per_read") && r.contentUrl,
   );
@@ -114,7 +114,7 @@ export async function runResearch(question: string): Promise<RunResearchResult> 
 
   const id = randomUUID();
   const mode = hasOpenAI() ? "live" : "mock";
-  db.insert(research).values({ id, question, mode }).run();
+  db.insert(research).values({ id, question, mode, profileId: profileId ?? null }).run();
 
   const out: RunResearchResult["citations"] = [];
   const synthSources: { marker: number; title: string; summary: string | null }[] = [];
