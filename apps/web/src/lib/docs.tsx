@@ -460,7 +460,7 @@ curl -X POST ${API}/connectors/navidrome \\
 
   {
     slug: "partners",
-    title: "List your x402 endpoint",
+    title: "List your endpoint on the Bazaar",
     group: "Build",
     description: "Cross-team exchange: put your priced endpoint on the Sluice Bazaar — our agents pay it for real.",
     headings: [
@@ -584,6 +584,16 @@ pnpm --filter @sluice/api start   # serves the registry + /paid/* paywall`}
         <Lead>Every entry is real and dated to when it shipped to Arc testnet + production.</Lead>
         <H2 id="log">Releases</H2>
         <P>
+          <strong>2026-07-06 · Overhaul R0–R6.</strong> Zero-defect audit gate (Playwright crawler);
+          brand v2 (Michroma wordmark, glacial flow accent, halftone depth); motion system
+          (reduced-motion safe, transform/opacity only); the living-logo landing hero drawn from real
+          receipts; the comprehension layer (guided tour, first-run checklist, glossary); people &amp;
+          traction — profiles (one profile = one human), <A href="/community">/community</A>,{" "}
+          <A href="/traction">/traction</A>, partner x402 endpoints with a proven cross-team
+          settlement; hand-built architecture diagram, whitepaper v2 (brand typography, linked
+          TOC), and the rebuilt README.
+        </P>
+        <P>
           <strong>2026-06-25 · Phase 8 — Docs &amp; trust artifacts.</strong> This documentation
           site (search, scroll-spy, prev/next), the whitepaper PDF, changelog, and FAQ.
         </P>
@@ -624,6 +634,7 @@ pnpm --filter @sluice/api start   # serves the registry + /paid/* paywall`}
     description: "Plain-English: what's live, what's testnet, how settlement works.",
     headings: [
       { id: "real", text: "Is the data real?" },
+      { id: "traction", text: "Is the traction real?" },
       { id: "network", text: "Mainnet or testnet?" },
       { id: "settle", text: "How does settlement work?" },
       { id: "creators", text: "How do creators get paid?" },
@@ -638,10 +649,24 @@ pnpm --filter @sluice/api start   # serves the registry + /paid/* paywall`}
           chain. Payments are real x402 authorizations settled by Circle Gateway; the latest receipt
           and its Circle transfer ID are shown so anyone can re-check.
         </P>
+        <H2 id="traction">Is the traction real?</H2>
+        <P>
+          Yes, and it is counted conservatively. One profile = one human: wallets linked to the same
+          profile are clustered and count as <strong>one</strong> user in every people metric, and we
+          never build anything that makes one person look like several. Partner endpoints are probed
+          with a real 402 handshake before they may list, so there are no dead entries. You can
+          verify all of it yourself: <A href="/traction">/traction</A> and{" "}
+          <InlineCode>/api/stats</InlineCode> read the same source, every settlement figure links to
+          its receipt, and the on-chain anchors resolve on Arcscan.
+        </P>
         <H2 id="network">Mainnet or testnet?</H2>
         <P>
-          Sluice runs on <strong>Arc testnet</strong> (chain 5042002) with real test USDC. Settlement
-          is network-agnostic; the same code targets mainnet when configured.
+          Sluice runs on <strong>Arc testnet</strong> (chain 5042002) with real test USDC — the flows
+          (deposits, x402 signatures, Gateway batches, withdrawals, contracts) are exactly the
+          mainnet flows, but the tokens carry no monetary value, so agents and judges can spend
+          freely. Settlement is network-agnostic by design (one chain interface, no scattered RPC
+          config): when Arc mainnet opens, redeployment is configuration plus contract deploys — not
+          a rewrite.
         </P>
         <H2 id="settle">How does settlement work?</H2>
         <P>

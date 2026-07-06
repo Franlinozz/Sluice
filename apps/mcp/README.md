@@ -50,7 +50,7 @@ receipt."* It will call `discover_resources` → `pay_resource` → `get_receipt
 ## Smoke test
 
 ```bash
-SLUICE_API=http://127.0.0.1:3001 SLUICE_PRIVATE_KEY=0x... \
+SLUICE_API=https://sluiceflow.vercel.app/gw SLUICE_PRIVATE_KEY=0x... \
   pnpm --filter @sluice/mcp exec tsx scripts/smoke.mts
 ```
 

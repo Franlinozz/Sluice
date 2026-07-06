@@ -2,6 +2,16 @@
 
 All dates are when the work shipped to Arc testnet + production. Every entry is real.
 
+## 2026-07-06 — Overhaul R0–R6 · Brand, motion, comprehension, traction, trust artifacts
+- Zero-defect audit gate: Playwright site crawler (console/network/screenshots/links/overflow) must pass before any phase closes.
+- Brand v2: Michroma wordmark, canonical `/public/brand` assets, glacial "flow" accent, halftone depth layer, Cards v2.
+- Motion system (CSS/rAF only, reduced-motion safe) + the living-logo landing hero drawn from real receipts.
+- Comprehension layer: guided tour over real surfaces, first-run checklist, plain-language glossary.
+- People & traction (one profile = one human): profiles with wallet clustering, `/community`, `/traction`, `/join`,
+  partner x402 endpoints (402-probed before listing) with a proven cross-team settlement.
+- Trust artifacts: hand-built architecture diagram (dark + light SVG), whitepaper v2 (brand typography, linked TOC,
+  every page visually verified), rebuilt README, docs FAQ on traction counting and testnet vs mainnet.
+
 ## 2026-06-25 — Phase 8 · Docs & trust artifacts
 - Documentation site at `/docs` (sidebar, ⌘K search, scroll-spy TOC, prev/next, reading progress).
 - Whitepaper PDF (`/sluice-whitepaper.pdf`) — real 2026 context only (Pay Per Crawl, RSL 1.0).

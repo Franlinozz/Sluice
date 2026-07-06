@@ -1,7 +1,7 @@
 /**
  * 10-line example: discover a Sluice resource and pay for it on Arc with a real nanopayment.
  *
- *   SLUICE_API=http://127.0.0.1:3001 PK=0x... pnpm --filter @sluice/pay example
+ *   SLUICE_API=https://sluiceflow.vercel.app/gw PK=0x... pnpm --filter @sluice/pay example
  */
 import { SluicePay } from "../src/index.ts";
 
