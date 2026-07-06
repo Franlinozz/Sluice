@@ -295,7 +295,15 @@ async function httpParity(routes: string[]): Promise<void> {
   const RAW_IP = [62, 171, 182, 75].join(".");
   for (const route of routes) {
     try {
-      const res = await fetch(`${BASE}${route}`, { headers: { accept: "text/html" }, redirect: "follow" });
+      const res = await fetch(`${BASE}${route}`, {
+        redirect: "follow",
+        headers: {
+          accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "accept-language": "en-US,en;q=0.9",
+          "user-agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
+        },
+      });
       if (res.status >= 400) {
         report({ route, viewport: "http", defect: `route returned HTTP ${res.status}`, severity: "high" });
         continue;
