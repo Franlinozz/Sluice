@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -89,7 +90,21 @@ export default async function LandingPage() {
       <main className="flex-1">
         {/* ── Hero: the logo itself, alive ─────────────────────── */}
         <section className="relative overflow-hidden">
-          <div className="mx-auto max-w-4xl px-4 pt-16 text-center sm:px-6 sm:pt-24">
+          <div className="relative isolate">
+            {/* the metered rail, physical — an environmental backdrop for the copy only;
+                masked to fade out entirely before the animated hero below */}
+            <div aria-hidden className="hero-photo">
+              <Image
+                src="/media/editorial/landing/the-metered-rail-horizon.webp"
+                alt=""
+                fill
+                sizes="100vw"
+                draggable={false}
+                className="object-cover object-[center_top]"
+              />
+              <div className="hero-photo-scrim" />
+            </div>
+            <div className="mx-auto max-w-4xl px-4 pb-10 pt-16 text-center sm:px-6 sm:pb-16 sm:pt-24">
             <p className="eyebrow">Arc · Circle · x402 · Gateway nanopayments</p>
             <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.03] tracking-tight text-hi sm:text-6xl">
               Make the smallest unit sellable.
@@ -121,6 +136,7 @@ export default async function LandingPage() {
                 verify on Arcscan <ArrowUpRight className="size-3" />
               </a>
             </p>
+            </div>
           </div>
 
           {/* the living schematic — value flows in, the gate meters it, receipts settle out */}

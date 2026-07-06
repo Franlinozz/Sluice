@@ -144,3 +144,47 @@ a .text-steel:hover {
 [data-theme="dark"] .editorial-img {
   opacity: var(--edm-dark, 1);
 }
+
+/* ── Landing hero-copy photographic backdrop (the metered rail, physical) ──
+   Scoped to the copy block only; vertical mask fades in from the page top and out
+   completely before the animated HeroFlow below — the photo foreshadows the rail,
+   the animation IS the rail. Opacity lives on the image alone, per theme/viewport. */
+.hero-photo {
+  position: absolute;
+  inset: 0 0 -56px 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 62%, transparent 93%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 62%, transparent 93%);
+}
+.hero-photo img {
+  opacity: 0.3;
+}
+/* edge dissolve + a soft readability pool behind the headline/copy */
+.hero-photo-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, var(--canvas) 0%, transparent 20%, transparent 80%, var(--canvas) 100%),
+    radial-gradient(ellipse 58% 52% at 50% 32%, color-mix(in srgb, var(--canvas) 72%, transparent) 0%, transparent 72%);
+}
+@media (max-width: 1024px) {
+  .hero-photo img { opacity: 0.24; }
+  .hero-photo {
+    mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 54%, transparent 88%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 54%, transparent 88%);
+  }
+}
+@media (max-width: 640px) {
+  .hero-photo img { opacity: 0.17; }
+  .hero-photo {
+    mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 50%, transparent 84%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 50%, transparent 84%);
+  }
+}
+/* the charcoal photograph reads as a smudge on Marble — dark theme only */
+[data-theme="light"] .hero-photo {
+  display: none;
+}
