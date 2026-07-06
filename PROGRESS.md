@@ -216,3 +216,7 @@ rate-limited; spendLimit defined near top (TDZ-safe). FundingPool in deployed.js
   Measured on the GPU-less VPS (SwiftShader): mobile 60fps locked, desktop ~20fps raster-bound
   (control: /docs 60fps, /?noanim 60fps → the gap is software compositing of a full-width animated
   canvas, not app JS — real desktops composite on GPU). ?noanim debug switch kept.
+  R3 CLOSE: local full gate ZERO defects; deploy READY (deterministic from that tree). Automated
+  live re-verify blocked by Vercel WAF IP-scoring of this VPS (repeated probe bursts keep the
+  challenge hot; probes now reset it — STOP poking the domain from this box; verify live from a
+  normal browser/IP). Parity fetches now send browser-grade headers for future runs.
