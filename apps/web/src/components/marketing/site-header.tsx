@@ -22,6 +22,9 @@ export function SiteHeader() {
           <Link href="/docs" className="transition-colors hover:text-hi">
             Docs
           </Link>
+          <Link href="/traction" className="transition-colors hover:text-hi">
+            Traction
+          </Link>
           <a
             href={arcConfig.explorerUrl}
             target="_blank"

@@ -41,8 +41,14 @@ export function computeStats(): StatsView {
 
   const payingClusters = new Set(settled.map((r) => clusterOf(r.payer)));
   const resById = new Map(db.select().from(resources).all().map((r) => [r.id, r] as const));
+  // Creators are counted from NON-ARCHIVED resources only: archiving a resource curates it out of
+  // the headline story (rule 15) — its receipts stay in Settlements, but a hidden/junk/test resource
+  // never inflates the distinct-creator count.
   const creatorClusters = new Set(
-    settled.map((r) => resById.get(r.resourceId)?.payTo).filter(Boolean).map((w) => clusterOf(w!)),
+    settled
+      .map((r) => resById.get(r.resourceId))
+      .filter((res): res is NonNullable<typeof res> => Boolean(res) && !res!.archived)
+      .map((res) => clusterOf(res.payTo)),
   );
 
   const total = settled.reduce((a, r) => a + BigInt(r.grossAmount), 0n);

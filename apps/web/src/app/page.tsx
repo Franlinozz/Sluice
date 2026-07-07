@@ -255,6 +255,11 @@ export default async function LandingPage() {
                 No mock data, no vanity counters. The latest real settlement is shown with its Circle
                 transfer ID, and the on-chain anchors are open on Arcscan for anyone to inspect.
               </p>
+              <Button asChild variant="outline" size="sm" className="mt-5">
+                <Link href="/traction">
+                  See the traction scoreboard <ArrowRight className="size-4" />
+                </Link>
+              </Button>
             </div>
             <Reveal delay={80}>
               <VerifyReceipt data={verifyData} anchors={anchors} />
