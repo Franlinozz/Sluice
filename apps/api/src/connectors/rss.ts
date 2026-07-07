@@ -88,6 +88,10 @@ export interface IngestInput {
   unitType?: "per_citation" | "per_read" | "per_crawl" | "per_request";
   limit?: number;
   author?: string;
+  /** Creator's wallet — every ingested item pays HERE (defaults to the platform seller if unset). */
+  payTo?: string;
+  /** Creator's profile (R5 attribution + rule-16 clustering). */
+  profileId?: string;
   /** Optional collaborators → one splitter for the whole feed. */
   splits?: SplitShare[];
 }
@@ -129,6 +133,9 @@ export async function ingestFeed(input: IngestInput) {
         author: item.author ?? input.author ?? title,
         contentUrl: item.link,
         sourceType: "feed_item",
+        // Creator earns to their own wallet (splitter, if any, still takes precedence upstream).
+        payTo: input.payTo,
+        profileId: input.profileId,
         splits,
         splitterAddress,
         feedId: feed.id,

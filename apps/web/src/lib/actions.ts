@@ -30,6 +30,8 @@ async function call<T>(
 
 export interface RegisterResourceFields {
   profileId?: string;
+  /** Creator's connected wallet — settlements for this resource pay here. */
+  payTo?: string;
   name: string;
   description?: string;
   unitType: string;
@@ -91,6 +93,10 @@ export interface IngestRssFields {
   unitType?: string;
   limit?: number;
   author?: string;
+  /** Creator's connected wallet — every ingested item pays here. */
+  payTo?: string;
+  /** Creator's profile (attribution + rule-16 clustering). */
+  profileId?: string;
 }
 
 export async function ingestRssAction(input: IngestRssFields) {

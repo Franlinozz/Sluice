@@ -68,6 +68,9 @@ export async function registerResource(input: RegisterResourceInput): Promise<Re
     splitterAddress = await deploySplitter(splits);
   }
 
+  if (input.payTo && !/^0x[0-9a-fA-F]{40}$/.test(input.payTo)) {
+    throw new Error(`invalid payTo address: ${input.payTo}`);
+  }
   const payTo = splitterAddress ?? input.payTo ?? DEFAULT_SELLER;
   if (!payTo) throw new Error("payTo is required (no SELLER_ADDRESS configured)");
 

@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { Loader2, UserRound, Link2 } from "lucide-react";
 import { AddressChip, Button, Card, Input, Label, Pill } from "@sluice/ui";
+import { WalletButton } from "@/components/wallet/wallet-button";
 import { useProfile } from "./use-profile";
 
 /**
@@ -12,7 +13,7 @@ import { useProfile } from "./use-profile";
  * actions show your name on /community and in attributions.
  */
 export function ProfileCard() {
-  const { profile, refresh, connectedWallet } = useProfile();
+  const { profile, refresh, ensure, loading, error, connectedWallet, isConnected } = useProfile();
   const [name, setName] = React.useState("");
   const [handle, setHandle] = React.useState("");
   const [isPublic, setIsPublic] = React.useState(false);
@@ -29,17 +30,37 @@ export function ProfileCard() {
 
   if (!profile) {
     return (
-      <Card className="p-5">
-        <div className="flex items-center gap-3">
-          <UserRound className="size-5 text-low" />
+      <Card className="flex flex-col gap-4 p-5">
+        <div className="flex items-start gap-3">
+          <UserRound className="size-5 shrink-0 text-low" />
           <div>
             <h3 className="text-sm font-medium text-hi">Your profile</h3>
             <p className="mt-1 text-sm text-mid">
-              Connect a wallet (top bar) and your profile is created automatically — one profile per
-              human, however many wallets you link.
+              One profile per human, however many wallets you link. It attributes your asks and the
+              resources you register — and, if you opt in, shows you on /community.
             </p>
           </div>
         </div>
+
+        {!isConnected ? (
+          <div className="flex flex-wrap items-center gap-3 border-t border-hairline pt-4">
+            <span className="text-sm text-mid">Connect a wallet to create your profile.</span>
+            <WalletButton />
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-3 border-t border-hairline pt-4">
+            <Button size="sm" onClick={() => ensure()} disabled={loading}>
+              {loading ? <Loader2 className="size-4 animate-spin" /> : <UserRound className="size-4" />}
+              {loading ? "Creating…" : "Create my profile"}
+            </Button>
+            {connectedWallet && (
+              <span className="text-xs text-low">
+                for <span className="font-mono text-mid">{connectedWallet.slice(0, 6)}…{connectedWallet.slice(-4)}</span>
+              </span>
+            )}
+            {error && <span className="text-xs text-[color:var(--failed)]">{error}</span>}
+          </div>
+        )}
       </Card>
     );
   }

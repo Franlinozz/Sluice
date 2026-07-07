@@ -29,6 +29,8 @@ export async function ingestPeerTube(opts?: {
   instance?: string;
   count?: number;
   pricePerSecond?: string;
+  payTo?: string;
+  profileId?: string;
 }): Promise<PeerTubeIngestResult> {
   const instance = (opts?.instance ?? DEFAULT_INSTANCE).replace(/\/$/, "");
   const count = Math.min(Math.max(opts?.count ?? 6, 1), 25);
@@ -54,6 +56,8 @@ export async function ingestPeerTube(opts?: {
         author,
         contentUrl: v.url ?? `${instance}/w/${v.shortUUID ?? v.uuid}`,
         sourceType: "url",
+        payTo: opts?.payTo,
+        profileId: opts?.profileId,
         metadata: { connector: "peertube", instance, durationSec: v.duration, uuid: v.uuid },
       });
       out.ingested += 1;

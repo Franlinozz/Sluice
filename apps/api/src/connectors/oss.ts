@@ -14,6 +14,8 @@ export interface NavidromeOpts {
   salt: string;
   count?: number;
   pricePerListen?: string;
+  payTo?: string;
+  profileId?: string;
 }
 
 /** Ingest songs from a Navidrome (Subsonic API) server as per_listen resources. */
@@ -41,6 +43,8 @@ export async function ingestNavidrome(opts: NavidromeOpts): Promise<{ ingested: 
         author: s.artist,
         contentUrl: `${base}/rest/stream.view?id=${s.id}`,
         sourceType: "url",
+        payTo: opts.payTo,
+        profileId: opts.profileId,
         metadata: { connector: "navidrome", songId: s.id },
       });
       ingested += 1;
@@ -53,7 +57,7 @@ export async function ingestNavidrome(opts: NavidromeOpts): Promise<{ ingested: 
 
 // ── Owncast (per_second live) ────────────────────────────────────
 /** Register an Owncast live stream as a per_second streaming resource (uses its public status API). */
-export async function ingestOwncast(opts: { instance: string; pricePerSecond?: string }) {
+export async function ingestOwncast(opts: { instance: string; pricePerSecond?: string; payTo?: string; profileId?: string }) {
   const base = opts.instance.replace(/\/$/, "");
   const res = await fetch(`${base}/api/status`, { headers: { accept: "application/json" } });
   if (!res.ok) throw new Error(`Owncast ${res.status}`);
@@ -67,6 +71,8 @@ export async function ingestOwncast(opts: { instance: string; pricePerSecond?: s
     description: `Owncast live stream · ${status.online ? "online" : "offline"}`,
     contentUrl: base,
     sourceType: "url",
+    payTo: opts.payTo,
+    profileId: opts.profileId,
     metadata: { connector: "owncast", instance: base, online: Boolean(status.online) },
   });
   return { resourceId: r.id, online: Boolean(status.online) };
