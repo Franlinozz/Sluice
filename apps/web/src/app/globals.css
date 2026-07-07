@@ -151,7 +151,7 @@ a .text-steel:hover {
    the animation IS the rail. Opacity lives on the image alone, per theme/viewport. */
 .hero-photo {
   position: absolute;
-  inset: 0 0 -280px 0;
+  inset: 0 0 -160px 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;

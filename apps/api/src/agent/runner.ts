@@ -26,14 +26,29 @@ export async function runAgentSession(agentId: string): Promise<Run> {
   const mode = hasOpenAI() ? "live" : "mock";
   db.insert(runs).values({ id: runId, agentId, status: "running", mode }).run();
 
-  // Consider policy-ELIGIBLE resources first (allowed unit types), newest first within each group —
-  // so a fresh partner listing isn't crowded out of the session by older ineligible rows.
+  // Candidate ranking (MAX_STEPS caps the session, so ORDER decides what the agent ever sees):
+  // 1) policy-eligible unit types first; 2) resources whose name/description matches the agent's
+  //    topics first (cheap deterministic prefilter — the LLM still scores each one; this only
+  //    stops a burst of freshly-ingested off-topic feed items from crowding relevant resources
+  //    out of the session entirely); 3) newest first within each tier.
   const eligible = (u: string) => !rules.allowedUnitTypes || rules.allowedUnitTypes.includes(u as never);
+  // Word-boundary matching — short topics like "ai" must not substring-match "Laity"/"aircraft".
+  const topicRes = (rules.topics ?? []).map(
+    (t) => new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i"),
+  );
+  const topicHit = (r: { name: string; description: string | null }) => {
+    if (topicRes.length === 0) return 0;
+    const hay = `${r.name} ${r.description ?? ""}`;
+    return topicRes.some((re) => re.test(hay)) ? 0 : 1;
+  };
   const resources = listResources()
     .sort((a, b) => {
       const ea = eligible(a.unitType) ? 0 : 1;
       const eb = eligible(b.unitType) ? 0 : 1;
       if (ea !== eb) return ea - eb;
+      const ta = topicHit(a);
+      const tb = topicHit(b);
+      if (ta !== tb) return ta - tb;
       return b.createdAt.getTime() - a.createdAt.getTime();
     })
     .slice(0, MAX_STEPS);
