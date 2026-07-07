@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, BookOpen, Coins, ReceiptText } from "lucide-react";
 import { AmountMono, Button, Card, RowEnter, StatusPill } from "@sluice/ui";
+import { cookies } from "next/headers";
 import { sluiceApi } from "@/lib/api";
 import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
 import { AutoRefresh } from "@/components/auto-refresh";
@@ -19,6 +20,7 @@ const FLOW = [
 ];
 
 export default async function OverviewPage() {
+  const firstRunDismissed = (await cookies()).get("sluice-firstrun-dismissed")?.value === "1";
   const [kpis, receipts] = await Promise.all([sluiceApi.kpis(), sluiceApi.resources().then(() => sluiceApi.receipts())]);
 
   const recent = (receipts ?? []).slice(0, 6);
@@ -32,7 +34,7 @@ export default async function OverviewPage() {
         description="What's been earned, paid, and settled — every number here is real and updates as it happens."
       />
 
-      <FirstRunChecklist />
+      <FirstRunChecklist initialDismissed={firstRunDismissed} />
 
       <div data-tour="workspace">
         <KpiTiles kpis={kpis} />

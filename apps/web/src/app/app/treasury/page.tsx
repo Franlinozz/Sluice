@@ -91,6 +91,11 @@ export default async function TreasuryPage() {
                 instant mint on Arc, or cross-chain to another testnet. The balance figures on this
                 page are always read live from Gateway, never from an image.
               </p>
+              <p className="text-xs leading-relaxed text-low">
+                Note: this is the shared platform treasury (testnet funds), deliberately left open
+                during the hackathon so judges can perform a real withdrawal end-to-end. After the
+                hackathon it locks to the operator wallet.
+              </p>
             </div>
           </Card>
           <WithdrawPanel available={bal.gateway.formattedAvailable} chains={chains ?? []} />

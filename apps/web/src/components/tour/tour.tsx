@@ -145,16 +145,21 @@ export function Tour() {
   const spot = rect
     ? { left: rect.left - pad, top: rect.top - pad, width: rect.width + pad * 2, height: rect.height + pad * 2 }
     : null;
-  // card position: below the spotlight if it fits, else above, else centered
+  // card position: below the spotlight if it fits, else above, else centered.
+  // Both the card and the spotlight are placed via TRANSFORM (top/left stay 0): transform moves
+  // composite only and is excluded from CLS — animating top/left here scored 0.3 CLS on /app.
   const cardW = 360;
-  let cardStyle: React.CSSProperties = { left: "50%", top: "50%", transform: "translate(-50%,-50%)" };
+  let cardStyle: React.CSSProperties = {
+    top: 0,
+    left: 0,
+    transform: `translate(${Math.max(12, (window.innerWidth - cardW) / 2)}px, ${Math.max(12, window.innerHeight / 2 - 100)}px)`,
+  };
   if (spot) {
     const below = spot.top + spot.height + 16;
     const fitsBelow = below + 190 < window.innerHeight;
-    cardStyle = {
-      left: Math.max(12, Math.min(window.innerWidth - cardW - 12, spot.left)),
-      top: fitsBelow ? below : Math.max(12, spot.top - 206),
-    };
+    const x = Math.max(12, Math.min(window.innerWidth - cardW - 12, spot.left));
+    const y = fitsBelow ? below : Math.max(12, spot.top - 206);
+    cardStyle = { top: 0, left: 0, transform: `translate(${x}px, ${y}px)` };
   }
 
   return (
@@ -164,7 +169,11 @@ export function Tour() {
         <div
           className="absolute rounded-[14px] transition-all duration-300"
           style={{
-            ...spot,
+            top: 0,
+            left: 0,
+            width: spot.width,
+            height: spot.height,
+            transform: `translate(${spot.left}px, ${spot.top}px)`,
             boxShadow: "0 0 0 9999px rgba(4,5,6,0.72), 0 0 0 1.5px var(--flow), 0 0 32px var(--flow-glow)",
             pointerEvents: "none",
           }}

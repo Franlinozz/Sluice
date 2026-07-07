@@ -4,7 +4,7 @@
 a second, a citation, a listen, a call — metered and settled on **Arc** in USDC via **Circle
 Gateway**. Humans and agents pay per use; creators get paid per use.
 
-- **Live app:** https://sluiceflow.vercel.app
+- **Live app:** https://sluiceflow.vercel.app · **Traction (honest scoreboard):** https://sluiceflow.vercel.app/traction
 - **Docs:** https://sluiceflow.vercel.app/docs · **Whitepaper:** https://sluiceflow.vercel.app/sluice-whitepaper.pdf
 - **Repo:** https://github.com/Franlinozz/Sluice
 - **API:** https://sluiceflow.vercel.app/gw · **Network:** Arc testnet (chain 5042002)
@@ -24,6 +24,18 @@ Everything is real on Arc testnet — no mock data, no vanity counters.
   - **Cross-chain** withdrawal (Arc → Base Sepolia mint): `0xa6e27ea615e2e4bea4b3a6c84faada659a96a8aad22e1b649b7aa828948b677c`
 - **Reputation bonds:** provider self-bonds USDC; underdelivery slashes it to the buyer (real value
   transfer), delivery releases it; ERC-8004 feedback recorded on resolution.
+- **FundingPool (quadratic matching):** `0xf7ef1d456e74736bbf346c29f74e28c60ce3ade8` — real tips,
+  single-tx round sweeps.
+- **R7 journey evidence:** docs/JOURNEY-R7.md — join → faucet → agent pays 4 sources → citation
+  toll → streaming proof-of-flow → bond staked & released → funding sweep → treasury mint, all
+  with live tx hashes.
+- **People & traction (R5, one profile = one human):** /traction and /api/stats read the same
+  conservative source; partner x402 endpoints are 402-probed before listing; a cross-team
+  settlement (our agent paying another team's endpoint at their price) is proven end-to-end.
+- **Lighthouse (local prod, desktop):** landing 98/96/100/100 · docs 96/93/100/100 · console
+  69/96/77/100 (console carries the wallet SDK; the 77 is a third-party cookie from
+  WalletConnect; measured on a GPU-less build host).
+- **Demo video script:** docs/DEMO-SCRIPT.md (<3 min, shot list included).
 
 ## Demo walkthrough (< 3 min)
 

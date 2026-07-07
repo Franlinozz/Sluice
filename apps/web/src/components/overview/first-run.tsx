@@ -20,14 +20,15 @@ interface StepState {
   hint: string;
 }
 
-export function FirstRunChecklist() {
+export function FirstRunChecklist({ initialDismissed = false }: { initialDismissed?: boolean }) {
   const { address, isConnected } = useAccount();
-  const [dismissed, setDismissed] = React.useState(true); // start hidden; decide after mount
+  // The dismissed flag lives in a COOKIE so the server renders the correct state on first paint —
+  // a post-mount localStorage flip inserted the card late and caused CLS 0.4 on /app.
+  const [dismissed, setDismissed] = React.useState(initialDismissed);
   const [flags, setFlags] = React.useState({ asked: false, receipt: false });
   const [balances, setBalances] = React.useState<{ wallet: number; gateway: number } | null>(null);
 
   React.useEffect(() => {
-    setDismissed(localStorage.getItem("sluice-firstrun-dismissed") === "1");
     setFlags({
       asked: localStorage.getItem("sluice-asked") === "1",
       receipt: localStorage.getItem("sluice-receipt-viewed") === "1",
@@ -113,7 +114,7 @@ export function FirstRunChecklist() {
         </div>
         <button
           onClick={() => {
-            localStorage.setItem("sluice-firstrun-dismissed", "1");
+            document.cookie = "sluice-firstrun-dismissed=1; path=/; max-age=31536000; samesite=lax";
             setDismissed(true);
           }}
           aria-label="Dismiss checklist"

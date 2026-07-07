@@ -1,4 +1,4 @@
-# DEFECTS — site-audit 2026-07-07T08:47:04.067Z
+# DEFECTS — site-audit 2026-07-07T10:52:16.040Z
 
 Base: http://localhost:3005 · routes: 32 · mode: desktop 1440x900 + mobile 390x844 · click-audit: on (safe mode — POSTs intercepted)
 
@@ -12,7 +12,7 @@ Base: http://localhost:3005 · routes: 32 · mode: desktop 1440x900 + mobile 390
 - /: pageerror: Error: An unexpected response was received from the server.
 - /ask: pageerror: Error: An unexpected response was received from the server.
 - /app/spend: pageerror: Error: An unexpected response was received from the server.
-- /app/agents: 3rd-party console error: Analytics SDK: TypeError: Failed to fetch
+- /app/discover: 3rd-party console error: Analytics SDK: TypeError: Failed to fetch
     at _t (<anonymous>:1:64025)
     at <anonymous>:1:68106 {context: AnalyticsSDKApiError}
 - /app/settlements: pageerror: Error: An unexpected response was received from the server.
