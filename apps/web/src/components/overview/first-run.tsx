@@ -27,6 +27,7 @@ export function FirstRunChecklist({ initialDismissed = false }: { initialDismiss
   const [dismissed, setDismissed] = React.useState(initialDismissed);
   const [flags, setFlags] = React.useState({ asked: false, receipt: false });
   const [balances, setBalances] = React.useState<{ wallet: number; gateway: number } | null>(null);
+  const [ownsResource, setOwnsResource] = React.useState(false);
 
   React.useEffect(() => {
     setFlags({
@@ -65,6 +66,28 @@ export function FirstRunChecklist({ initialDismissed = false }: { initialDismiss
     };
   }, [address]);
 
+  // "Register something to earn" is checked from real state: does this wallet own a live resource?
+  React.useEffect(() => {
+    if (!address) {
+      setOwnsResource(false);
+      return;
+    }
+    let alive = true;
+    fetch(`/api/sluice/resources`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list: { payTo?: string; archived?: boolean }[]) => {
+        if (!alive) return;
+        const mine = Array.isArray(list)
+          ? list.some((r) => !r.archived && r.payTo?.toLowerCase() === address.toLowerCase())
+          : false;
+        setOwnsResource(mine);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [address]);
+
   const steps: StepState[] = [
     {
       done: isConnected,
@@ -79,10 +102,10 @@ export function FirstRunChecklist({ initialDismissed = false }: { initialDismiss
       hint: "Claim $0.25 from the built-in faucet on the join page — one click, real on-chain transfer.",
     },
     {
-      done: (balances?.gateway ?? 0) > 0,
-      label: "Deposit into the Gateway",
-      href: "/app/treasury",
-      hint: "Your spending balance for per-use payments.",
+      done: ownsResource,
+      label: "Register something to earn",
+      href: "/earn",
+      hint: "List a page, feed, or endpoint — you get paid every time an agent cites it.",
     },
     {
       done: flags.asked,

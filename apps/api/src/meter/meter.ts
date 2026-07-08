@@ -18,6 +18,7 @@ import {
 import { buildRequirements, type PaymentPayload } from "../payments/requirements.ts";
 import { extractTxHash, getTransfer, transferOutcome } from "../payments/transfers.ts";
 import { getSettlementBackend, type SettleItem, type SettlementBackend } from "./backends.ts";
+import { walletClusters } from "../people/profiles.ts";
 
 /** Default batch trigger: settle once a payer's authorized accruals reach this amount (base units). */
 export const SETTLE_THRESHOLD = BigInt(process.env.METER_SETTLE_THRESHOLD ?? "10000"); // $0.01
@@ -271,9 +272,17 @@ export function aggregates(): MeterAggregates {
   const unitsMetered = allAccruals.reduce((acc, a) => acc + a.units, 0);
   const payers = new Set(allAccruals.map((a) => a.payer)).size;
   const allResources = db.select().from(resources).all();
-  const payToById = new Map(allResources.map((r) => [r.id, r.payTo] as const));
+  const resById = new Map(allResources.map((r) => [r.id, r] as const));
+  // Canonical creator count — MUST match computeStats().creatorsEarning (people/stats.ts) so the
+  // landing "Creators earning" tile and the /traction scoreboard never disagree: cluster linked
+  // wallets into one human (rule 16) and exclude archived resources from the headline (rule 15).
+  const clusters = walletClusters();
+  const clusterOf = (w: string) => clusters.get(w.toLowerCase()) ?? w.toLowerCase();
   const creatorsPaid = new Set(
-    settledReceipts.map((r) => payToById.get(r.resourceId)).filter((p): p is string => Boolean(p)),
+    settledReceipts
+      .map((r) => resById.get(r.resourceId))
+      .filter((res): res is NonNullable<typeof res> => Boolean(res) && !res!.archived)
+      .map((res) => clusterOf(res.payTo)),
   ).size;
   const pending = allAccruals.filter((a) => a.status === "authorized").length;
   return {

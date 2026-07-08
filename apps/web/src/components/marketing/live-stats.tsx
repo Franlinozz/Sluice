@@ -85,7 +85,7 @@ export function LiveStats({ initial }: { initial: Kpis | null }) {
     { label: "Settlements", value: k?.settlements ?? 0, format: (n) => Math.round(n).toLocaleString(), source: "kpis.settlements" },
     { label: "Resources priced", value: k?.resources ?? 0, format: (n) => Math.round(n).toLocaleString(), source: "kpis.resources" },
     { label: "Paying agents", value: k?.payers ?? 0, format: (n) => Math.round(n).toLocaleString(), source: "kpis.payers" },
-    { label: "Creators paid", value: k?.creatorsPaid ?? 0, format: (n) => Math.round(n).toLocaleString(), source: "kpis.creatorsPaid" },
+    { label: "Creators earning", value: k?.creatorsPaid ?? 0, format: (n) => Math.round(n).toLocaleString(), source: "kpis.creatorsPaid" },
   ];
 
   return (

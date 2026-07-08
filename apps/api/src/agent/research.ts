@@ -12,7 +12,7 @@ import { db } from "../db/client.ts";
 import { citations, research, resources, type Resource } from "../db/schema.ts";
 import { listResources } from "../registry.ts";
 import { reason } from "./reasoning.ts";
-import { defaultRules } from "./policy.ts";
+import { defaultRules, keywords } from "./policy.ts";
 import { payResource } from "./pay.ts";
 import { splitPayment } from "../contracts/splitter.ts";
 import { chatJSON, hasOpenAI } from "./openai.ts";
@@ -92,10 +92,29 @@ export interface RunResearchResult {
 }
 
 export async function runResearch(question: string, profileId?: string): Promise<RunResearchResult> {
-  const pool = listResources().filter(
+  const eligible = listResources().filter(
     (r) => (r.unitType === "per_citation" || r.unitType === "per_read") && r.contentUrl,
   );
-  const candidates = pool.slice(0, EVAL_LIMIT);
+  // Pre-rank the evaluation window by lexical overlap with the question, breaking ties by recency.
+  // Previously this took the first EVAL_LIMIT resources in insertion order (oldest-first), which
+  // structurally starved every creator who registered after the pool passed EVAL_LIMIT: their
+  // resources were never even evaluated for citation, so they could never earn. Now on-topic AND
+  // newly-registered resources both reach the window; the per-resource relevance gate below still
+  // decides what actually gets cited (so we never pay for an irrelevant source).
+  const qk = new Set(keywords(question));
+  const overlap = (r: Resource): number => {
+    if (qk.size === 0) return 0;
+    let n = 0;
+    for (const w of keywords(`${r.name} ${r.description ?? ""} ${r.author ?? ""}`)) if (qk.has(w)) n++;
+    return n;
+  };
+  const candidates = [...eligible]
+    .sort((a, b) => {
+      const d = overlap(b) - overlap(a);
+      if (d !== 0) return d;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    })
+    .slice(0, EVAL_LIMIT);
 
   // Reason relevance per candidate.
   const scored: { r: Resource; relevance: number }[] = [];
