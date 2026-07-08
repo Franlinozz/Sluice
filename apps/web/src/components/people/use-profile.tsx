@@ -19,6 +19,7 @@ export interface ProfileDTO {
   avatarUrl: string | null;
   isPublic: boolean;
   joinedAt: string;
+  authProvider: string | null;
   wallets: string[];
 }
 
@@ -49,7 +50,11 @@ export function useProfile() {
       const r = await fetch("/api/sluice/profiles/ensure", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ wallet: address, refHandle: localStorage.getItem("sluice-ref") ?? undefined }),
+        body: JSON.stringify({
+          wallet: address,
+          refHandle: localStorage.getItem("sluice-ref") ?? undefined,
+          authProvider: localStorage.getItem("sluice-auth-provider") ?? undefined,
+        }),
       });
       const p = (await r.json().catch(() => null)) as (ProfileDTO & { error?: string }) | null;
       if (!r.ok || !p?.id) {

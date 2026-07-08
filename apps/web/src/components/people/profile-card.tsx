@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Loader2, UserRound, Link2 } from "lucide-react";
 import { AddressChip, Button, Card, Input, Label, Pill } from "@sluice/ui";
 import { WalletButton } from "@/components/wallet/wallet-button";
+import { ProviderBadge } from "./provider-badge";
 import { useProfile } from "./use-profile";
 
 /**
@@ -111,6 +112,7 @@ export function ProfileCard() {
         <div className="flex items-center gap-2">
           <UserRound className="size-4 text-steel" />
           <h3 className="text-sm font-medium text-hi">Your profile</h3>
+          <ProviderBadge provider={profile.authProvider} showLabel />
         </div>
         <Pill tone={profile.isPublic ? "settled" : "neutral"} dot>
           {profile.isPublic ? "public" : "private"}

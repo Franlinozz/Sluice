@@ -19,7 +19,7 @@ import {
 // `typeof window`. When there's no projectId, the wallet UI takes the injected-only path
 // (no useAppKit), so this stays unset and nothing throws.
 if (hasProjectId) {
-  createAppKit({
+  const modal = createAppKit({
     adapters: [wagmiAdapter],
     networks: appKitNetworks,
     defaultNetwork: appKitNetworks[0],
@@ -37,6 +37,19 @@ if (hasProjectId) {
       "--w3m-border-radius-master": "2px",
       "--w3m-font-family": "var(--ff-sans), system-ui, sans-serif",
     },
+  });
+
+  // Capture the REAL sign-in medium so profiles can honestly show it (Google/X/Discord/etc.).
+  // embeddedWalletInfo.authProvider is present for email/social logins; undefined for external
+  // wallets (MetaMask etc.) → recorded as "wallet". Stashed for use-profile's ensure() call.
+  modal.subscribeAccount((acc) => {
+    if (typeof window === "undefined" || !acc?.isConnected) return;
+    const provider = acc.embeddedWalletInfo?.authProvider ?? "wallet";
+    try {
+      window.localStorage.setItem("sluice-auth-provider", provider);
+    } catch {
+      /* private mode / storage disabled — capture is best-effort, never blocks sign-in */
+    }
   });
 }
 

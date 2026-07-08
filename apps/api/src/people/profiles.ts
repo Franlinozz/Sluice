@@ -32,18 +32,39 @@ export function profileByHandle(handle: string): Profile | undefined {
   return db.select().from(profiles).where(eq(profiles.handle, handle.toLowerCase())).get();
 }
 
+/** Sign-in mediums we recognise (Reown authProvider values) + "wallet" for external wallets. */
+const AUTH_PROVIDERS = new Set([
+  "google", "github", "x", "apple", "discord", "email", "farcaster", "facebook", "wallet",
+]);
+
+/** Normalise a claimed sign-in medium to a known value, or null (never store a guess). */
+export function normalizeAuthProvider(p?: string | null): string | null {
+  if (!p) return null;
+  const v = p.toLowerCase().trim();
+  return AUTH_PROVIDERS.has(v) ? v : null;
+}
+
 /** Get-or-create the profile for a wallet. Referral recorded ONCE, at creation only. */
-export function ensureProfile(wallet: string, refHandle?: string): Profile {
+export function ensureProfile(wallet: string, refHandle?: string, authProvider?: string): Profile {
   const w = wallet.toLowerCase();
+  const provider = normalizeAuthProvider(authProvider);
   const existing = profileByWallet(w);
-  if (existing) return existing;
+  if (existing) {
+    // Enrich profiles created before capture existed — only fill a null, never overwrite a real
+    // prior value (the first recorded medium for a returning human stands).
+    if (provider && !existing.authProvider) {
+      db.update(profiles).set({ authProvider: provider }).where(eq(profiles.id, existing.id)).run();
+      return profileById(existing.id)!;
+    }
+    return existing;
+  }
   let refBy: string | null = null;
   if (refHandle) {
     const ref = profileByHandle(refHandle);
     if (ref) refBy = ref.id; // an unknown handle simply records nothing — no invented referrers
   }
   const id = randomUUID();
-  db.insert(profiles).values({ id, displayName: short(w), refBy }).run();
+  db.insert(profiles).values({ id, displayName: short(w), refBy, authProvider: provider }).run();
   db.insert(profileWallets).values({ wallet: w, profileId: id }).run();
   return profileById(id)!;
 }
@@ -105,6 +126,7 @@ export interface PublicProfileView {
   avatarUrl: string | null;
   joinedAt: Date;
   invitedBy: string | null; // handle or name of the referrer (if that referrer is public)
+  authProvider: string | null; // real sign-in medium (null when unknown — never guessed)
   questionsAsked: number;
   resourcesRegistered: number;
 }
@@ -127,6 +149,7 @@ export function communityProfiles(): PublicProfileView[] {
       avatarUrl: p.avatarUrl,
       joinedAt: p.joinedAt,
       invitedBy,
+      authProvider: p.authProvider,
       questionsAsked: asked,
       resourcesRegistered: regs,
     };
@@ -136,6 +159,21 @@ export function communityProfiles(): PublicProfileView[] {
 /** Total distinct humans = profiles (each may hold many wallets — still one human). */
 export function profileCount(): number {
   return db.select().from(profiles).all().length;
+}
+
+/**
+ * How the humans signed in, from real captured data only. Profiles created before capture existed
+ * have a null authProvider and are grouped as "unknown" (never guessed). Ordered most-common first.
+ */
+export function authProviderBreakdown(): { provider: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const p of db.select().from(profiles).all()) {
+    const key = p.authProvider ?? "unknown";
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([provider, count]) => ({ provider, count }))
+    .sort((a, b) => b.count - a.count);
 }
 
 /** wallet(lowercase) → profileId map, for clustering wallet-level metrics into humans. */

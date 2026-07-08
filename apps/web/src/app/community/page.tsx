@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Users, ArrowRight } from "lucide-react";
 import { Card, Pill } from "@sluice/ui";
 import { SiteHeader } from "@/components/marketing/site-header";
+import { ProviderBadge } from "@/components/people/provider-badge";
 import { sanitizeLabel } from "@/lib/sanitize";
 
 export const metadata = {
@@ -17,6 +18,7 @@ interface CommunityProfile {
   avatarUrl: string | null;
   joinedAt: string;
   invitedBy: string | null;
+  authProvider: string | null;
   questionsAsked: number;
   resourcesRegistered: number;
 }
@@ -64,6 +66,7 @@ export default async function CommunityPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-medium text-hi">{sanitizeLabel(p.displayName, 40)}</span>
                       {p.handle && <span className="font-mono text-xs text-steel">@{p.handle}</span>}
+                      <ProviderBadge provider={p.authProvider} showLabel />
                       {p.invitedBy && (
                         <span className="text-xs text-low">invited by @{sanitizeLabel(p.invitedBy, 24)}</span>
                       )}

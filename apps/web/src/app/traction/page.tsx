@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight, ShieldCheck } from "lucide-react";
 import { Card, Pill } from "@sluice/ui";
 import { SiteHeader } from "@/components/marketing/site-header";
+import { ProviderBadge } from "@/components/people/provider-badge";
 import { sanitizeLabel } from "@/lib/sanitize";
 
 export const metadata = {
@@ -17,6 +18,7 @@ interface Stats {
   distinctHumans: number;
   distinctPayingWallets: number;
   creatorsEarning: number;
+  signinMediums: { provider: string; count: number }[];
   settlements: number;
   formattedTotalSettled: string;
   settlementsByDay: { day: string; count: number; amount: string }[];
@@ -86,6 +88,40 @@ export default async function TractionPage() {
                 </Link>
               ))}
             </div>
+
+            {/* how the humans actually signed in — real captured mediums (rule 16) */}
+            {stats.signinMediums.some((m) => m.provider !== "unknown") && (
+              <Card className="mt-6 p-5">
+                <div className="mb-3 flex items-baseline justify-between">
+                  <span className="text-sm font-medium text-hi">Signed in via</span>
+                  <span className="text-xs text-low">real logins, one per human</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {stats.signinMediums
+                    .filter((m) => m.provider !== "unknown")
+                    .map((m) => (
+                      <span
+                        key={m.provider}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface-1/60 px-2.5 py-1"
+                      >
+                        <ProviderBadge provider={m.provider} showLabel />
+                        <span className="font-mono text-xs tnum text-hi">{m.count}</span>
+                      </span>
+                    ))}
+                  {stats.signinMediums
+                    .filter((m) => m.provider === "unknown")
+                    .map((m) => (
+                      <span key="unknown" className="text-[11px] text-low">
+                        + {m.count} joined before sign-in capture
+                      </span>
+                    ))}
+                </div>
+                <p className="mt-3 text-[11px] leading-snug text-low">
+                  Captured from the wallet/social provider each person actually used — not inferred.
+                  Different mediums (wallet, Google, X, Discord, GitHub, Apple) all settle here.
+                </p>
+              </Card>
+            )}
 
             {/* settlements over time — inline SVG, real daily counts */}
             <Card className="mt-6 p-5">

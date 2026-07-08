@@ -12,13 +12,14 @@ import { desc } from "drizzle-orm";
 import { formatUSD } from "@sluice/money";
 import { db } from "../db/client.ts";
 import { receipts, resources } from "../db/schema.ts";
-import { profileCount, walletClusters } from "./profiles.ts";
+import { authProviderBreakdown, profileCount, walletClusters } from "./profiles.ts";
 
 export interface StatsView {
   generatedAt: string;
   distinctHumans: number;
   distinctPayingWallets: number;
   creatorsEarning: number;
+  signinMediums: { provider: string; count: number }[];
   settlements: number;
   totalSettled: string;
   formattedTotalSettled: string;
@@ -67,6 +68,7 @@ export function computeStats(): StatsView {
     distinctHumans: profileCount(),
     distinctPayingWallets: payingClusters.size,
     creatorsEarning: creatorClusters.size,
+    signinMediums: authProviderBreakdown(),
     settlements: settled.length,
     totalSettled: total.toString(),
     formattedTotalSettled: formatUSD(total),

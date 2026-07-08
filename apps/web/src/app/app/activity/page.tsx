@@ -6,6 +6,7 @@ import { Activity, ArrowUpRight, MessageCircleQuestion, ReceiptText } from "luci
 import { AmountMono, Card, Pill, Skeleton, StatusPill } from "@sluice/ui";
 import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
 import { useProfile } from "@/components/people/use-profile";
+import { ProviderBadge } from "@/components/people/provider-badge";
 import { sanitizeExcerpt } from "@/lib/sanitize";
 import type { ReceiptDTO, RecentAnswerDTO } from "@/lib/api";
 
@@ -50,6 +51,7 @@ export default function ActivityPage() {
         eyebrow="Activity"
         title="My activity"
         description="What you've paid, asked, and earned — receipts from your linked wallets, questions you asked. All of it real."
+        actions={profile?.authProvider ? <ProviderBadge provider={profile.authProvider} showLabel /> : undefined}
       />
 
       {!profile ? (

@@ -803,14 +803,15 @@ function serializeProfile(p: NonNullable<ReturnType<typeof profileById>>) {
     avatarUrl: p.avatarUrl,
     isPublic: p.isPublic,
     joinedAt: p.joinedAt,
+    authProvider: p.authProvider,
     wallets: walletsOf(p.id),
   };
 }
 
 app.post("/profiles/ensure", async (req, reply) => {
-  const b = (req.body ?? {}) as { wallet?: string; refHandle?: string };
+  const b = (req.body ?? {}) as { wallet?: string; refHandle?: string; authProvider?: string };
   if (!b.wallet || !ADDR_RE.test(b.wallet)) return reply.code(400).send({ error: "valid wallet required" });
-  return serializeProfile(ensureProfile(b.wallet, b.refHandle));
+  return serializeProfile(ensureProfile(b.wallet, b.refHandle, b.authProvider));
 });
 
 app.get("/profiles/:id", async (req, reply) => {

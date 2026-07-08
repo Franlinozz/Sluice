@@ -247,6 +247,12 @@ export const profiles = sqliteTable("profiles", {
   isPublic: integer("is_public", { mode: "boolean" }).notNull().default(false),
   /** Honest referral: the profile that invited this one (set once at creation). */
   refBy: text("ref_by"),
+  /**
+   * How this human signed in, captured from Reown's embeddedWalletInfo.authProvider at connect:
+   * "google" | "github" | "x" | "apple" | "discord" | "email" | "farcaster" | "wallet".
+   * Real data only — null for profiles created before capture existed (never guessed).
+   */
+  authProvider: text("auth_provider"),
   joinedAt: integer("joined_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
