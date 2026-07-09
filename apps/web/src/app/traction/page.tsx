@@ -46,7 +46,7 @@ export default async function TractionPage() {
   const figures = stats
     ? [
         { label: "Distinct humans", value: String(stats.distinctHumans), href: "/community", note: "profiles — linked wallets count once" },
-        { label: "Paying agents", value: String(stats.distinctPayingWallets), href: "/app/settlements", note: "one demo agent pays every creator (by design)" },
+        { label: "Paying agents", value: String(stats.distinctPayingWallets), href: "/app/settlements", note: "the demo agent + anyone paying from their own wallet" },
         { label: "Creators earning", value: String(stats.creatorsEarning), href: "/app/settlements", note: "distinct paid recipients" },
         { label: "Settlements", value: String(stats.settlements), href: "/app/settlements", note: "settled receipts" },
         { label: "Total settled", value: stats.formattedTotalSettled, href: "/app/settlements", note: "USDC on Arc" },

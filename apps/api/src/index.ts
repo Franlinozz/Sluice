@@ -37,6 +37,7 @@ import { ingestFeed, listFeeds } from "./connectors/rss.ts";
 import { ingestPeerTube } from "./connectors/peertube.ts";
 import { ingestNavidrome, ingestOwncast, connectorCatalog } from "./connectors/oss.ts";
 import { getResearch, recentResearch, resourceEarned, runResearch } from "./agent/research.ts";
+import { prepareUserAsk, submitUserAsk } from "./agent/user-pay.ts";
 import {
   createSession,
   getSessionState,
@@ -496,6 +497,31 @@ app.post("/research", spendLimit, async (req, reply) => {
       formattedTotalPaid: formatUSD(BigInt(r.totalPaid)),
       citations: r.citations.map(serializeCitation),
     };
+  } catch (err) {
+    reply.code(500).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// User-funded ask (phase 1): pick the source + return the EIP-712 authorization to sign.
+app.post("/research/user-pay/prepare", spendLimit, async (req, reply) => {
+  const body = (req.body ?? {}) as { question?: string; address?: string; profileId?: string };
+  if (!body.question || !body.question.trim()) return reply.code(400).send({ error: "question is required" });
+  if (!body.address || !ADDR_RE.test(body.address)) return reply.code(400).send({ error: "a connected wallet is required" });
+  try {
+    return await prepareUserAsk(body.question.trim(), body.address, body.profileId);
+  } catch (err) {
+    reply.code(500).send({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// User-funded ask (phase 2): relay the signed authorization on-chain, record the receipt.
+app.post("/research/user-pay/submit", async (req, reply) => {
+  const body = (req.body ?? {}) as { requestId?: string; signature?: string };
+  if (!body.requestId || !body.signature) return reply.code(400).send({ error: "requestId and signature are required" });
+  try {
+    const res = await submitUserAsk(body.requestId, body.signature);
+    if (!res.ok) return reply.code(400).send(res);
+    return res;
   } catch (err) {
     reply.code(500).send({ error: err instanceof Error ? err.message : String(err) });
   }
