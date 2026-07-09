@@ -104,7 +104,7 @@ export function FirstRunChecklist({ initialDismissed = false }: { initialDismiss
     {
       done: ownsResource,
       label: "Register something to earn",
-      href: "/earn",
+      href: "/app/earn",
       hint: "List a page, feed, or endpoint — you get paid every time an agent cites it.",
     },
     {
