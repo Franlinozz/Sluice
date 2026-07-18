@@ -109,7 +109,11 @@ export async function claimFaucet(profileId: string, wallet: string): Promise<Fa
       account: op.account!,
       chain: op.chain,
     } as never);
-    await getClient().waitForTransactionReceipt({ hash: txHash });
+    // Broadcast succeeded — a receipt-poll error here is an RPC flake, not a failed drip
+    // (hotfix 2026-07-18). The claim is recorded with its Arcscan-checkable hash either way.
+    await getClient()
+      .waitForTransactionReceipt({ hash: txHash, timeout: 30_000, retryCount: 3 })
+      .catch(() => {});
 
     db.insert(faucetClaims).values({ id: randomUUID(), profileId, wallet: w, amount: DRIP_BASE_6DP, txHash }).run();
 

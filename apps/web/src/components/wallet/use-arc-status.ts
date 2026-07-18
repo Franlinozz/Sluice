@@ -8,7 +8,8 @@ import type { LiveStatus } from "@sluice/ui";
 export function useArcStatus(): { status: LiveStatus; blockNumber?: bigint } {
   const { data, isError, isLoading } = useBlockNumber({
     chainId: arcConfig.chainId,
-    query: { refetchInterval: 10_000, retry: 1 },
+    // 45s: a liveness dot doesn't need a chain read every 10s (hotfix 2026-07-18, RPC volume).
+    query: { refetchInterval: 45_000, staleTime: 45_000, retry: 1 },
   });
 
   const status: LiveStatus = isError ? "down" : data != null ? "live" : isLoading ? "connecting" : "connecting";

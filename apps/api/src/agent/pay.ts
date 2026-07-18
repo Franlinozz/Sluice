@@ -3,6 +3,7 @@
  * (GatewayClient handles 402 → sign → retry). Deposit-aware.
  */
 import { GatewayClient } from "@circle-fin/x402-batching/client";
+import { arcConfig } from "@sluice/chain";
 
 let buyer: GatewayClient | undefined;
 
@@ -11,7 +12,8 @@ function buyerClient(): GatewayClient | undefined {
     | `0x${string}`
     | undefined;
   if (!pk) return undefined;
-  return (buyer ??= new GatewayClient({ chain: "arcTestnet", privateKey: pk }));
+  // rpcUrls[0] = healthiest backup (official endpoint rate-limits; hotfix 2026-07-18).
+  return (buyer ??= new GatewayClient({ chain: "arcTestnet", privateKey: pk, rpcUrl: arcConfig.rpcUrls[0] }));
 }
 
 export function buyerAddress(): string | undefined {

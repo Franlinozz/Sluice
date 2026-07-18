@@ -22,15 +22,25 @@ import { arcTestnet } from "./chain.ts";
 
 let cached: PublicClient | undefined;
 
-export function createArcPublicClient(): PublicClient {
-  const urls = [arcConfig.rpcUrl, ...arcConfig.rpcFallbacks];
-  const transports = urls.map((url) =>
-    http(url, { retryCount: 3, retryDelay: 300, timeout: 10_000 }),
+/**
+ * Ranked fallback transport over the full ordered RPC list (hotfix 2026-07-18: the official RPC
+ * rate-limits under load; rank:true lets the healthiest provider win). retryDelay backs off
+ * exponentially inside viem (delay × 2^attempt).
+ */
+function arcTransport() {
+  const transports = arcConfig.rpcUrls.map((url) =>
+    http(url, { retryCount: 3, retryDelay: 500, timeout: 10_000 }),
   );
+  return transports.length > 1 ? fallback(transports, { rank: true }) : transports[0]!;
+}
+
+export function createArcPublicClient(): PublicClient {
   return createPublicClient({
     chain: arcTestnet,
-    // rank:false → strict priority order, keeping Arc primary and quiet.
-    transport: transports.length > 1 ? fallback(transports, { rank: false }) : transports[0]!,
+    transport: arcTransport(),
+    // Receipt polls (waitForTransactionReceipt etc.) tick every 2.5s instead of viem's tighter
+    // default — Arc finality is sub-second, so this loses nothing and slashes request volume.
+    pollingInterval: 2_500,
   });
 }
 
@@ -50,7 +60,10 @@ export function getWalletClient(privateKey: Hex): WalletClient {
   return createWalletClient({
     account,
     chain: arcTestnet,
-    transport: http(arcConfig.rpcUrl, { retryCount: 3, retryDelay: 300, timeout: 10_000 }),
+    // Same ranked fallback as reads — a rate-limited primary must never block a WRITE
+    // (withdrawals/faucet/relays were failing on the single official endpoint).
+    transport: arcTransport(),
+    pollingInterval: 2_500,
   });
 }
 

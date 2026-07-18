@@ -3,16 +3,15 @@
 import * as React from "react";
 import {
   useAccount,
-  useBalance,
   useConnect,
   useConnectors,
   useDisconnect,
   useSwitchChain,
 } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
 import { useAppKit } from "@reown/appkit/react";
 import { LogOut, Wallet } from "lucide-react";
 import { arcConfig, explorerAddressUrl } from "@sluice/chain";
-import { formatNative } from "@sluice/money";
 import { AddressChip, Button, HelpTip, Skeleton } from "@sluice/ui";
 import { hasProjectId } from "@/lib/wagmi";
 
@@ -69,10 +68,18 @@ function ConnectInjected() {
 function useWalletView() {
   const { address, chainId } = useAccount();
   const { switchChain, isPending: switching } = useSwitchChain();
-  const { data: balance } = useBalance({
-    address,
-    chainId: arcConfig.chainId,
-    query: { enabled: Boolean(address), refetchInterval: 15_000 },
+  // Balance comes from the SERVER-CACHED endpoint, not a direct chain read (hotfix 2026-07-18:
+  // per-client 15s chain polling was part of tripping the RPC rate limit). useQuery dedupes
+  // identical in-flight requests across every mounted consumer.
+  const { data } = useQuery<{ wallet?: { formattedNative?: string } } | null>({
+    queryKey: ["wallet-balance", address],
+    enabled: Boolean(address),
+    refetchInterval: 30_000,
+    staleTime: 30_000,
+    queryFn: () =>
+      fetch(`/api/sluice/gateway/balance?address=${address}`, { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
   });
   const wrongNetwork = chainId != null && chainId !== arcConfig.chainId;
   return {
@@ -80,7 +87,7 @@ function useWalletView() {
     wrongNetwork,
     switching,
     switchToArc: () => switchChain({ chainId: arcConfig.chainId }),
-    balanceLabel: balance ? `${formatNative(balance.value)} USDC` : null,
+    balanceLabel: data?.wallet?.formattedNative ? `${data.wallet.formattedNative} USDC` : null,
   };
 }
 

@@ -61,11 +61,25 @@ export function WithdrawPanel({
             description: res.instant ? "Instant mint" : "Cross-chain mint",
           });
           router.refresh();
+        } else if (/request limit|rate.?limit|timed? ?out|timeout|network|busy|fetch failed/i.test(res?.error ?? "")) {
+          // RPC congestion, not a definitive refusal — the tx may have landed (hotfix 2026-07-18).
+          toast.message("Network busy — withdrawal may still have completed", {
+            description:
+              "Balances refresh within ~30s. Check your balance (or Arcscan) before retrying, so you don't withdraw twice.",
+            duration: 12_000,
+          });
+          setTimeout(() => router.refresh(), 15_000);
         } else {
           toast.error("Withdrawal failed", { description: res?.error ?? "API error" });
         }
       })
-      .catch(() => toast.error("Withdrawal failed", { description: "API unreachable" }))
+      .catch(() =>
+        toast.message("Network busy — withdrawal may still have completed", {
+          description:
+            "The request didn't come back. Check your balance (or Arcscan) before retrying, so you don't withdraw twice.",
+          duration: 12_000,
+        }),
+      )
       .finally(() => setPending(false));
   }
 

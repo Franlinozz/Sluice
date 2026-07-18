@@ -3,6 +3,7 @@
  * batches on-chain asynchronously; the reconciler polls these to resolve the real tx hash.
  */
 import { GatewayClient } from "@circle-fin/x402-batching/client";
+import { arcConfig } from "@sluice/chain";
 
 let reader: GatewayClient | undefined;
 
@@ -13,7 +14,8 @@ function readerClient(): GatewayClient | undefined {
     process.env.ARC_WALLET_PRIVATE_KEY ??
     process.env.SELLER_PRIVATE_KEY) as `0x${string}` | undefined;
   if (!pk) return undefined;
-  return (reader ??= new GatewayClient({ chain: "arcTestnet", privateKey: pk }));
+  // rpcUrls[0] = healthiest backup (official endpoint rate-limits; hotfix 2026-07-18).
+  return (reader ??= new GatewayClient({ chain: "arcTestnet", privateKey: pk, rpcUrl: arcConfig.rpcUrls[0] }));
 }
 
 export async function getTransfer(id: string): Promise<Record<string, unknown> | undefined> {

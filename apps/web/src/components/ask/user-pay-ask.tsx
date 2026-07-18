@@ -35,6 +35,8 @@ interface PrepItem {
 }
 interface SubmitOk {
   ok: true;
+  /** Tx broadcast but receipt not yet seen (RPC lag) — show "Submitted — confirming…", never "failed". */
+  confirming?: boolean;
   answer: string;
   txHash: string;
   explorerUrl: string;
@@ -192,9 +194,15 @@ export function UserPayAsk() {
             <p className="text-[15px] leading-relaxed text-hi">{result.answer}</p>
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-[10px] border border-hairline bg-surface-1 p-3 text-xs">
-            <span className="inline-flex items-center gap-1.5 font-medium" style={{ color: "var(--settled)" }}>
-              <ReceiptText className="size-3.5" /> receipt
-            </span>
+            {result.confirming ? (
+              <span className="inline-flex items-center gap-1.5 font-medium text-steel">
+                <PulseDot active /> Submitted — confirming…
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 font-medium" style={{ color: "var(--settled)" }}>
+                <ReceiptText className="size-3.5" /> receipt
+              </span>
+            )}
             <span className="font-mono text-mid">
               you paid <AmountMono value={result.citation.formattedAmount} size="sm" tone="settled" dimDecimals />{" "}
               → {result.citation.author ?? result.citation.name}
@@ -207,6 +215,12 @@ export function UserPayAsk() {
             >
               on-chain tx <ArrowUpRight className="size-3" />
             </a>
+            {result.confirming && (
+              <span className="text-low">
+                Your payment is on Arc — the network is confirming it. The receipt lands in
+                Settlements automatically; check the tx link any time.
+              </span>
+            )}
           </div>
         </div>
       )}

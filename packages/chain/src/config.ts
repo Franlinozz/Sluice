@@ -12,6 +12,12 @@ import type { Address } from "viem";
 const DEFAULTS = {
   chainId: 5042002,
   rpcUrl: "https://rpc.testnet.arc.network",
+  /**
+   * Public keyless backup RPCs, BAKED IN so the BROWSER gets fallback too (hotfix 2026-07-18:
+   * the official RPC rate-limits under judge traffic; a server-only env list left every browser
+   * wallet read/write on the single limited endpoint). Verified same chain (eth_chainId 5042002).
+   */
+  rpcBackups: ["https://arc-testnet.drpc.org"],
   explorerUrl: "https://testnet.arcscan.app",
   explorerName: "Arcscan",
   usdcToken: "0x3600000000000000000000000000000000000000" as Address,
@@ -42,20 +48,31 @@ const chainId = Number.parseInt(
 const rpcUrl = pick(process.env.NEXT_PUBLIC_ARC_RPC_URL, DEFAULTS.rpcUrl);
 const explorerUrl = pick(process.env.NEXT_PUBLIC_ARC_EXPLORER_URL, DEFAULTS.explorerUrl);
 
-// Optional server-only ordered backup RPCs (Arc stays primary, quiet).
+// Ordered backup RPCs. Alchemy (keyed, server-only) first when configured, then any env-supplied
+// extras, then the baked-in public backups — deduped, primary excluded.
 const alchemyKey = process.env.ALCHEMY_ARC_KEY;
 const rpcFallbacks = [
-  ...parseList(process.env.ARC_RPC_FALLBACKS),
   ...(alchemyKey ? [`https://arc-testnet.g.alchemy.com/v2/${alchemyKey}`] : []),
-].filter((u) => u !== rpcUrl);
+  ...parseList(process.env.ARC_RPC_FALLBACKS),
+  ...DEFAULTS.rpcBackups,
+].filter((u, i, a) => u !== rpcUrl && a.indexOf(u) === i);
+
+/**
+ * Transport-ordered RPC list (hotfix 2026-07-18): healthy backups FIRST, the rate-limited
+ * official endpoint demoted to last. viem's ranked fallback() re-orders by live health anyway;
+ * this ordering just makes the first attempt land on a provider with headroom.
+ */
+const rpcUrls = [...rpcFallbacks, rpcUrl];
 
 export interface ArcConfig {
   readonly chainId: number;
   /** CAIP-2 network id, e.g. "eip155:5042002" (x402 uses this). */
   readonly caip2: `eip155:${number}`;
   readonly rpcUrl: string;
-  /** Ordered backup RPCs (same chain). Empty in the browser by design. */
+  /** Ordered backup RPCs (same chain). Includes baked-in public backups (browser-visible). */
   readonly rpcFallbacks: readonly string[];
+  /** Transport-ordered list for fallback(): backups first, official last. Never empty. */
+  readonly rpcUrls: readonly string[];
   readonly explorerUrl: string;
   readonly explorerName: string;
   readonly nativeSymbol: string;
@@ -75,6 +92,7 @@ export const arcConfig: ArcConfig = {
   caip2: `eip155:${chainId}`,
   rpcUrl,
   rpcFallbacks,
+  rpcUrls,
   explorerUrl,
   explorerName: DEFAULTS.explorerName,
   // Arc's native gas token is USDC, displayed with 18 decimals (CLAUDE.md #5).

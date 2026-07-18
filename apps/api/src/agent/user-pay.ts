@@ -246,6 +246,8 @@ function splitSignature(sig: string): { v: number; r: Hex; s: Hex } {
 export interface SubmitResult {
   ok: boolean;
   error?: string;
+  /** Tx broadcast (hash known) but receipt not yet seen — show "Submitted — confirming…", not failed. */
+  confirming?: boolean;
   answer?: string;
   txHash?: string;
   explorerUrl?: string;
@@ -316,13 +318,40 @@ export async function submitUserAsk(requestId: string, signature: string): Promi
     return { ok: false, error: `on-chain payment failed: ${e instanceof Error ? e.message.slice(0, 160) : String(e)}` };
   }
 
-  const rcpt = await pub.waitForTransactionReceipt({ hash: txHash });
-  if (rcpt.status !== "success") {
+  // Broadcast succeeded — from here on, a receipt-lookup error is "unconfirmed", NEVER "failed"
+  // (hotfix 2026-07-18: RPC rate limits made receipt polls error on txs that had actually landed).
+  let rcpt: Awaited<ReturnType<typeof pub.waitForTransactionReceipt>> | null = null;
+  try {
+    rcpt = await pub.waitForTransactionReceipt({ hash: txHash, timeout: 30_000, retryCount: 3 });
+  } catch {
+    /* still confirming — background loop below keeps trying */
+  }
+  if (rcpt && rcpt.status !== "success") {
     return { ok: false, error: "payment transaction reverted on-chain" };
   }
 
-  // Record the ask + citation + a settled receipt whose PAYER is the user (real distinct payer).
   const answer = await synthesize(p.question, p.resourceName, p.description);
+  const citation = {
+    name: p.resourceName,
+    author: p.author,
+    sourceUrl: p.sourceUrl,
+    formattedAmount: formatUSD(p.value),
+    payTo: p.payTo,
+  };
+
+  if (!rcpt) {
+    // Tx broadcast but not yet confirmed by any RPC we could reach. Record it only once a real
+    // receipt is seen (rule 1 — never write "settled" we haven't verified); retry in background.
+    confirmInBackground(p, txHash, answer);
+    return { ok: true, confirming: true, answer, txHash, explorerUrl: explorerTxUrl(txHash), citation };
+  }
+
+  recordUserPayment(p, txHash, answer);
+  return { ok: true, answer, txHash, explorerUrl: explorerTxUrl(txHash), citation };
+}
+
+/** Record the ask + citation + a settled receipt whose PAYER is the user (real distinct payer). */
+function recordUserPayment(p: Pending, txHash: Hex, answer: string): void {
   const researchId = randomUUID();
   const now = new Date();
   db.insert(research)
@@ -369,20 +398,27 @@ export async function submitUserAsk(requestId: string, signature: string): Promi
       settledAt: now,
     })
     .run();
+}
 
-  return {
-    ok: true,
-    answer,
-    txHash,
-    explorerUrl: explorerTxUrl(txHash),
-    citation: {
-      name: p.resourceName,
-      author: p.author,
-      sourceUrl: p.sourceUrl,
-      formattedAmount: formatUSD(p.value),
-      payTo: p.payTo,
-    },
-  };
+/** Bounded background confirmation (2.5s-polled client, up to ~2 min) for "confirming" txs. */
+function confirmInBackground(p: Pending, txHash: Hex, answer: string): void {
+  void (async () => {
+    const pub = getClient();
+    for (let i = 0; i < 24; i++) {
+      await new Promise((res) => setTimeout(res, 5_000));
+      try {
+        const rcpt = await pub.getTransactionReceipt({ hash: txHash });
+        if (rcpt) {
+          if (rcpt.status === "success") recordUserPayment(p, txHash, answer);
+          else console.error(`user-pay tx ${txHash} reverted; not recording a receipt`);
+          return;
+        }
+      } catch {
+        /* not yet visible — keep trying */
+      }
+    }
+    console.error(`user-pay tx ${txHash} unconfirmed after 2min; check ${explorerTxUrl(txHash)}`);
+  })();
 }
 
 // A tiny helper so tests can assert the pending map behaviour without exporting internals.

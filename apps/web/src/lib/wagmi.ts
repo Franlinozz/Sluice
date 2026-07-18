@@ -6,7 +6,7 @@
  * and must NOT touch window. Chain config comes from @sluice/chain (the single source).
  */
 import { cookieStorage, createStorage } from "wagmi";
-import { http } from "viem";
+import { fallback, http } from "viem";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { defineChain, type AppKitNetwork } from "@reown/appkit/networks";
 import { arcConfig } from "@sluice/chain";
@@ -22,7 +22,7 @@ export const arcAppKitNetwork = defineChain({
   chainNamespace: "eip155",
   name: "Arc Testnet",
   nativeCurrency: { name: "USD Coin", symbol: arcConfig.nativeSymbol, decimals: arcConfig.nativeDecimals },
-  rpcUrls: { default: { http: [arcConfig.rpcUrl, ...arcConfig.rpcFallbacks] } },
+  rpcUrls: { default: { http: [...arcConfig.rpcUrls] } },
   blockExplorers: {
     default: { name: arcConfig.explorerName, url: arcConfig.explorerUrl },
   },
@@ -48,7 +48,12 @@ export const wagmiAdapter = new WagmiAdapter({
   ssr: true,
   storage: createStorage({ storage: cookieStorage }),
   transports: {
-    [arcConfig.chainId]: http(arcConfig.rpcUrl),
+    // Ranked fallback across ALL RPCs (hotfix 2026-07-18): the official endpoint rate-limits
+    // under judge traffic; browser reads/writes must never depend on a single provider.
+    [arcConfig.chainId]: fallback(
+      arcConfig.rpcUrls.map((u) => http(u, { retryCount: 3, retryDelay: 500, timeout: 10_000 })),
+      { rank: true },
+    ),
   },
 });
 

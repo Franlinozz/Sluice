@@ -55,7 +55,8 @@ if (hasProjectId) {
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { staleTime: 10_000, refetchOnWindowFocus: false, retry: 2 },
+    // staleTime 30s (hotfix 2026-07-18): chain-backed reads must not refetch more than ~2×/min.
+    queries: { staleTime: 30_000, refetchOnWindowFocus: false, retry: 2 },
   },
 });
 

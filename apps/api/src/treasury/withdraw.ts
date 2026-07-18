@@ -7,7 +7,7 @@
  */
 import { createPublicClient, http, parseEther, type Address, type Hex } from "viem";
 import { GatewayClient } from "@circle-fin/x402-batching/client";
-import { getWalletClient, getNativeBalance, getClient } from "@sluice/chain";
+import { arcConfig, getWalletClient, getNativeBalance, getClient } from "@sluice/chain";
 
 export interface WithdrawChain {
   name: string; // GatewayClient SupportedChainName
@@ -21,7 +21,7 @@ export const WITHDRAW_CHAINS: WithdrawChain[] = [
   {
     name: "arcTestnet",
     label: "Arc (instant)",
-    rpc: process.env.NEXT_PUBLIC_ARC_RPC_URL ?? "https://rpc.arc-sepolia.gelato.digital",
+    rpc: arcConfig.rpcUrls[0]!,
     explorerTx: "https://testnet.arcscan.app/tx/",
     sameChain: true,
   },
@@ -69,7 +69,8 @@ export async function withdrawTreasury(params: {
   if (!Number.isFinite(amountNum) || amountNum <= 0) throw new Error("amount must be > 0");
 
   const key = treasuryKey();
-  const client = new GatewayClient({ chain: "arcTestnet", privateKey: key });
+  // rpcUrls[0] = healthiest backup (official endpoint rate-limits; hotfix 2026-07-18).
+  const client = new GatewayClient({ chain: "arcTestnet", privateKey: key, rpcUrl: arcConfig.rpcUrls[0] });
   const recipient = (params.recipient as Address) || client.address;
 
   const balances = await client.getBalances();
@@ -91,11 +92,45 @@ export async function withdrawTreasury(params: {
     }
   }
 
-  const res = await client.withdraw(params.amount, {
-    chain: chain.name as never,
-    recipient,
-    maxFee: "0.05",
-  });
+  let res;
+  try {
+    res = await client.withdraw(params.amount, {
+      chain: chain.name as never,
+      recipient,
+      maxFee: "0.05",
+    });
+  } catch (e) {
+    // Hotfix 2026-07-18: under RPC congestion the library's internal receipt poll flakes and it
+    // reports "Mint transaction failed: 0x…" for txs that actually LANDED (reproduced live:
+    // 0x835dee61… status=success on-chain). The CHAIN is authoritative — when the error carries
+    // a hash, verify the receipt ourselves through the fallback transport and answer honestly.
+    const msg = e instanceof Error ? e.message : String(e);
+    const m = msg.match(/(0x[0-9a-fA-F]{64})/);
+    if (!m) throw e;
+    const hash = m[1] as Hex;
+    const destClient = chain.sameChain
+      ? getClient()
+      : createPublicClient({ transport: http(chain.rpc, { retryCount: 3, retryDelay: 500, timeout: 10_000 }) });
+    const rcpt = await destClient
+      .waitForTransactionReceipt({ hash, timeout: 30_000, retryCount: 3, pollingInterval: 2_500 })
+      .catch(() => null);
+    if (rcpt && rcpt.status !== "success") {
+      throw new Error(`mint reverted on-chain — no funds moved. Tx: ${chain.explorerTx}${hash}`);
+    }
+    if (!rcpt) {
+      throw new Error(
+        `submitted — confirming. Check ${chain.explorerTx}${hash} and your balance before retrying (do not withdraw twice).`,
+      );
+    }
+    // Confirmed success the library mislabeled — reconstruct the honest result.
+    res = {
+      mintTxHash: hash,
+      sourceChain: "arcTestnet",
+      destinationChain: chain.name,
+      formattedAmount: String(amountNum),
+      recipient,
+    };
+  }
 
   return {
     mintTxHash: res.mintTxHash,
