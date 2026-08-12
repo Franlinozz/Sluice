@@ -314,6 +314,12 @@ async function httpParity(routes: string[]): Promise<void> {
         headers: {
           accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
           "accept-language": "en-US,en;q=0.9",
+          ...(process.env.VERCEL_BYPASS_SECRET
+            ? {
+                "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_SECRET,
+                "x-vercel-set-bypass-cookie": "true",
+              }
+            : {}),
           "user-agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
         },
