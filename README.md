@@ -26,6 +26,20 @@
 
 ---
 
+## Continued development after submission
+
+Sluice's submission snapshot was finalized on **July 7, 2026** ([49b0f14](https://github.com/Franlinozz/Sluice/commit/49b0f146ad2c3c42aa1e084961da83184daf46e1)). Development has continued in small, auditable releases rather than stopping at the hackathon build.
+
+| Shipped | Product delta | Evidence |
+| --- | --- | --- |
+| **Aug 12** | Hardened public connectors/x402 probes against private-network SSRF, paginated Creator Studio to prevent badge-request storms, added regression tests, and made Solidity formatting a real failing quality gate | [Changelog](CHANGELOG.md#2026-08-12--public-connector-security-and-quality-gate) |
+| **Jul 18–19** | Added ordered Arc RPC fallback, reduced provider load, preserved honest confirming states through receipt-poll failures, and fixed the settled payer metric | [770977b](https://github.com/Franlinozz/Sluice/commit/770977b) · [048a3b4](https://github.com/Franlinozz/Sluice/commit/048a3b4) |
+| **Jul 9** | Let humans fund creator citations directly from their wallet with a bounded EIP-3009 authorization; fixed first-run routing | [c02ec9e](https://github.com/Franlinozz/Sluice/commit/c02ec9e) · [4e776eb](https://github.com/Franlinozz/Sluice/commit/4e776eb) |
+| **Jul 8** | Made newly registered creators eligible to earn and surfaced the real sign-in medium without guessing legacy identities | [13e6ba1](https://github.com/Franlinozz/Sluice/commit/13e6ba1) · [16579f4](https://github.com/Franlinozz/Sluice/commit/16579f4) |
+| **Jul 7** | Corrected creator payout ownership/counting, exposed Traction, refreshed evidence, and paginated settlement history | [436c3ae](https://github.com/Franlinozz/Sluice/commit/436c3ae) · [c56c4c1](https://github.com/Franlinozz/Sluice/commit/c56c4c1) · [3ec6414](https://github.com/Franlinozz/Sluice/commit/3ec6414) |
+
+**[Read the full changelog](CHANGELOG.md)** · **[Inspect the complete delta since submission](https://github.com/Franlinozz/Sluice/compare/49b0f146ad2c3c42aa1e084961da83184daf46e1...main)**
+
 ## The 60-second story
 
 **The fight.** AI reads the web at industrial scale and pays almost nothing back — orders of

@@ -1,4 +1,5 @@
-import { AlertTriangle, ArrowUpRight, Coins } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, ArrowLeft, ArrowRight, ArrowUpRight, Coins } from "lucide-react";
 import { AddressChip, AmountMono, Badge, Card } from "@sluice/ui";
 import { explorerAddressUrl } from "@sluice/chain";
 import { sluiceApi, type ResourceDTO } from "@/lib/api";
@@ -13,6 +14,7 @@ export const metadata = { title: "Earn · Creator Studio" };
 export const dynamic = "force-dynamic";
 
 const CITE_UNITS = new Set(["per_citation", "per_read", "per_crawl"]);
+const CITE_PAGE_SIZE = 12;
 
 function CitableCard({ r }: { r: ResourceDTO }) {
   return (
@@ -73,10 +75,18 @@ function CitableCard({ r }: { r: ResourceDTO }) {
   );
 }
 
-export default async function EarnPage() {
+export default async function EarnPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const resources = await sluiceApi.resources();
-  const citable = (resources ?? []).filter((r) => CITE_UNITS.has(r.unitType));
+  const citableAll = (resources ?? []).filter((r) => CITE_UNITS.has(r.unitType));
   const others = (resources ?? []).filter((r) => !CITE_UNITS.has(r.unitType));
+  const requestedPage = Number.parseInt((await searchParams).page ?? "1", 10);
+  const pageCount = Math.max(1, Math.ceil(citableAll.length / CITE_PAGE_SIZE));
+  const page = Math.min(Math.max(Number.isFinite(requestedPage) ? requestedPage : 1, 1), pageCount);
+  const citable = citableAll.slice((page - 1) * CITE_PAGE_SIZE, page * CITE_PAGE_SIZE);
 
   return (
     <div className="flex flex-col gap-8">
@@ -131,7 +141,14 @@ export default async function EarnPage() {
         </div>
       </Card>
 
-      <Section title="Citable sources" hint={`${citable.length}`}>
+      <Section
+        title="Citable sources"
+        hint={
+          citableAll.length > CITE_PAGE_SIZE
+            ? `${citableAll.length} · page ${page} of ${pageCount}`
+            : `${citableAll.length}`
+        }
+      >
         {resources === null ? (
           <EmptyState
             icon={AlertTriangle}
@@ -150,6 +167,34 @@ export default async function EarnPage() {
               <CitableCard key={r.id} r={r} />
             ))}
           </div>
+        )}
+        {citableAll.length > CITE_PAGE_SIZE && (
+          <nav className="mt-4 flex items-center justify-between border-t border-hairline pt-4" aria-label="Citable sources pages">
+            {page > 1 ? (
+              <Link
+                href={`/app/earn?page=${page - 1}`}
+                className="inline-flex items-center gap-1.5 rounded-md border border-edge bg-surface-1 px-3 py-2 text-xs text-mid transition-colors hover:border-steel hover:text-hi"
+              >
+                <ArrowLeft className="size-3.5" /> Previous
+              </Link>
+            ) : (
+              <span />
+            )}
+            <span className="font-mono text-xs text-low">
+              {(page - 1) * CITE_PAGE_SIZE + 1}–{Math.min(page * CITE_PAGE_SIZE, citableAll.length)} of{" "}
+              {citableAll.length}
+            </span>
+            {page < pageCount ? (
+              <Link
+                href={`/app/earn?page=${page + 1}`}
+                className="inline-flex items-center gap-1.5 rounded-md border border-edge bg-surface-1 px-3 py-2 text-xs text-mid transition-colors hover:border-steel hover:text-hi"
+              >
+                Next <ArrowRight className="size-3.5" />
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
         )}
       </Section>
 

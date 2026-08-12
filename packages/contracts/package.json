@@ -5,7 +5,7 @@
   "scripts": {
     "build": "forge build",
     "test": "forge test",
-    "lint": "forge fmt --check || true",
+    "lint": "forge fmt --check",
     "typecheck": "node -e \"process.exit(0)\""
   }
 }

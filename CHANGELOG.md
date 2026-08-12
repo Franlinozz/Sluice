@@ -1,41 +1,85 @@
 # Changelog
 
-All dates are when the work shipped to Arc testnet + production. Every entry is real.
+Sluice's hackathon submission snapshot was finalized in [49b0f14](https://github.com/Franlinozz/Sluice/commit/49b0f146ad2c3c42aa1e084961da83184daf46e1) on July 7, 2026. This log separates that baseline from continued product work so reviewers can inspect the delta directly.
 
-## 2026-07-06 — Overhaul R0–R6 · Brand, motion, comprehension, traction, trust artifacts
+## 2026-08-12 — Public connector security and quality gate
+
+- Blocked server-side requests from RSS, PeerTube, Owncast, Navidrome, and partner x402 probes to loopback, private, link-local, reserved, and cloud-metadata destinations.
+- Applied the same validation to every redirect hop and rejected unsafe protocols and credential-bearing URLs.
+- Added regression coverage for the outbound URL boundary.
+- Paginated Creator Studio's citable-resource gallery to prevent large catalogs from triggering a badge-request storm and rate-limit errors.
+- Made Solidity formatting a real failing lint gate instead of suppressing formatter failures, then normalized the existing contracts.
+- Added this reviewer-facing changelog to the README and live documentation.
+- Re-ran the 32-route desktop/mobile production audit with safe click coverage: zero first-party defects.
+
+## 2026-07-19 — Paying-agent metric integrity
+
+- Fixed the landing-page payer count to derive from settled receipts instead of accruals, removing a stale value that could remain frozen at one.
+- Commit: [048a3b4](https://github.com/Franlinozz/Sluice/commit/048a3b4)
+
+## 2026-07-18 — RPC and transaction-state resilience
+
+- Added ordered Arc RPC fallback across chain reads and wallet state.
+- Reduced redundant request volume with cache/deduplication and longer polling intervals.
+- Preserved broadcast transactions through receipt-polling failures and surfaced an honest confirming state instead of misreporting failure.
+- Commit: [770977b](https://github.com/Franlinozz/Sluice/commit/770977b)
+
+## 2026-07-09 — User-funded citation payments
+
+- Added a two-phase EIP-3009 flow so a connected human can fund an Ask citation directly from their wallet while the operator relays gas.
+- Bound the browser signature to the server-selected source, exact amount, creator wallet, nonce, and expiry.
+- Corrected the first-run creator link and clarified the paying-agent label.
+- Commits: [c02ec9e](https://github.com/Franlinozz/Sluice/commit/c02ec9e), [4e776eb](https://github.com/Franlinozz/Sluice/commit/4e776eb)
+
+## 2026-07-08 — Creator conversion and identity attribution
+
+- Let newly registered creator sources enter the citation candidate window and unified the definition of “creator earning” across product surfaces.
+- Captured and displayed the real Reown sign-in medium (Google, X, Discord, GitHub, Apple, email, or wallet), leaving legacy records unknown rather than guessing.
+- Commits: [13e6ba1](https://github.com/Franlinozz/Sluice/commit/13e6ba1), [16579f4](https://github.com/Franlinozz/Sluice/commit/16579f4)
+
+## 2026-07-07 — Creator payout correctness and reviewer UX
+
+- Routed creator registrations to their own wallet and made profile creation explicit.
+- Corrected the creator count, exposed Traction in primary navigation, and refreshed reviewer screenshots.
+- Paginated the immutable settlements explorer to keep long histories usable.
+- Commits: [436c3ae](https://github.com/Franlinozz/Sluice/commit/436c3ae), [c56c4c1](https://github.com/Franlinozz/Sluice/commit/c56c4c1), [3ec6414](https://github.com/Franlinozz/Sluice/commit/3ec6414)
+
+## Submission baseline — 2026-07-07
+
+The baseline included the metering and Gateway settlement core, paying agent, citation toll, streaming proof-of-flow, creator profiles and traction, royalty splits, reputation bonds, quadratic funding, Treasury withdrawals, SDK, MCP server, documentation, whitepaper, end-to-end Arc evidence, and the production audit harness.
+
+- Baseline: [49b0f14](https://github.com/Franlinozz/Sluice/commit/49b0f146ad2c3c42aa1e084961da83184daf46e1)
+- Complete post-submission comparison: [49b0f14…main](https://github.com/Franlinozz/Sluice/compare/49b0f146ad2c3c42aa1e084961da83184daf46e1...main)
+
+### 2026-07-06 — Overhaul R0–R6 · Brand, motion, comprehension, traction, trust artifacts
+
 - Zero-defect audit gate: Playwright site crawler (console/network/screenshots/links/overflow) must pass before any phase closes.
-- Brand v2: Michroma wordmark, canonical `/public/brand` assets, glacial "flow" accent, halftone depth layer, Cards v2.
-- Motion system (CSS/rAF only, reduced-motion safe) + the living-logo landing hero drawn from real receipts.
+- Brand v2: Michroma wordmark, canonical public brand assets, glacial flow accent, halftone depth layer, Cards v2.
+- Motion system (CSS/rAF only, reduced-motion safe) and the living-logo landing hero drawn from real receipts.
 - Comprehension layer: guided tour over real surfaces, first-run checklist, plain-language glossary.
-- People & traction (one profile = one human): profiles with wallet clustering, `/community`, `/traction`, `/join`,
-  partner x402 endpoints (402-probed before listing) with a proven cross-team settlement.
-- Trust artifacts: hand-built architecture diagram (dark + light SVG), whitepaper v2 (brand typography, linked TOC,
-  every page visually verified), rebuilt README, docs FAQ on traction counting and testnet vs mainnet.
+- People and traction (one profile = one human): profiles with wallet clustering, Community, Traction, Join, and partner x402 endpoints probed before listing.
+- Trust artifacts: hand-built architecture diagram, whitepaper v2, rebuilt README, and documentation on traction counting and testnet versus mainnet.
 
-## 2026-06-25 — Phase 8 · Docs & trust artifacts
-- Documentation site at `/docs` (sidebar, ⌘K search, scroll-spy TOC, prev/next, reading progress).
-- Whitepaper PDF (`/sluice-whitepaper.pdf`) — real 2026 context only (Pay Per Crawl, RSL 1.0).
-- Changelog + FAQ.
+### 2026-06-25 — Phase 8 · Docs and trust artifacts
 
-## 2026-06-25 — Phase 7 · SDK & MCP
-- `@sluice/pay`: one-call x402 payments, deposit-aware, budget + reasoning hooks.
-- `@sluice/mcp`: MCP server (discover_resources, get_price, pay_resource, get_receipts, register_resource).
-- Verified with real $0.001 nanopayments via both the SDK example and an MCP client.
+- Documentation site with search, scroll-spy, previous/next navigation, and reading progress.
+- Whitepaper PDF with current payments context.
+- Original changelog and FAQ.
 
-## 2026-06-24 — Phase 6 · Cinematic landing
-- Public landing: canvas meter, live real stats, "watch the economy" from real settlements, verify-the-receipt.
+### 2026-06-25 — Phase 7 · SDK and MCP
 
-## 2026-06-24 — Phase 5 · Reputation bonds, Bazaar & Treasury
-- ERC-8004 Identity/Reputation + BondEscrow deployed and verified on Arcscan.
-- Broker: post → slash / release; ERC-8004 feedback on resolution.
-- Bazaar (`/app/discover`); real Treasury withdrawals — instant Arc mint + cross-chain to Base Sepolia.
+- @sluice/pay: one-call x402 payments with deposit awareness, budget enforcement, and reasoning hooks.
+- Sluice MCP: resource discovery, pricing, payment, receipts, and registration tools.
+- Verified both paths with real testnet nanopayments.
 
-## 2026-06-24 — Phase 4 · Streaming meter
-- Per-second metering with proof-of-flow auto-pause (no charge for dead air); real settlement on stop.
+### 2026-06-24 — Phases 4–6 · Product surfaces and settlement primitives
 
-## 2026-06-23 — Phases 1–3 · Meter, agent & citation toll
-- The Meter + Circle Gateway settlement; the paying agent; the citation toll with on-chain royalty splits.
-- RSS connector; RSL / llms.txt generators; embeddable earned badge.
+- Cinematic landing with real stats and receipt verification.
+- ERC-8004 identity/reputation, BondEscrow, Bazaar, and Treasury withdrawals.
+- Per-second metering with proof-of-flow auto-pause.
 
-## 2026-06-23 — Phase 0 · Foundation
-- pnpm monorepo, Graphite design system, SSR-safe Reown/wagmi wallet, the console shell.
+### 2026-06-23 — Phases 0–3 · Foundation, Meter, agent, and citation toll
+
+- pnpm monorepo, Graphite design system, SSR-safe wallet, and console shell.
+- The Meter and Circle Gateway settlement, paying agent, citation toll, and royalty splits.
+- RSS connector, RSL and llms.txt generators, and the embeddable earned badge.

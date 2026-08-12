@@ -17,11 +17,16 @@ contract IdentityRegistry {
     mapping(uint256 => Agent) public agents;
     mapping(address => uint256) public agentIdOf; // owner => id (0 = none)
 
-    event AgentRegistered(uint256 indexed agentId, address indexed owner, string domain, string metadataURI);
+    event AgentRegistered(
+        uint256 indexed agentId, address indexed owner, string domain, string metadataURI
+    );
     event AgentUpdated(uint256 indexed agentId, string domain, string metadataURI);
 
     /// @notice Register the caller as an agent. Reverts if already registered.
-    function register(string calldata domain, string calldata metadataURI) external returns (uint256 id) {
+    function register(string calldata domain, string calldata metadataURI)
+        external
+        returns (uint256 id)
+    {
         require(agentIdOf[msg.sender] == 0, "already registered");
         id = ++agentCount;
         agents[id] = Agent(msg.sender, domain, metadataURI, uint64(block.timestamp));

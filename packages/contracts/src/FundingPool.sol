@@ -44,7 +44,9 @@ contract FundingPool {
     /// @notice Add USDC to the matching pool (caller must approve this contract first).
     function fund(uint256 amount) external {
         require(amount > 0, "amount=0");
-        require(IERC20(token).transferFrom(msg.sender, address(this), amount), "transferFrom failed");
+        require(
+            IERC20(token).transferFrom(msg.sender, address(this), amount), "transferFrom failed"
+        );
         emit Funded(msg.sender, amount);
     }
 
@@ -59,7 +61,9 @@ contract FundingPool {
     {
         require(creators.length == amounts.length && creators.length > 0, "bad input");
         uint256 total;
-        for (uint256 i = 0; i < amounts.length; i++) total += amounts[i];
+        for (uint256 i = 0; i < amounts.length; i++) {
+            total += amounts[i];
+        }
         require(IERC20(token).balanceOf(address(this)) >= total, "pool underfunded");
 
         for (uint256 i = 0; i < creators.length; i++) {

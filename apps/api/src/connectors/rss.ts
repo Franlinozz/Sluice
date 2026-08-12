@@ -9,6 +9,7 @@ import { db } from "../db/client.ts";
 import { feeds, resources } from "../db/schema.ts";
 import { registerResource } from "../registry.ts";
 import { deploySplitter, type SplitShare } from "../contracts/splitter.ts";
+import { fetchPublicUrl } from "../security/public-url.ts";
 
 const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_", trimValues: true });
 
@@ -37,7 +38,7 @@ function atomLink(link: unknown): string {
 }
 
 export async function fetchFeed(feedUrl: string): Promise<{ title: string; items: FeedItem[] }> {
-  const res = await fetch(feedUrl, {
+  const res = await fetchPublicUrl(feedUrl, {
     headers: { "user-agent": "Sluice/1.0 (+https://sluiceflow.vercel.app)" },
     signal: AbortSignal.timeout(15_000),
   });

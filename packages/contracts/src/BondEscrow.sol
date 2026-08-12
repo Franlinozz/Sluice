@@ -53,7 +53,9 @@ contract BondEscrow {
         address beneficiary,
         uint256 amount
     );
-    event BondReleased(bytes32 indexed matchId, address indexed provider, uint256 amount, string reason);
+    event BondReleased(
+        bytes32 indexed matchId, address indexed provider, uint256 amount, string reason
+    );
     event BondSlashed(
         bytes32 indexed matchId,
         address indexed provider,
@@ -81,10 +83,14 @@ contract BondEscrow {
     }
 
     /// @notice Post a bond for a match. Caller (broker) must approve this contract for `amount` first.
-    function postBond(bytes32 matchId, address provider, address beneficiary, uint256 amount) external {
+    function postBond(bytes32 matchId, address provider, address beneficiary, uint256 amount)
+        external
+    {
         require(bonds[matchId].status == Status.None, "match exists");
         require(provider != address(0) && beneficiary != address(0) && amount > 0, "bad args");
-        require(IERC20(token).transferFrom(msg.sender, address(this), amount), "transferFrom failed");
+        require(
+            IERC20(token).transferFrom(msg.sender, address(this), amount), "transferFrom failed"
+        );
         bonds[matchId] = Bond({
             broker: msg.sender,
             provider: provider,

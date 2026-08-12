@@ -5,6 +5,7 @@
  * (Navidrome needs credentials; Owncast needs your instance URL). We don't fake a running instance.
  */
 import { registerResource } from "../registry.ts";
+import { fetchPublicUrl } from "../security/public-url.ts";
 
 // ── Navidrome (per_listen) ───────────────────────────────────────
 export interface NavidromeOpts {
@@ -22,8 +23,9 @@ export interface NavidromeOpts {
 export async function ingestNavidrome(opts: NavidromeOpts): Promise<{ ingested: number; skipped: number }> {
   const base = opts.baseUrl.replace(/\/$/, "");
   const auth = `u=${encodeURIComponent(opts.user)}&t=${opts.token}&s=${opts.salt}&v=1.16.1&c=sluice&f=json`;
-  const res = await fetch(`${base}/rest/getRandomSongs.view?${auth}&size=${opts.count ?? 10}`, {
+  const res = await fetchPublicUrl(`${base}/rest/getRandomSongs.view?${auth}&size=${opts.count ?? 10}`, {
     headers: { accept: "application/json" },
+    signal: AbortSignal.timeout(15_000),
   });
   if (!res.ok) throw new Error(`Navidrome ${res.status}`);
   const json = (await res.json()) as {
@@ -59,7 +61,10 @@ export async function ingestNavidrome(opts: NavidromeOpts): Promise<{ ingested: 
 /** Register an Owncast live stream as a per_second streaming resource (uses its public status API). */
 export async function ingestOwncast(opts: { instance: string; pricePerSecond?: string; payTo?: string; profileId?: string }) {
   const base = opts.instance.replace(/\/$/, "");
-  const res = await fetch(`${base}/api/status`, { headers: { accept: "application/json" } });
+  const res = await fetchPublicUrl(`${base}/api/status`, {
+    headers: { accept: "application/json" },
+    signal: AbortSignal.timeout(15_000),
+  });
   if (!res.ok) throw new Error(`Owncast ${res.status}`);
   const status = (await res.json()) as { online?: boolean; streamTitle?: string; serverName?: string };
   const name = status.streamTitle || status.serverName || "Owncast live stream";

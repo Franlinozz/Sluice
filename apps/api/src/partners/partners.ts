@@ -8,6 +8,7 @@
  */
 import { registerResource } from "../registry.ts";
 import { listAllResources } from "../registry.ts";
+import { fetchPublicUrl } from "../security/public-url.ts";
 
 export interface PartnerInput {
   name: string;
@@ -27,7 +28,10 @@ export interface ProbeResult {
 /** Probe: a real x402 endpoint answers 402 with machine-readable payment requirements. */
 export async function probeX402(url: string): Promise<ProbeResult> {
   try {
-    const res = await fetch(url, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(10_000) });
+    const res = await fetchPublicUrl(url, {
+      headers: { accept: "application/json" },
+      signal: AbortSignal.timeout(10_000),
+    });
     if (res.status !== 402) {
       return { ok: false, status: res.status, error: `expected 402 Payment Required, got ${res.status}` };
     }

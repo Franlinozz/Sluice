@@ -591,11 +591,48 @@ pnpm --filter @sluice/api start   # serves the registry + /paid/* paywall`}
     title: "Changelog",
     group: "Trust",
     description: "What shipped, when — real dated entries.",
-    headings: [{ id: "log", text: "Releases" }],
+    headings: [
+      { id: "continued", text: "Continued development" },
+      { id: "baseline", text: "Submission baseline" },
+    ],
     Body: () => (
       <>
-        <Lead>Every entry is real and dated to when it shipped to Arc testnet + production.</Lead>
-        <H2 id="log">Releases</H2>
+        <Lead>
+          Sluice did not stop at submission. Every entry below is tied to a public commit or a
+          regression test, and the complete delta remains inspectable in Git.
+        </Lead>
+        <H2 id="continued">Continued development</H2>
+        <P>
+          <strong>2026-08-12 · Connector security &amp; quality gate.</strong> Blocked RSS, media
+          connectors, and partner x402 probes from reaching private, loopback, link-local, reserved,
+          or cloud-metadata destinations; validated redirect hops; paginated Creator Studio to stop
+          large catalogs causing badge-request storms; added regression tests; and made Solidity
+          formatting a failing lint gate.
+        </P>
+        <P>
+          <strong>2026-07-18–19 · Network and metric reliability.</strong> Ordered Arc RPC fallback,
+          request deduplication, honest confirming states through receipt-poll failures, and a payer
+          count derived from settled receipts rather than accruals.
+        </P>
+        <P>
+          <strong>2026-07-09 · User-funded asks.</strong> A connected human can fund the creator cited
+          by Ask directly from their wallet through a bounded, gasless EIP-3009 authorization.
+        </P>
+        <P>
+          <strong>2026-07-08 · Creator conversion &amp; attribution.</strong> Newly registered sources
+          became eligible to earn immediately, creator metrics were unified, and profiles began
+          showing the real Reown sign-in medium without guessing older records.
+        </P>
+        <P>
+          <strong>2026-07-07 · Payout correctness &amp; reviewer UX.</strong> Creator-owned payout
+          routing, corrected creator counts, visible Traction navigation, refreshed screenshots, and
+          a paginated immutable settlements explorer.
+        </P>
+        <P>
+          The detailed commit-by-commit record and comparison link live in the repository&apos;s{" "}
+          <A href="https://github.com/Franlinozz/Sluice/blob/main/CHANGELOG.md">CHANGELOG.md</A>.
+        </P>
+        <H2 id="baseline">Submission baseline</H2>
         <P>
           <strong>2026-07-06 · Overhaul R0–R6.</strong> Zero-defect audit gate (Playwright crawler);
           brand v2 (Michroma wordmark, glacial flow accent, halftone depth); motion system

@@ -4,6 +4,7 @@
  * is unauthenticated for public videos, so this is genuinely live (no keys required).
  */
 import { registerResource } from "../registry.ts";
+import { fetchPublicUrl } from "../security/public-url.ts";
 
 const DEFAULT_INSTANCE = process.env.PEERTUBE_INSTANCE ?? "https://framatube.org";
 const DEFAULT_PRICE_PER_SECOND = process.env.PEERTUBE_PRICE ?? "0.0001"; // $0.0001/sec
@@ -36,8 +37,9 @@ export async function ingestPeerTube(opts?: {
   const count = Math.min(Math.max(opts?.count ?? 6, 1), 25);
   const price = opts?.pricePerSecond ?? DEFAULT_PRICE_PER_SECOND;
 
-  const res = await fetch(`${instance}/api/v1/videos?count=${count}&sort=-publishedAt&isLive=false&nsfw=false`, {
+  const res = await fetchPublicUrl(`${instance}/api/v1/videos?count=${count}&sort=-publishedAt&isLive=false&nsfw=false`, {
     headers: { accept: "application/json" },
+    signal: AbortSignal.timeout(15_000),
   });
   if (!res.ok) throw new Error(`PeerTube API ${res.status} for ${instance}`);
   const data = (await res.json()) as { data: PeerTubeVideo[] };
