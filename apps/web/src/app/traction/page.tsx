@@ -134,7 +134,7 @@ export default async function TractionPage() {
               ) : (
                 <div className="flex h-28 items-end gap-1">
                   {days.map((d) => (
-                    <div key={d.day} className="group relative flex-1">
+                    <div key={d.day} className="group relative min-w-0 flex-1">
                       <div
                         className="w-full rounded-t-[3px] bg-steel/60 transition-colors group-hover:bg-[var(--flow)]"
                         style={{ height: `${Math.max(6, (d.count / maxCount) * 100)}px` }}

@@ -36,6 +36,7 @@ const STATIC_ROUTES = [
   "/docs/api-reference",
   "/docs/connectors",
   "/docs/partners",
+  "/docs/x402-discovery",
   "/docs/rsl",
   "/docs/self-hosting",
   "/docs/changelog",
@@ -111,6 +112,28 @@ function report(d: Defect) {
 
 function slug(route: string, vp: string) {
   return `${route.replace(/\//g, "_") || "_root"}-${vp}`.replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
+/**
+ * Ask Vercel to set its automation bypass cookie on this browser context. Using a context-wide
+ * bypass header would also attach the secret header to Arc RPC and wallet-provider requests,
+ * causing third-party CORS failures that do not occur for real visitors.
+ */
+async function seedVercelBypassCookie(ctx: BrowserContext): Promise<void> {
+  const secret = process.env.VERCEL_BYPASS_SECRET;
+  if (!secret || BASE.includes("localhost")) return;
+  const bootstrap = await ctx.newPage();
+  await bootstrap.setExtraHTTPHeaders({
+    "x-vercel-protection-bypass": secret,
+    "x-vercel-set-bypass-cookie": "true",
+  });
+  // Stop at the first-party response headers: the cookie is established before any page
+  // subresources can inherit the temporary header.
+  await bootstrap
+    .goto(`${BASE}/?x-vercel-set-bypass-cookie=true`, { waitUntil: "commit", timeout: 45000 })
+    .catch(() => null);
+  await bootstrap.setExtraHTTPHeaders({});
+  await bootstrap.close();
 }
 
 async function preparePage(ctx: BrowserContext, route: string, vp: string): Promise<Page> {
@@ -360,11 +383,8 @@ async function main() {
   // Pre-flight: can a headless browser crawl this base at all, or does the WAF challenge it?
   const browser: Browser = await chromium.launch();
   {
-    const probeCtx = await browser.newContext({
-      extraHTTPHeaders: process.env.VERCEL_BYPASS_SECRET
-        ? { "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_SECRET, "x-vercel-set-bypass-cookie": "true" }
-        : undefined,
-    });
+    const probeCtx = await browser.newContext();
+    await seedVercelBypassCookie(probeCtx);
     const probe = await probeCtx.newPage();
     const res = await probe.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => null);
     const challenged = !res || res.status() === 403 || res.status() === 708;
@@ -384,20 +404,15 @@ async function main() {
     const ctx = await browser.newContext({
       viewport: { width: vp.width, height: vp.height },
       permissions: ["clipboard-read", "clipboard-write"],
-      // Vercel Protection Bypass for Automation (never committed — lives in the secrets env).
-      // Lets the harness crawl the LIVE deployment without tripping the WAF challenge (HTTP 708).
-      extraHTTPHeaders: process.env.VERCEL_BYPASS_SECRET
-        ? {
-            "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_SECRET,
-            "x-vercel-set-bypass-cookie": "true",
-          }
-        : undefined,
       deviceScaleFactor: 1,
       userAgent:
         vp.name === "mobile"
           ? "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
           : undefined,
     });
+    // The first-party bypass cookie avoids WAF challenges without leaking the bypass header into
+    // Arc RPC, Reown, or other third-party browser requests.
+    await seedVercelBypassCookie(ctx);
     // pre-seed: the audit exercises the base UI; the tour has its own keyboard/a11y path via "?"
     await ctx.addInitScript(() => localStorage.setItem("sluice-tour-done", "1"));
     for (const route of routes) {

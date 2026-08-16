@@ -8,6 +8,8 @@ Sluice's hackathon submission snapshot was finalized in [49b0f14](https://github
 - Made discovery filterable by resource type, recipient, scheme, network, and extension, with bounded offset pagination.
 - Exposed the exact protected URL and enforced payment requirements for every active listing; archived and inactive resources are excluded.
 - Added a live JSON entry point to the Bazaar UI, compatibility documentation, and regression tests for filtering, visibility, metadata resilience, and pagination.
+- Corrected the production audit harness to scope Vercel automation bypass to a first-party cookie, preventing false third-party CORS failures, and added the discovery docs to its route matrix.
+- Fixed the settlement-history chart's mobile flex sizing so growing day counts cannot push the Traction page beyond the viewport.
 
 ## 2026-08-12 — Public connector security and quality gate
 
