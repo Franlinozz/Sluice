@@ -517,6 +517,38 @@ curl -X POST ${API}/connectors/navidrome \\
 
   // ── Compatibility ────────────────────────────────────────────
   {
+    slug: "x402-discovery",
+    title: "x402 agent discovery",
+    group: "Compatibility",
+    description: "Let agents enumerate live paid resources without scraping.",
+    headings: [
+      { id: "endpoint", text: "Discovery endpoint" },
+      { id: "filters", text: "Filters & pagination" },
+    ],
+    Body: () => (
+      <>
+        <Lead>
+          Sluice exposes its live registry in the x402 Bazaar discovery format. Every result carries
+          the protected URL and the exact payment requirements the paywall enforces.
+        </Lead>
+        <H2 id="endpoint">Discovery endpoint</H2>
+        <CodeBlock lang="bash" code={`curl '${API}/discovery/resources?limit=20&offset=0'`} />
+        <P>
+          The response uses <InlineCode>x402Version: 2</InlineCode> and includes each active
+          resource&apos;s scheme, CAIP-2 network, asset, amount, recipient, unit type, and update time.
+          Archived or inactive listings are omitted automatically.
+        </P>
+        <H2 id="filters">Filters &amp; pagination</H2>
+        <P>
+          Filter with <InlineCode>type</InlineCode>, <InlineCode>payTo</InlineCode>,{" "}
+          <InlineCode>scheme</InlineCode>, <InlineCode>network</InlineCode>, or{" "}
+          <InlineCode>extensions</InlineCode>. Use <InlineCode>limit</InlineCode> (1–100) and{" "}
+          <InlineCode>offset</InlineCode> for bounded traversal.
+        </P>
+      </>
+    ),
+  },
+  {
     slug: "rsl",
     title: "RSL & llms.txt",
     group: "Compatibility",

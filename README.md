@@ -32,6 +32,7 @@ Sluice's submission snapshot was finalized on **July 7, 2026** ([49b0f14](https:
 
 | Shipped | Product delta | Evidence |
 | --- | --- | --- |
+| **Aug 16** | Added native x402 v2 agent discovery: live payment requirements, standard filters, bounded pagination, and a machine-readable Bazaar feed | [Live discovery JSON](https://sluiceflow.vercel.app/gw/discovery/resources?limit=20) · [Changelog](CHANGELOG.md#2026-08-16--native-x402-agent-discovery) |
 | **Aug 12** | Hardened public connectors/x402 probes against private-network SSRF, paginated Creator Studio to prevent badge-request storms, added regression tests, and made Solidity formatting a real failing quality gate | [Changelog](CHANGELOG.md#2026-08-12--public-connector-security-and-quality-gate) |
 | **Jul 18–19** | Added ordered Arc RPC fallback, reduced provider load, preserved honest confirming states through receipt-poll failures, and fixed the settled payer metric | [770977b](https://github.com/Franlinozz/Sluice/commit/770977b) · [048a3b4](https://github.com/Franlinozz/Sluice/commit/048a3b4) |
 | **Jul 9** | Let humans fund creator citations directly from their wallet with a bounded EIP-3009 authorization; fixed first-run routing | [c02ec9e](https://github.com/Franlinozz/Sluice/commit/c02ec9e) · [4e776eb](https://github.com/Franlinozz/Sluice/commit/4e776eb) |
@@ -71,6 +72,7 @@ Everything in this table runs live on Arc testnet today. Nothing is mocked.
 | Cross-team x402 exchange — our agent pays partner endpoints | **Live** | [Traction](https://sluiceflow.vercel.app/traction) (partners strip + decision traces) |
 | Real treasury withdrawals — instant on Arc, cross-chain via Gateway Minter | **Live** | [Treasury](https://sluiceflow.vercel.app/app/treasury) |
 | `@sluice/pay` SDK + MCP server (agents pay as a native tool call) | **Live** | [`packages/sluice-pay`](packages/sluice-pay) · [`apps/mcp`](apps/mcp) |
+| x402 v2 discovery feed — agents enumerate live resources and payment terms | **Live** | [`GET /discovery/resources`](https://sluiceflow.vercel.app/gw/discovery/resources?limit=20) |
 | OSS connectors — PeerTube live; Navidrome/Owncast adapters | **Live / available** | [Connectors docs](https://sluiceflow.vercel.app/docs/connectors) |
 | Cross-chain withdrawals to more destinations | Beta | Needs destination gas; pre-flighted honestly |
 | Arc mainnet | Roadmap | See [roadmap](#roadmap) |

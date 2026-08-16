@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, Compass, ShieldCheck, BadgeCheck, Star } from "lucide-react";
+import { AlertTriangle, Compass, ShieldCheck, BadgeCheck, Star, Radar, ExternalLink } from "lucide-react";
 import { AddressChip, Card, Pill } from "@sluice/ui";
 import { sluiceApi } from "@/lib/api";
 import { PageHeader, EmptyState, Section } from "@/components/shell/page-parts";
@@ -23,6 +23,34 @@ export default async function DiscoverPage() {
         title="Bazaar"
         description="Everything with a price on it, in one place. Hire providers who stake real money on delivering — reputation you can read as money, not stars."
       />
+
+      <Section title="Agent discovery" hint="x402 v2 · live registry">
+        <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-[10px] border border-hairline bg-surface-2 text-steel">
+              <Radar className="size-5" />
+            </span>
+            <div>
+              <div className="text-sm font-medium text-hi">Machine-readable Bazaar feed</div>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-mid">
+                Agents can now discover every active resource with its live price, recipient,
+                network, unit, and protected endpoint—without scraping this page.
+              </p>
+              <code className="mt-2 block break-all font-mono text-xs text-low">
+                GET /gw/discovery/resources
+              </code>
+            </div>
+          </div>
+          <a
+            href="/gw/discovery/resources?limit=20"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex shrink-0 items-center gap-2 text-sm text-steel hover:underline"
+          >
+            Inspect live JSON <ExternalLink className="size-3.5" />
+          </a>
+        </Card>
+      </Section>
 
       {/* Verified contracts on Arcscan */}
       {contracts?.ready && contracts.contracts && (

@@ -2,6 +2,13 @@
 
 Sluice's hackathon submission snapshot was finalized in [49b0f14](https://github.com/Franlinozz/Sluice/commit/49b0f146ad2c3c42aa1e084961da83184daf46e1) on July 7, 2026. This log separates that baseline from continued product work so reviewers can inspect the delta directly.
 
+## 2026-08-16 — Native x402 agent discovery
+
+- Added a public, x402 v2-compatible `GET /discovery/resources` feed generated directly from Sluice's live registry.
+- Made discovery filterable by resource type, recipient, scheme, network, and extension, with bounded offset pagination.
+- Exposed the exact protected URL and enforced payment requirements for every active listing; archived and inactive resources are excluded.
+- Added a live JSON entry point to the Bazaar UI, compatibility documentation, and regression tests for filtering, visibility, metadata resilience, and pagination.
+
 ## 2026-08-12 — Public connector security and quality gate
 
 - Blocked server-side requests from RSS, PeerTube, Owncast, Navidrome, and partner x402 probes to loopback, private, link-local, reserved, and cloud-metadata destinations.

@@ -70,6 +70,7 @@ import {
 import { computeStats } from "./people/stats.ts";
 import { claimFaucet, faucetStatus } from "./people/faucet.ts";
 import { listPartners, registerPartnerEndpoint } from "./partners/partners.ts";
+import { buildDiscoveryCatalog, type DiscoveryQuery } from "./discovery/catalog.ts";
 import type { Agent, Decision, Receipt, Resource, Run } from "./db/schema.ts";
 
 // Boot guard: server secrets must never be exposed as NEXT_PUBLIC_* (CLAUDE.md #12).
@@ -200,6 +201,12 @@ app.post("/resources", async (req, reply) => {
 });
 
 app.get("/resources", async () => listResources().map(serializeResource));
+
+// x402 Bazaar-compatible discovery. This is deliberately generated from the live registry so
+// agents see the same availability, price, recipient, and network that the paywall will enforce.
+app.get("/discovery/resources", async (req) =>
+  buildDiscoveryCatalog(listResources(), API_PUBLIC, req.query as DiscoveryQuery),
+);
 
 app.get("/resources/:id", async (req, reply) => {
   const { id } = req.params as { id: string };
