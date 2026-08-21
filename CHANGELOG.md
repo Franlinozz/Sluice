@@ -6,7 +6,7 @@ Sluice's hackathon submission snapshot was finalized in [49b0f14](https://github
 
 - Replaced the landing hero's abstract architectural backdrop with a responsive, editorial boardroom environment while preserving the living Sluice rail animation beneath it.
 - Added breakpoint-specific crops, a protected central text field, restrained edge atmosphere, and a seamless graphite fade before the product animation.
-- Kept Marble mode's clean paper treatment photograph-free and reduced the above-the-fold source from 1.54 MiB to a 65 KiB WebP without changing its dimensions.
+- Added a lifted monochrome treatment for Marble mode, increased selective boardroom detail in Graphite mode, and reduced the above-the-fold source from 1.54 MiB to a 65 KiB WebP without changing its dimensions.
 
 ## 2026-08-16 — Native x402 agent discovery
 

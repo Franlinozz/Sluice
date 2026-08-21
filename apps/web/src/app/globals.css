@@ -162,17 +162,17 @@ a .text-steel:hover {
 .hero-photo-image {
   object-fit: cover;
   object-position: 50% 50%;
-  opacity: 0.42;
-  filter: brightness(0.84) contrast(0.94) saturate(0.78);
+  opacity: 0.62;
+  filter: brightness(0.96) contrast(0.98) saturate(0.86);
 }
 /* Horizontal dissolve, central readability pool, and a final graphite floor. */
 .hero-photo-scrim {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--canvas) 34%, transparent) 0%, transparent 26%, transparent 57%, color-mix(in srgb, var(--canvas) 76%, transparent) 90%, var(--canvas) 100%),
-    linear-gradient(90deg, var(--canvas) 0%, transparent 14%, transparent 86%, var(--canvas) 100%),
-    radial-gradient(ellipse 52% 50% at 50% 34%, color-mix(in srgb, var(--canvas) 46%, transparent) 0%, color-mix(in srgb, var(--canvas) 18%, transparent) 58%, transparent 100%);
+    linear-gradient(180deg, color-mix(in srgb, var(--canvas) 22%, transparent) 0%, transparent 24%, transparent 60%, color-mix(in srgb, var(--canvas) 68%, transparent) 90%, var(--canvas) 100%),
+    linear-gradient(90deg, var(--canvas) 0%, transparent 11%, transparent 89%, var(--canvas) 100%),
+    radial-gradient(ellipse 52% 50% at 50% 34%, color-mix(in srgb, var(--canvas) 32%, transparent) 0%, color-mix(in srgb, var(--canvas) 10%, transparent) 58%, transparent 100%);
 }
 @media (min-width: 1600px) {
   .hero-photo-image { object-position: 50% 53%; }
@@ -180,7 +180,7 @@ a .text-steel:hover {
 @media (max-width: 1024px) {
   .hero-photo-image {
     object-position: 50% 44%;
-    opacity: 0.34;
+    opacity: 0.52;
   }
   .hero-photo {
     inset: 0 0 -120px 0;
@@ -190,22 +190,42 @@ a .text-steel:hover {
 }
 @media (max-width: 640px) {
   .hero-photo-image {
-    object-position: 50% 50%;
-    opacity: 0.26;
+    object-fit: contain;
+    object-position: 50% 12%;
+    opacity: 0.4;
   }
   .hero-photo {
     inset: 0 0 -60px 0;
-    mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 52%, transparent 78%);
-    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 52%, transparent 78%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 42%, transparent 65%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 42%, transparent 65%);
   }
   .hero-photo-scrim {
     background:
-      linear-gradient(180deg, color-mix(in srgb, var(--canvas) 42%, transparent) 0%, transparent 24%, transparent 50%, color-mix(in srgb, var(--canvas) 82%, transparent) 88%, var(--canvas) 100%),
+      linear-gradient(180deg, color-mix(in srgb, var(--canvas) 28%, transparent) 0%, transparent 22%, transparent 40%, color-mix(in srgb, var(--canvas) 82%, transparent) 68%, var(--canvas) 100%),
       linear-gradient(90deg, var(--canvas) 0%, transparent 8%, transparent 92%, var(--canvas) 100%),
-      radial-gradient(ellipse 78% 52% at 50% 32%, color-mix(in srgb, var(--canvas) 52%, transparent) 0%, color-mix(in srgb, var(--canvas) 20%, transparent) 62%, transparent 100%);
+      radial-gradient(ellipse 78% 52% at 50% 32%, color-mix(in srgb, var(--canvas) 44%, transparent) 0%, color-mix(in srgb, var(--canvas) 16%, transparent) 62%, transparent 100%);
   }
 }
-/* The dark photograph muddies Marble's paper-like treatment; keep it dark-only. */
-[data-theme="light"] .hero-photo {
-  display: none;
+/* Marble uses a lifted, nearly monochrome editorial print rather than the dark treatment. */
+[data-theme="light"] .hero-photo-image {
+  opacity: 0.28;
+  filter: grayscale(0.72) brightness(1.28) contrast(0.7) saturate(0.3);
+}
+[data-theme="light"] .hero-photo-scrim {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--canvas) 34%, transparent) 0%, transparent 24%, transparent 58%, color-mix(in srgb, var(--canvas) 76%, transparent) 90%, var(--canvas) 100%),
+    linear-gradient(90deg, var(--canvas) 0%, transparent 11%, transparent 89%, var(--canvas) 100%),
+    radial-gradient(ellipse 56% 52% at 50% 34%, color-mix(in srgb, var(--canvas) 60%, transparent) 0%, color-mix(in srgb, var(--canvas) 28%, transparent) 62%, transparent 100%);
+}
+@media (max-width: 1024px) {
+  [data-theme="light"] .hero-photo-image { opacity: 0.24; }
+}
+@media (max-width: 640px) {
+  [data-theme="light"] .hero-photo-image { opacity: 0.2; }
+  [data-theme="light"] .hero-photo-scrim {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--canvas) 42%, transparent) 0%, transparent 20%, transparent 36%, color-mix(in srgb, var(--canvas) 88%, transparent) 66%, var(--canvas) 100%),
+      linear-gradient(90deg, var(--canvas) 0%, transparent 8%, transparent 92%, var(--canvas) 100%),
+      radial-gradient(ellipse 84% 50% at 50% 31%, color-mix(in srgb, var(--canvas) 66%, transparent) 0%, color-mix(in srgb, var(--canvas) 34%, transparent) 64%, transparent 100%);
+  }
 }
