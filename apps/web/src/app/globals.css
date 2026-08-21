@@ -162,8 +162,8 @@ a .text-steel:hover {
 .hero-photo-image {
   object-fit: cover;
   object-position: 50% 50%;
-  opacity: 0.62;
-  filter: brightness(0.96) contrast(0.98) saturate(0.86);
+  opacity: 0.66;
+  filter: brightness(1) contrast(1.08) saturate(0.92);
 }
 /* Horizontal dissolve, central readability pool, and a final graphite floor. */
 .hero-photo-scrim {
@@ -180,7 +180,7 @@ a .text-steel:hover {
 @media (max-width: 1024px) {
   .hero-photo-image {
     object-position: 50% 44%;
-    opacity: 0.52;
+    opacity: 0.56;
   }
   .hero-photo {
     inset: 0 0 -120px 0;
@@ -192,7 +192,7 @@ a .text-steel:hover {
   .hero-photo-image {
     object-fit: contain;
     object-position: 50% 12%;
-    opacity: 0.4;
+    opacity: 0.44;
   }
   .hero-photo {
     inset: 0 0 -60px 0;
@@ -208,24 +208,24 @@ a .text-steel:hover {
 }
 /* Marble uses a lifted, nearly monochrome editorial print rather than the dark treatment. */
 [data-theme="light"] .hero-photo-image {
-  opacity: 0.28;
-  filter: grayscale(0.72) brightness(1.28) contrast(0.7) saturate(0.3);
+  opacity: 0.34;
+  filter: grayscale(0.58) brightness(1.14) contrast(0.9) saturate(0.45);
 }
 [data-theme="light"] .hero-photo-scrim {
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--canvas) 34%, transparent) 0%, transparent 24%, transparent 58%, color-mix(in srgb, var(--canvas) 76%, transparent) 90%, var(--canvas) 100%),
     linear-gradient(90deg, var(--canvas) 0%, transparent 11%, transparent 89%, var(--canvas) 100%),
-    radial-gradient(ellipse 56% 52% at 50% 34%, color-mix(in srgb, var(--canvas) 60%, transparent) 0%, color-mix(in srgb, var(--canvas) 28%, transparent) 62%, transparent 100%);
+    radial-gradient(ellipse 56% 52% at 50% 34%, color-mix(in srgb, var(--canvas) 50%, transparent) 0%, color-mix(in srgb, var(--canvas) 20%, transparent) 62%, transparent 100%);
 }
 @media (max-width: 1024px) {
-  [data-theme="light"] .hero-photo-image { opacity: 0.24; }
+  [data-theme="light"] .hero-photo-image { opacity: 0.3; }
 }
 @media (max-width: 640px) {
-  [data-theme="light"] .hero-photo-image { opacity: 0.2; }
+  [data-theme="light"] .hero-photo-image { opacity: 0.24; }
   [data-theme="light"] .hero-photo-scrim {
     background:
       linear-gradient(180deg, color-mix(in srgb, var(--canvas) 42%, transparent) 0%, transparent 20%, transparent 36%, color-mix(in srgb, var(--canvas) 88%, transparent) 66%, var(--canvas) 100%),
       linear-gradient(90deg, var(--canvas) 0%, transparent 8%, transparent 92%, var(--canvas) 100%),
-      radial-gradient(ellipse 84% 50% at 50% 31%, color-mix(in srgb, var(--canvas) 66%, transparent) 0%, color-mix(in srgb, var(--canvas) 34%, transparent) 64%, transparent 100%);
+      radial-gradient(ellipse 84% 50% at 50% 31%, color-mix(in srgb, var(--canvas) 58%, transparent) 0%, color-mix(in srgb, var(--canvas) 28%, transparent) 64%, transparent 100%);
   }
 }
