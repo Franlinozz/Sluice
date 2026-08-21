@@ -91,16 +91,17 @@ export default async function LandingPage() {
         {/* ── Hero: the logo itself, alive ─────────────────────── */}
         <section className="relative overflow-hidden">
           <div className="relative isolate">
-            {/* the metered rail, physical — an environmental backdrop for the copy only;
-                masked to fade out entirely before the animated hero below */}
+            {/* The boardroom is environmental context for the copy only. It is masked out
+                completely before the animated Sluice rail below becomes prominent. */}
             <div aria-hidden className="hero-photo">
               <Image
-                src="/media/editorial/landing/the-metered-rail-horizon.webp"
+                src="/media/editorial/landing/boardroom-night-hero.webp"
                 alt=""
                 fill
                 sizes="100vw"
+                priority
                 draggable={false}
-                className="object-cover object-center"
+                className="hero-photo-image"
               />
               <div className="hero-photo-scrim" />
             </div>

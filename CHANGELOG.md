@@ -2,6 +2,12 @@
 
 Sluice's hackathon submission snapshot was finalized in [49b0f14](https://github.com/Franlinozz/Sluice/commit/49b0f146ad2c3c42aa1e084961da83184daf46e1) on July 7, 2026. This log separates that baseline from continued product work so reviewers can inspect the delta directly.
 
+## 2026-08-21 — Editorial boardroom hero
+
+- Replaced the landing hero's abstract architectural backdrop with a responsive, editorial boardroom environment while preserving the living Sluice rail animation beneath it.
+- Added breakpoint-specific crops, a protected central text field, restrained edge atmosphere, and a seamless graphite fade before the product animation.
+- Kept Marble mode's clean paper treatment photograph-free and reduced the above-the-fold source from 1.54 MiB to a 65 KiB WebP without changing its dimensions.
+
 ## 2026-08-16 — Native x402 agent discovery
 
 - Added a public, x402 v2-compatible `GET /discovery/resources` feed generated directly from Sluice's live registry.

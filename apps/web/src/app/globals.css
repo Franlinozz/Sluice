@@ -145,48 +145,67 @@ a .text-steel:hover {
   opacity: var(--edm-dark, 1);
 }
 
-/* ── Landing hero-copy photographic backdrop (the metered rail, physical) ──
-   Scoped to the copy block only; vertical mask fades in from the page top and out
-   completely before the animated HeroFlow below — the photo foreshadows the rail,
-   the animation IS the rail. Opacity lives on the image alone, per theme/viewport. */
+/* ── Landing hero-copy photographic backdrop ──────────────────────────────
+   A deliberately cropped boardroom environment, scoped to the copy block. The
+   mask dissolves it before HeroFlow: the photograph grounds the economy; the
+   animation remains the product's visual identity. */
 .hero-photo {
   position: absolute;
-  inset: 0 0 -160px 0;
+  inset: 0 0 -150px 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
   user-select: none;
-  mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 64%, transparent 80%);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 64%, transparent 80%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 62%, transparent 84%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 62%, transparent 84%);
 }
-.hero-photo img {
-  opacity: 0.34;
+.hero-photo-image {
+  object-fit: cover;
+  object-position: 50% 50%;
+  opacity: 0.42;
+  filter: brightness(0.84) contrast(0.94) saturate(0.78);
 }
-/* edge dissolve + a soft readability pool behind the headline/copy */
+/* Horizontal dissolve, central readability pool, and a final graphite floor. */
 .hero-photo-scrim {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, var(--canvas) 0%, transparent 20%, transparent 80%, var(--canvas) 100%),
-    radial-gradient(ellipse 58% 52% at 50% 32%, color-mix(in srgb, var(--canvas) 72%, transparent) 0%, transparent 72%);
+    linear-gradient(180deg, color-mix(in srgb, var(--canvas) 34%, transparent) 0%, transparent 26%, transparent 57%, color-mix(in srgb, var(--canvas) 76%, transparent) 90%, var(--canvas) 100%),
+    linear-gradient(90deg, var(--canvas) 0%, transparent 14%, transparent 86%, var(--canvas) 100%),
+    radial-gradient(ellipse 52% 50% at 50% 34%, color-mix(in srgb, var(--canvas) 46%, transparent) 0%, color-mix(in srgb, var(--canvas) 18%, transparent) 58%, transparent 100%);
+}
+@media (min-width: 1600px) {
+  .hero-photo-image { object-position: 50% 53%; }
 }
 @media (max-width: 1024px) {
-  .hero-photo img { opacity: 0.26; }
+  .hero-photo-image {
+    object-position: 50% 44%;
+    opacity: 0.34;
+  }
   .hero-photo {
     inset: 0 0 -120px 0;
-    mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 58%, transparent 82%);
-    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 58%, transparent 82%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 58%, transparent 82%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 58%, transparent 82%);
   }
 }
 @media (max-width: 640px) {
-  .hero-photo img { opacity: 0.2; }
+  .hero-photo-image {
+    object-position: 50% 50%;
+    opacity: 0.26;
+  }
   .hero-photo {
     inset: 0 0 -60px 0;
     mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 52%, transparent 78%);
     -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 52%, transparent 78%);
   }
+  .hero-photo-scrim {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--canvas) 42%, transparent) 0%, transparent 24%, transparent 50%, color-mix(in srgb, var(--canvas) 82%, transparent) 88%, var(--canvas) 100%),
+      linear-gradient(90deg, var(--canvas) 0%, transparent 8%, transparent 92%, var(--canvas) 100%),
+      radial-gradient(ellipse 78% 52% at 50% 32%, color-mix(in srgb, var(--canvas) 52%, transparent) 0%, color-mix(in srgb, var(--canvas) 20%, transparent) 62%, transparent 100%);
+  }
 }
-/* the charcoal photograph reads as a smudge on Marble — dark theme only */
+/* The dark photograph muddies Marble's paper-like treatment; keep it dark-only. */
 [data-theme="light"] .hero-photo {
   display: none;
 }
